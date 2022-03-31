@@ -1,5 +1,5 @@
 # studybook
-This contains the code to the proposed digital studybook. 
+This contains the code to the web-DB project. 
 
 ## DB
 
