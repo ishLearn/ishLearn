@@ -3,11 +3,20 @@ import express from 'express'
 import dotenv from 'dotenv'
 dotenv.config()
 
+// Import api routes
+import users from './routes/users'
+
 // Initialize logger
 import Logger from './utils/Logger'
+/**
+ * Global Logger for logging to console
+ */
 const logger = new Logger()
 // Initialize DBService (start DB connection pool)
 import DBService from './services/DBService'
+/**
+ * Global Service for DB connections
+ */
 const dbService = new DBService()
 
 // Express server and middleware:
@@ -18,6 +27,8 @@ const app = express()
 app.use(express.json())
 // Middleware: Log all requests
 app.use(logger.request)
+
+app.use('/api/users', users)
 
 // Initial API-route
 app.get('/api', (req, res) => {

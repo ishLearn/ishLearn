@@ -47,6 +47,25 @@ export default class Logger {
   }
 
   /**
+   * Log an error to the console.
+   * TODO: Send information to another server / log to a file to preserve stack trace?
+   * @param category The part of the code where the error occurred (e.g., "Hashing password", "Handling request")
+   * @param task The specific task that failed
+   * @param error The original error log
+   */
+  error(category: string, task: string, error: any) {
+    console.log(
+      chalk.bgRed(`ERROR:`) +
+        ' ' +
+        chalk.red(task) +
+        ': ' +
+        chalk.blue(category) +
+        ' \n' +
+        error
+    )
+  }
+
+  /**
    * Logs the server's listening status to the console in bright green.
    *
    * @param {number | string} PORT Port the server is listening on

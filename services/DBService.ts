@@ -55,10 +55,10 @@ class DBService {
    * @param queryString The string to query the DB against
    * @returns a Promise that resolves when the query is executed; returns an object containing results and fields
    */
-  query(queryString: string) {
+  query(queryString: string, values: any[]) {
     return new Promise<{ results: any; fields: mysql.FieldInfo[] | undefined }>(
       (resolve, reject) => {
-        this.pool.query(queryString, (err, results, fields) => {
+        this.pool.query(queryString, values, (err, results, fields) => {
           if (err) return reject(err)
           return resolve({ results, fields })
         })
