@@ -55,10 +55,10 @@ class DBService {
    * @param queryString The string to query the DB against
    * @returns a Promise that resolves when the query is executed; returns an object containing results and fields
    */
-  query(queryString: string, values: any[]) {
+  query(queryString: string, values?: any[]) {
     return new Promise<{ results: any; fields: mysql.FieldInfo[] | undefined }>(
       (resolve, reject) => {
-        this.pool.query(queryString, values, (err, results, fields) => {
+        this.pool.query(queryString, values || [], (err, results, fields) => {
           if (err) return reject(err)
           return resolve({ results, fields })
         })
@@ -95,6 +95,38 @@ class DBService {
       })
     })
   }
+
+  /**
+   * Creates a table in the database with a connection from pool.
+   * @param tableName Table to create
+   * @param columns Columns for the table.
+   * @returns The MySQL-db return
+   */
+  createTable(tableName: string, columns: Column[]) {
+    return this.query(
+      `CREATE TABLE IF NOT EXISTS ${tableName} (${columns
+        .map(c => columnToString(c))
+        .join(', ')});`
+    )
+  }
+
+  insertInto(tableName: string, columnNames: Column[], values: any[]) {
+    return this.query(
+      `INSERT INTO ${tableName} (${columnNames
+        .map(c => columnToString(c))
+        .join(', ')}) VALUES ?;`,
+      values
+    )
+  }
+}
+
+export type Column = {
+  name: string
+  type?: string
+}
+
+export function columnToString(c: Column): string {
+  return `${c.name} ${c.type || ''}`.trim()
 }
 
 export default DBService
