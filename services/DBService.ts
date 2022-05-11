@@ -39,7 +39,7 @@ class DBService {
     this.getConnection().then(async connection => {
       try {
         if (await this.ping(connection))
-          console.log('Pinged MySQL-DB successfully')
+          console.log('Pinged MySQL-DB with new DBService successfully')
       } catch (err) {
         console.error(`MySQL ping on Pool connection failed!`)
         console.error(err)

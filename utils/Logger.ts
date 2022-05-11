@@ -48,6 +48,24 @@ export default class Logger {
 
   /**
    * Log an error to the console.
+   * @param category The part of the code that finished
+   * @param task The specific task that successfully finished
+   * @param directInfo Potential direct output from variable, not formatted
+   */
+  event(category: string, task: string, directInfo?: any) {
+    console.log(
+      chalk.bgBlueBright(`SUCCESS:`) +
+        ' ' +
+        chalk.red(task) +
+        ': ' +
+        chalk.blue(category) +
+        ' \n' +
+        directInfo
+    )
+  }
+
+  /**
+   * Log an error to the console.
    * TODO: Send information to another server / log to a file to preserve stack trace?
    * @param category The part of the code where the error occurred (e.g., "Hashing password", "Handling request")
    * @param task The specific task that failed
