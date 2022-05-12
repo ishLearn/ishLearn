@@ -14,6 +14,7 @@ import Logger from './utils/Logger'
 const logger = new Logger()
 // Initialize DBService (start DB connection pool)
 import DBService from './services/DBService'
+import { exec } from 'child_process'
 /**
  * Global Service for DB connections
  */
@@ -31,7 +32,7 @@ app.use(logger.request)
 app.use('/api/users', users)
 
 // Initial API-route
-app.get('/api', (req, res) => {
+app.get('/api', (_req, res) => {
   res.status(200).json({ message: 'OK, but nothing to do here.' })
 })
 
@@ -39,4 +40,15 @@ app.get('/api', (req, res) => {
 const PORT = process.env.PORT || 5000
 app.listen(PORT, () => {
   logger.listen(PORT)
+})
+
+exec('ffmpeg -version', (err, _stdout, _stderr) => {
+  if (err) {
+    logger.error(
+      'FFMpeg',
+      'Test FFMpeg',
+      'Please install FFMpeg on your system!'
+    )
+    throw err
+  }
 })
