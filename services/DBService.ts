@@ -129,10 +129,30 @@ export function columnToString(c: Column): string {
   return `${c.name} ${c.type || ''}`.trim()
 }
 
+export const enums = {
+  visibilities: ['private', 'schoolPrivate', 'link', 'public'],
+  categories: ['school', 'gradeLevel', 'mediaType', 'subject'], // TODO: What categories should be allowed?
+  supervisedByStatus: ['submissionOpen', 'submissionClosed', 'graded'], // TODO: What status should be allowed?
+}
+
 export const dbQueries = {
   exportTableQueries: {
-    products: `CREATE TABLE IF NOT EXISTS products (ID VARCHAR(16) PRIMARY KEY, title VARCHAR(255) NOT NULL, visibility ENUM('private', 'schoolPrivate', 'link', 'public') NOT NULL, createDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updatedDate Timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP);`,
-    media: `CREATE TABLE IF NOT EXISTS media (ID VARCHAR(16), filename VARCHAR(255) NOT NULL, URL VARCHAR(255) NOT NULL), uploadedDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP, product VARCHAR(16) FOREIGN KEY REFERENCES products(ID);`,
+    products: `CREATE TABLE IF NOT EXISTS products (ID VARCHAR(16) PRIMARY KEY, title VARCHAR(255) NOT NULL, visibility ENUM(${enums.visibilities.join(
+      ', '
+    )}) NOT NULL, createDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updatedDate Timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, updatedBy VARCHAR(16) FOREIGN KEY (title) REFERENCES users(ID));`,
+    media: `CREATE TABLE IF NOT EXISTS media (ID VARCHAR(16) PRIMARY KEY, filename VARCHAR(255) NOT NULL, URL VARCHAR(255) NOT NULL), uploadedDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP, product VARCHAR(16) FOREIGN KEY REFERENCES products(ID);`,
+    users: `CREATE TABLE IF NOT EXISTS users (ID VARCHAR(16) PRIMARY KEY, email VARCHAR(255) NOT NULL (TODO: UNIQUE OR KEY?), emailTmp VARCHAR(255), password: VARCHAR(255) NOT NULL), firstName VARCHAR(255) NOT NULL, lastName VARCHAR(255) NOT NULL, birthday Date NOT NULL, profilePicture VARCHAR(255) FOREIGN KEY REFERENCES !!!!, profileText VARCHAR(255) FOREIGN KEY REFERENCES !!!!;`, // TODO: What references
+    tags: `CREATE TABLE IF NOT EXISTS tags (tag VARCHAR(255) PRIMARY KEY);`,
+    hasTag: `CREATE TABLE IF NOT EXISTS hasTag (tag VARCHAR(255) NOT NULL FOREIGN KEY REFERENCES tags(tag), ID FOREIGN KEY REFERENCES !!!!, PRIMARY KEY (tag, ID));`,
+    categories: `CREATE TABLE IF NOT EXISTS categories (tag VARCHAR(255) NOT NULL PRIMARY KEY FOREIGN KEY REFERENCES tags(tag), category ENUM(${enums.categories.join(
+      ', '
+    )}) NOT NULL)`,
+    supervisedBy: `CREATE TABLE IF NOT EXISTS supervisedBy (PID VARCHAR(16) FOREIGN KEY REFERENCES products(ID), TID VARCHAR(16) FOREIGN KEY REFERENCES users(ID), status ENUM(${enums.supervisedByStatus.join(
+      ', '
+    )}) NOT NULL, grade VARCHAR(255)), PRIMARY KEY (PID, TID)`,
+    uploadBy: `CREATE TABLE IF NOT EXISTS uploadBy (PID VARCHAR(16) FOREIGN KEY REFERENCES products(ID), SID VARCHAR(16) FOREIGN KEY REFERENCES users(ID), PRIMARY KEY (PID, SID))`,
+    // TODO: Missing (remark / star project, comment)
+    // TODO: Decide whether corrections should only be added to
   },
 }
 
