@@ -129,4 +129,11 @@ export function columnToString(c: Column): string {
   return `${c.name} ${c.type || ''}`.trim()
 }
 
+export const dbQueries = {
+  exportTableQueries: {
+    products: `CREATE TABLE IF NOT EXISTS products (ID VARCHAR(16) PRIMARY KEY, title VARCHAR(255) NOT NULL, visibility ENUM('private', 'schoolPrivate', 'link', 'public') NOT NULL, createDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updatedDate Timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP);`,
+    media: `CREATE TABLE IF NOT EXISTS media (ID VARCHAR(16), filename VARCHAR(255) NOT NULL, URL VARCHAR(255) NOT NULL), uploadedDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP, product VARCHAR(16) FOREIGN KEY REFERENCES products(ID);`,
+  },
+}
+
 export default DBService
