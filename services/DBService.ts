@@ -125,29 +125,74 @@ export type Column = {
   type?: string
 }
 
+/**
+ * Converts a column into a string
+ * @param c A column with name and potentially type, otherwise type is ignored
+ */
 export function columnToString(c: Column): string {
   return `${c.name} ${c.type || ''}`.trim()
 }
 
-export const enums = {
-  visibilities: ['private', 'schoolPrivate', 'link', 'public'],
-  categories: ['school', 'gradeLevel', 'mediaType', 'subject'], // TODO: What categories should be allowed?
-  supervisedByStatus: ['submissionOpen', 'submissionClosed', 'graded'], // TODO: What status should be allowed?
+/**
+ * Project Visibilities
+ */
+enum Visibility {
+  PRIVATE = 'private',
+  SCHOOL_PRIVATE = 'schoolPrivate',
+  LINK = 'link',
+  PUBLIC = 'public',
+}
+/**
+ * @return An array of all Visibilities
+ */
+export function getVisibilities() {
+  return Object.entries(Visibility).filter(v => typeof v === 'string')
+}
+
+/**
+ * The categories a tag can be part of
+ */
+enum Category { // TODO: What categories should be allowed?
+  SCHOOL = 'school',
+  GRADE_LEVEL = 'gradeLevel',
+  MEDIA_TYPE = 'mediaType',
+  SUBJECT = 'subject',
+}
+/**
+ * @return An array of all tag categories
+ */
+export function getCategories() {
+  return Object.entries(Category).filter(v => typeof v === 'string')
+}
+
+/**
+ * Status of a Project
+ */
+enum SupervisedByStatus { // TODO: What status should be allowed?
+  SUBMISSION_OPEN = 'submissionOpen',
+  SUBMISSION_CLOSED = 'submissionClosed',
+  GRADED = 'graded',
+}
+/**
+ * @return An array of all supervised_by_status
+ */
+export function getSupervisedByStatus() {
+  return Object.entries(SupervisedByStatus).filter(v => typeof v === 'string')
 }
 
 export const dbQueries = {
   exportTableQueries: {
-    products: `CREATE TABLE IF NOT EXISTS products (ID VARCHAR(16) PRIMARY KEY, title VARCHAR(255) NOT NULL, visibility ENUM(${enums.visibilities.join(
+    products: `CREATE TABLE IF NOT EXISTS products (ID VARCHAR(16) PRIMARY KEY, title VARCHAR(255) NOT NULL, visibility ENUM(${getVisibilities().join(
       ', '
     )}) NOT NULL, createDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updatedDate Timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, updatedBy VARCHAR(16) FOREIGN KEY (title) REFERENCES users(ID));`,
     media: `CREATE TABLE IF NOT EXISTS media (ID VARCHAR(16) PRIMARY KEY, filename VARCHAR(255) NOT NULL, URL VARCHAR(255) NOT NULL), uploadedDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP, product VARCHAR(16) FOREIGN KEY REFERENCES products(ID);`,
     users: `CREATE TABLE IF NOT EXISTS users (ID VARCHAR(16) PRIMARY KEY, email VARCHAR(255) NOT NULL (TODO: UNIQUE OR KEY?), emailTmp VARCHAR(255), password: VARCHAR(255) NOT NULL), firstName VARCHAR(255) NOT NULL, lastName VARCHAR(255) NOT NULL, birthday Date NOT NULL, profilePicture VARCHAR(255) FOREIGN KEY REFERENCES !!!!, profileText VARCHAR(255) FOREIGN KEY REFERENCES !!!!;`, // TODO: What references
     tags: `CREATE TABLE IF NOT EXISTS tags (tag VARCHAR(255) PRIMARY KEY);`,
     hasTag: `CREATE TABLE IF NOT EXISTS hasTag (tag VARCHAR(255) NOT NULL FOREIGN KEY REFERENCES tags(tag), ID FOREIGN KEY REFERENCES !!!!, PRIMARY KEY (tag, ID));`,
-    categories: `CREATE TABLE IF NOT EXISTS categories (tag VARCHAR(255) NOT NULL PRIMARY KEY FOREIGN KEY REFERENCES tags(tag), category ENUM(${enums.categories.join(
+    categories: `CREATE TABLE IF NOT EXISTS categories (tag VARCHAR(255) NOT NULL PRIMARY KEY FOREIGN KEY REFERENCES tags(tag), category ENUM(${getCategories().join(
       ', '
     )}) NOT NULL)`,
-    supervisedBy: `CREATE TABLE IF NOT EXISTS supervisedBy (PID VARCHAR(16) FOREIGN KEY REFERENCES products(ID), TID VARCHAR(16) FOREIGN KEY REFERENCES users(ID), status ENUM(${enums.supervisedByStatus.join(
+    supervisedBy: `CREATE TABLE IF NOT EXISTS supervisedBy (PID VARCHAR(16) FOREIGN KEY REFERENCES products(ID), TID VARCHAR(16) FOREIGN KEY REFERENCES users(ID), status ENUM(${getSupervisedByStatus().join(
       ', '
     )}) NOT NULL, grade VARCHAR(255)), PRIMARY KEY (PID, TID)`,
     uploadBy: `CREATE TABLE IF NOT EXISTS uploadBy (PID VARCHAR(16) FOREIGN KEY REFERENCES products(ID), SID VARCHAR(16) FOREIGN KEY REFERENCES users(ID), PRIMARY KEY (PID, SID))`,

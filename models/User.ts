@@ -16,7 +16,13 @@ export default class User {
   // TODO: Add more params for User (from ER)
   id: string
   email: string
+  emailTmp: string | null = null
   password: string
+  firstName: string
+  lastName: string
+  birthday: Date | null
+  profilePictures: string[] // TODO: Foreign Key?
+  profileText: string // TODO: Foreign Key?
 
   /**
    * Create a User based on
@@ -24,9 +30,22 @@ export default class User {
    * @param password the User's password hash
    * @param id the User's ID. Optional: Will be auto generated (as [uuidV4](com/package/uuid)) if not specified
    */
-  constructor(email: string, password: string, id?: string) {
+  constructor(
+    email: string,
+    password: string,
+    firstName: string,
+    lastName: string,
+    profilePictures: string[],
+    profileText: string,
+    birthday?: Date,
+    id?: string
+  ) {
     this.email = email
     this.password = password
+    this.firstName = firstName
+    ;(this.lastName = lastName), (this.profilePictures = profilePictures)
+    this.profileText = profileText
+    this.birthday = typeof birthday !== 'undefined' ? birthday : null
 
     if (!id) {
       // TODO: The User is new and not yet saved in the DB
