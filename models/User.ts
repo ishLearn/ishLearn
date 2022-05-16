@@ -1,8 +1,12 @@
 import bcrypt from 'bcrypt'
-import { v4 as uuid } from 'uuid'
-import DBService from '../services/DBService'
+import DBService, {
+  getHashFromIntID,
+  getIntIDFromHash,
+} from '../services/DBService'
 
 import Logger from '../utils/Logger'
+
+import { ID } from '../types/ids'
 
 const saltRounds = Number(process.env.SALT_ROUNDS) || 10
 
@@ -14,7 +18,7 @@ const saltRounds = Number(process.env.SALT_ROUNDS) || 10
  */
 export default class User {
   // TODO: Add more params for User (from ER)
-  id: string
+  id: ID
   email: string
   emailTmp: string | null = null
   password: string
@@ -38,7 +42,7 @@ export default class User {
     profilePictures: string[],
     profileText: string,
     birthday?: Date,
-    id?: string
+    id?: ID | number
   ) {
     this.email = email
     this.password = password
@@ -46,22 +50,22 @@ export default class User {
     ;(this.lastName = lastName), (this.profilePictures = profilePictures)
     this.profileText = profileText
     this.birthday = typeof birthday !== 'undefined' ? birthday : null
-
-    if (!id) {
-      // TODO: The User is new and not yet saved in the DB
-      this.id = uuid()
-    } else this.id = id
+    this.id = typeof id === 'number' ? getHashFromIntID(id) : id
   }
 
   /**
    * Retrieve the specified fields from a user from the DB, and return it.
    *
-   * @param id THe ID to search for
+   * @param id The ID to search for
    * @param fields The fields (columns) to retrieve
    * @returns The found User in the DB or
    * @throws Error if the user is not found
    */
-  static async getUserById(id: string, fields: string[]): Promise<User> {
+  static async getUserById(
+    idInput: number | string,
+    fields: string[]
+  ): Promise<User> {
+    const id = typeof idInput === 'string' ? getIntIDFromHash(idInput) : idInput
     return (
       await new DBService().query('SELECT ?? FROM users WHERE id = ?', [
         fields,
@@ -89,7 +93,7 @@ export default class User {
    * @returns An object with the User's ID and other public information
    */
   getNormalData(): {
-    id: string
+    id: ID
   } {
     return {
       id: this.id,
