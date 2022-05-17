@@ -11,7 +11,9 @@ import { ID } from '../types/ids'
 const saltRounds = Number(process.env.SALT_ROUNDS) || 10
 
 /**
- * A User is every Account that can interact with the system. It's Primary Key is a random UUID.
+ * A User is every Account that can interact with the system.
+ * It's Primary Key is a AUTO-INCREMENT INT ID, for the Frontend
+ * hashed with the {@link https://www.npmjs.com/package/hashids hashids} package.
  *
  * @see {@link User.id}
  * @author Sebastian Thomas
@@ -32,7 +34,7 @@ export default class User {
    * Create a User based on
    * @param email the User's email
    * @param password the User's password hash
-   * @param id the User's ID. Optional: Will be auto generated (as [uuidV4](com/package/uuid)) if not specified
+   * @param id the User's ID. Optional: Will be auto generated (AUTO_INCREMENT) if not specified
    */
   constructor(
     email: string,
@@ -47,7 +49,8 @@ export default class User {
     this.email = email
     this.password = password
     this.firstName = firstName
-    ;(this.lastName = lastName), (this.profilePictures = profilePictures)
+    this.lastName = lastName
+    this.profilePictures = profilePictures
     this.profileText = profileText
     this.birthday = typeof birthday !== 'undefined' ? birthday : null
     this.id = typeof id === 'number' ? getHashFromIntID(id) : id
@@ -56,7 +59,7 @@ export default class User {
   /**
    * Retrieve the specified fields from a user from the DB, and return it.
    *
-   * @param id The ID to search for
+   * @param idInput The ID to search for. Can be provided as either number (search for the exact number ID in the DB) or string (search for the decoded ID in the DB).
    * @param fields The fields (columns) to retrieve
    * @returns The found User in the DB or
    * @throws Error if the user is not found
