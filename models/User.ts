@@ -1,48 +1,74 @@
 import bcrypt from 'bcrypt'
-import { v4 as uuid } from 'uuid'
-import DBService from '../services/DBService'
+import DBService, {
+  getHashFromIntID,
+  getIntIDFromHash,
+} from '../services/DBService'
 
 import Logger from '../utils/Logger'
+
+import { ID } from '../types/ids'
 
 const saltRounds = Number(process.env.SALT_ROUNDS) || 10
 
 /**
- * A User is every Account that can interact with the system. It's Primary Key is a random UUID.
+ * A User is every Account that can interact with the system.
+ * It's Primary Key is a AUTO-INCREMENT INT ID, for the Frontend
+ * hashed with the {@link https://www.npmjs.com/package/hashids hashids} package.
  *
  * @see {@link User.id}
  * @author Sebastian Thomas
  */
 export default class User {
   // TODO: Add more params for User (from ER)
-  id: string
+  id: ID
   email: string
+  emailTmp: string | null = null
   password: string
+  firstName: string
+  lastName: string
+  birthday: Date | null
+  profilePictures: string[] // TODO: Foreign Key?
+  profileText: string // TODO: Foreign Key?
 
   /**
    * Create a User based on
    * @param email the User's email
    * @param password the User's password hash
-   * @param id the User's ID. Optional: Will be auto generated (as [uuidV4](com/package/uuid)) if not specified
+   * @param id the User's ID. Optional: Will be auto generated (AUTO_INCREMENT) if not specified
    */
-  constructor(email: string, password: string, id?: string) {
+  constructor(
+    email: string,
+    password: string,
+    firstName: string,
+    lastName: string,
+    profilePictures: string[],
+    profileText: string,
+    birthday?: Date,
+    id?: ID | number
+  ) {
     this.email = email
     this.password = password
-
-    if (!id) {
-      // TODO: The User is new and not yet saved in the DB
-      this.id = uuid()
-    } else this.id = id
+    this.firstName = firstName
+    this.lastName = lastName
+    this.profilePictures = profilePictures
+    this.profileText = profileText
+    this.birthday = typeof birthday !== 'undefined' ? birthday : null
+    this.id = typeof id === 'number' ? getHashFromIntID(id) : id
   }
 
   /**
    * Retrieve the specified fields from a user from the DB, and return it.
    *
-   * @param id THe ID to search for
+   * @param idInput The ID to search for. Can be provided as either number (search for the exact number ID in the DB) or string (search for the decoded ID in the DB).
    * @param fields The fields (columns) to retrieve
    * @returns The found User in the DB or
    * @throws Error if the user is not found
    */
-  static async getUserById(id: string, fields: string[]): Promise<User> {
+  static async getUserById(
+    idInput: number | string,
+    fields: string[]
+  ): Promise<User> {
+    const id = typeof idInput === 'string' ? getIntIDFromHash(idInput) : idInput
     return (
       await new DBService().query('SELECT ?? FROM users WHERE id = ?', [
         fields,
@@ -70,7 +96,7 @@ export default class User {
    * @returns An object with the User's ID and other public information
    */
   getNormalData(): {
-    id: string
+    id: ID
   } {
     return {
       id: this.id,

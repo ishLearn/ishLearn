@@ -4,5 +4,6 @@
   "javascript.preferences.quoteStyle": "single",
   "prettier.jsxSingleQuote": true,
   "prettier.singleQuote": true,
-  "prettier.semi": false
+  "prettier.semi": false,
+  "cSpell.words": ["hashids", "ishlearn", "scripthost"]
 }
