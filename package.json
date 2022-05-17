@@ -6,8 +6,7 @@
   "scripts": {
     "start": "echo 'Not working yet!' node index.ts",
     "dev": "nodemon index.ts",
-    "build": "tsc index.ts ./dist",
-    "vidsmalltest": "nodemon smalltest/videotest.ts"
+    "build": "tsc index.ts ./dist"
   },
   "repository": {
     "type": "git",
@@ -28,8 +27,8 @@
     "express": "^4.17.3",
     "express-validator": "^6.14.0",
     "ffmpeg": "^0.0.4",
-    "mysql": "^2.18.1",
-    "uuid": "^8.3.2"
+    "hashids": "^2.2.10",
+    "mysql": "^2.18.1"
   },
   "devDependencies": {
     "@types/async": "^3.2.13",
