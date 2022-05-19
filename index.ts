@@ -57,6 +57,7 @@ import { listAll } from './libs/aws/commands/listBuckets'
 import { uploadFile, uploadContent } from './libs/aws/commands/uploadFile'
 import { createBucket } from './libs/aws/commands/createBucket'
 ;(async () => {
+  await listAll()
   // console.log(await createBucket({ Bucket: 'test' }))
   // console.log(
   //   await uploadFile({
@@ -65,7 +66,7 @@ import { createBucket } from './libs/aws/commands/createBucket'
   //     FilePath: 'testsFolder/test.txt',
   //   })
   // )
-  await listAll()
+  // await listAll()
   // console.log(
   //   await uploadContent({
   //     Bucket: 'test',
