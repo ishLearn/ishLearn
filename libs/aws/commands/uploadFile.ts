@@ -31,13 +31,19 @@ export const uploadContent = async (bucketParams: UploadBucketParams) => {
 
 // Create and upload the object to the S3 bucket.
 export const uploadFile = async (bucketParams: UploadFileBucketParams) => {
+  if (typeof bucketParams.FilePath === 'undefined')
+    throw new Error('Missing File Path in Upload File')
   const fileStream = fs.createReadStream(bucketParams.FilePath)
 
-  const bParams: UploadBucketParams = { ...bucketParams, Body: fileStream }
-  // delete bParams.FilePath
+  delete bucketParams.FilePath
+  const bParams: UploadBucketParams = {
+    ...bucketParams,
+    Body: fileStream,
+  }
 
   try {
-    const data = await s3Client.send(new PutObjectCommand(bParams))
+    const cmd = new PutObjectCommand(bParams)
+    const data = await s3Client.send(cmd)
     console.log(
       'Successfully uploaded object: ' + bParams.Bucket + '/' + bParams.Key
     )
@@ -48,5 +54,6 @@ export const uploadFile = async (bucketParams: UploadFileBucketParams) => {
       `Upload file with Bucket params: ${JSON.stringify(bParams)}`,
       err
     )
+    console.log(err)
   }
 }

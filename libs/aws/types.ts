@@ -46,7 +46,7 @@ export type UploadBucketParams = {
 export type UploadFileBucketParams = {
   Bucket: BucketName
   Key: BucketKey
-  FilePath: BucketFilePath
+  FilePath?: BucketFilePath
 }
 
 /**

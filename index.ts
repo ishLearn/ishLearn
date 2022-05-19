@@ -54,16 +54,23 @@ exec('ffmpeg -version', (err, _stdout, _stderr) => {
 })
 
 import { listAll } from './libs/aws/commands/listBuckets'
-import { uploadFile } from './libs/aws/commands/uploadFile'
-// import { createBucket } from './libs/aws/commands/createBucket'
+import { uploadFile, uploadContent } from './libs/aws/commands/uploadFile'
+import { createBucket } from './libs/aws/commands/createBucket'
 ;(async () => {
   // console.log(await createBucket({ Bucket: 'test' }))
-  console.log(
-    await uploadFile({
-      Bucket: 'test',
-      Key: 'test.txt',
-      FilePath: 'testsFolder/test.txt',
-    })
-  )
-  console.log(await listAll())
+  // console.log(
+  //   await uploadFile({
+  //     Bucket: 'test',
+  //     Key: 'test.txt',
+  //     FilePath: 'testsFolder/test.txt',
+  //   })
+  // )
+  await listAll()
+  // console.log(
+  //   await uploadContent({
+  //     Bucket: 'test',
+  //     Key: 'test2.txt',
+  //     Body: 'This is a test',
+  //   })
+  // )
 })()
