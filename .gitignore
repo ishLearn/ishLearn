@@ -1,6 +1,9 @@
 smalltest
 testsFolder
 
+# Docker setup
+initDockerS3.sh
+
 # Logs
 logs
 *.log
