@@ -1,8 +1,8 @@
 smalltest
 testsFolder
 
-# Docker setup
-initDockerS3.sh
+# Private setup files
+*.local.sh
 
 # Logs
 logs

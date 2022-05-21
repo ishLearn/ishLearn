@@ -1,3 +1,8 @@
+import dotenv from 'dotenv'
+dotenv.config()
+console.log(process.env.SCALITY_ACCESS_KEY_ID)
+console.log(process.env.SCALITY_SECRET_ACCESS_KEY)
+
 // Time import
 import { wait } from '../utils/dev/time'
 
@@ -53,21 +58,19 @@ test('upload to test bucket', async () => {
   })
   expect(file).toBe('TestTextForS3')
 })
-
-test('test list all buckets', async () => {
-  const s = await listAllBuckets()
-  expect(s.Buckets?.map(c => ({ Name: c.Name }))).toContainEqual({
-    Name: 'test',
-  })
-})
 */
+
+if (typeof process.env.TEST_BUCKET === 'undefined') {
+  throw new Error('Cannot start test, no test bucket name defined')
+}
+
+// Setup
+const testBucketName = process.env.TEST_BUCKET
+const salt = new Date().getTime()
+const Bucket = testBucketName + salt
 
 jest.setTimeout(15000)
 test('Complete test bucket', async () => {
-  // Setup
-  const salt = new Date().getTime()
-  const Bucket = 'test' + salt
-
   // Create bucket
   await createBucket({ Bucket })
 

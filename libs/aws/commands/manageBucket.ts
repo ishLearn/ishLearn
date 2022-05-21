@@ -21,9 +21,10 @@ export const createBucket = async (bucketParams: BucketParams) => {
   } catch (err) {
     new Logger().error(
       'AWS S3 Client',
-      `Create Bucket with params: ${JSON.stringify(bucketParams)}`,
+      `CREATE Bucket with params: ${JSON.stringify(bucketParams)}`,
       err
     )
+    throw new Error('Could not create bucket.')
   }
 }
 
@@ -39,9 +40,10 @@ export const deleteBucket = async (
   } catch (err) {
     new Logger().error(
       'AWS S3 Client',
-      `Create Bucket with params: ${JSON.stringify(bucketParams)}`,
+      `DELETE Bucket with params: ${JSON.stringify(bucketParams)}`,
       err
     )
+    throw new Error('Could not delete bucket.')
   }
 }
 
@@ -66,8 +68,9 @@ export const clearBucket = async (bucketParams: BucketParams) => {
   } catch (err) {
     new Logger().error(
       'AWS S3 Client',
-      `Clear Bucket with params: ${JSON.stringify(bucketParams)}`,
+      `CLEAR Bucket with params: ${JSON.stringify(bucketParams)}`,
       err
     )
+    throw new Error('Could not clear bucket.')
   }
 }

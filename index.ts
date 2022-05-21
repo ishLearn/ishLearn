@@ -1,7 +1,14 @@
+// Import server modules
 import express from 'express'
+import http from 'http'
+import { Server as SocketIOServer } from 'socket.io'
 
+// Config dotenv
 import dotenv from 'dotenv'
 dotenv.config()
+
+// Import socket.io handler
+import { socketIOConnectionHandler } from './socketio/socketIOConnectionHandler'
 
 // Import api routes
 import users from './routes/users'
@@ -21,8 +28,10 @@ import { exec } from 'child_process'
 const dbService = new DBService()
 
 // Express server and middleware:
-// Initialize Express server
+// Initialize Express and socket.io server with NodeJS HTTP module
 const app = express()
+const server = http.createServer(app)
+const io = new SocketIOServer(server)
 
 // Middleware: parse incoming json from HTTP-request body
 app.use(express.json())
@@ -36,9 +45,12 @@ app.get('/api', (_req, res) => {
   res.status(200).json({ message: 'OK, but nothing to do here.' })
 })
 
-// Bind server to port
+// Init socket.io connection
+io.on('connection', socketIOConnectionHandler)
+
+// Bind HTTP server to port (the one created with express and socket.io)
 const PORT = process.env.PORT || 5000
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   logger.listen(PORT)
 })
 
