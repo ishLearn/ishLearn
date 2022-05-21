@@ -4,11 +4,17 @@ This contains the code to the web-DB project.
 
 ## DB
 
-- MySQL
+### SQL
+
+- MySQL (connector is the official [mysql](https://www.npmjs.com/package/mysql) package)
+
+### File Storage
+
+- S3 (connector is the AWS-SDK for Node.js version 3, docs: [`@aws-sdk/client-s3`@npmjs.com](https://www.npmjs.com/package/%40aws-sdk/client-s3) and [Amazon AWS Docs](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/index.html))
 
 ## Backend
 
-- Logging with `chalk@4.1.2`
+- Logging with `chalk@4.1.2` and a custom logger class
 
 ### Requirements
 
