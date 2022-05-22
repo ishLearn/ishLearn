@@ -12,6 +12,7 @@ import { socketIOConnectionHandler } from './socketio/socketIOConnectionHandler'
 
 // Import api routes
 import users from './routes/users'
+import products from './routes/products'
 
 // Initialize logger
 import Logger from './utils/Logger'
@@ -20,12 +21,13 @@ import Logger from './utils/Logger'
  */
 const logger = new Logger()
 // Initialize DBService (start DB connection pool)
-import DBService from './services/DBService'
+import DBService, { Visibility } from './services/DBService'
 import { exec } from 'child_process'
+
 /**
  * Global Service for DB connections
  */
-const dbService = new DBService()
+new DBService()
 
 // Express server and middleware:
 // Initialize Express and socket.io server with NodeJS HTTP module
@@ -39,6 +41,7 @@ app.use(express.json())
 app.use(logger.request)
 
 app.use('/api/users', users)
+app.use('/api/products', products)
 
 // Initial API-route
 app.get('/api', (_req, res) => {

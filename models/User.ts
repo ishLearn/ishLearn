@@ -19,7 +19,6 @@ const saltRounds = Number(process.env.SALT_ROUNDS) || 10
  * @author Sebastian Thomas
  */
 export default class User {
-  // TODO: Add more params for User (from ER)
   id: ID
   email: string
   emailTmp: string | null = null
@@ -27,13 +26,18 @@ export default class User {
   firstName: string
   lastName: string
   birthday: Date | null
-  profilePictures: string[] // TODO: Foreign Key?
-  profileText: string // TODO: Foreign Key?
+  profilePicture: string | null
+  profileText: string | null
 
   /**
    * Create a User based on
    * @param email the User's email
    * @param password the User's password hash
+   * @param firstName the User's first name
+   * @param lastName the User's last name
+   * @param profilePicture the User's profile picture's links
+   * @param profileText the User's profile text link
+   * @param birthday the User's birth date; if specified, otherwise null
    * @param id the User's ID. Optional: Will be auto generated (AUTO_INCREMENT) if not specified
    */
   constructor(
@@ -41,16 +45,16 @@ export default class User {
     password: string,
     firstName: string,
     lastName: string,
-    profilePictures: string[],
-    profileText: string,
-    birthday?: Date,
+    profilePicture: string | null,
+    profileText: string | null,
+    birthday?: Date, // TODO: Can this be undefined, or is the possibility between 'Date | null' ?
     id?: ID | number
   ) {
     this.email = email
     this.password = password
     this.firstName = firstName
     this.lastName = lastName
-    this.profilePictures = profilePictures
+    this.profilePicture = profilePicture
     this.profileText = profileText
     this.birthday = typeof birthday !== 'undefined' ? birthday : null
     this.id = typeof id === 'number' ? getHashFromIntID(id) : id
@@ -61,7 +65,7 @@ export default class User {
    *
    * @param idInput The ID to search for. Can be provided as either number (search for the exact number ID in the DB) or string (search for the decoded ID in the DB).
    * @param fields The fields (columns) to retrieve
-   * @returns The found User in the DB or
+   * @returns The found User in the DB
    * @throws Error if the user is not found
    */
   static async getUserById(
@@ -77,18 +81,31 @@ export default class User {
     ).results
   }
 
-  // TODO: More params to leave out, not just pwd?
   /**
    * Retrieve a User from the DB, and return it.
-   * All fields are retrieved except for the Password Hash.
+   * Retrieved fields:
+   * - email
+   * - password hash
+   * - first name
+   * - last name
+   * - profile pictures urls
+   * - profile text url
+   * - birthday
    *
    * @param id The ID to search for
-   * @returns The found User in the DB or
+   * @returns The found User in the DB
    * @throws Error if the User is not found
    */
   static async getFullUserById(id: string): Promise<User> {
-    // TODO: What other fields to retrieve?
-    return await User.getUserById(id, ['email'])
+    return await User.getUserById(id, [
+      'email',
+      'password',
+      'firstName',
+      'lastName',
+      'profilePictures',
+      'profileText',
+      'birthday',
+    ])
   }
 
   /**
@@ -97,10 +114,13 @@ export default class User {
    */
   getNormalData(): {
     id: ID
+    firstName: string
+    lastName: string
+    profilePicture: string | null
+    profileText: string | null
   } {
-    return {
-      id: this.id,
-    }
+    const { id, firstName, lastName, profilePicture, profileText } = this
+    return { id, firstName, lastName, profilePicture, profileText }
   }
 
   /**
@@ -137,5 +157,33 @@ export default class User {
         return resolve(result)
       })
     })
+  }
+
+  /**
+   * Save the user to the database.
+   * @returns The new User
+   */
+  async save(): Promise<User> {
+    if (typeof this.id !== 'undefined')
+      throw new Error('Product has already been saved')
+    const res = await new DBService().query(
+      `INSERT INTO users (email, password, firstName, lastName, profileText, profilePicture, birthday) VALUES (?)`,
+      [
+        [
+          this.email,
+          this.password,
+          this.firstName,
+          this.lastName,
+          this.profileText,
+          this.profilePicture,
+          this.birthday,
+        ],
+      ]
+    )
+    console.log(res.results)
+
+    // TODO: Set this.id, this.createdDate, this.updatedDate
+
+    return res.results[0] as User
   }
 }

@@ -5,5 +5,6 @@
   "prettier.jsxSingleQuote": true,
   "prettier.singleQuote": true,
   "prettier.semi": false,
-  "cSpell.words": ["hashids", "ishlearn", "scripthost", "socketio"]
+  "cSpell.words": ["hashids", "ishlearn", "scripthost", "socketio"],
+  "html.format.wrapLineLength": 100
 }
