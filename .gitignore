@@ -1,4 +1,8 @@
 smalltest
+testsFolder
+
+# Private setup files
+*.local.sh
 
 # Logs
 logs
