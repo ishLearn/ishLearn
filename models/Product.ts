@@ -7,6 +7,7 @@ import DBService, {
 import Logger from '../utils/Logger'
 
 import { ID } from '../types/ids'
+import { NumberLike } from 'hashids/cjs/util'
 
 /**
  * A Product is a unit of files, comments and other content and information.
@@ -143,18 +144,61 @@ export default class Product {
 
   /**
    * Save the product to the database. Does not update `this` product.
+   * @param users the user's IDs
    * @returns The new Product's id
    */
-  async save(): Promise<number> {
+  async save(...users: number[] | string[]): Promise<number> {
     if (typeof this.id !== 'undefined')
       throw new Error('Product has already been saved')
+
+    let usersNrs: number[] | NumberLike[]
+    usersNrs = users.map(user => {
+      if (typeof user === 'string') return getIntIDFromHash(user)
+      return user
+    })
+
     const res = await new DBService().query(
       `INSERT INTO products (title, visibility, updatedBy, createdBy) VALUES (?)`,
       [[this.title, this.visibility, this.updatedBy, this.createdBy]]
     )
 
+    const resUploadBy = await new DBService().query(
+      `INSERT INTO uploadBy (PID, UID) VALUES (?)`,
+      usersNrs.map((user: number | NumberLike) => [res.results.insertId, user])
+    )
+
     this.id = res.results.insertId
 
     return res.results.insertId
+  }
+
+  static async addCollaborator(pid: string, uid: string) {
+    const productId = getIntIDFromHash(pid)
+    const userId = getIntIDFromHash(uid)
+
+    const resUploadBy = await new DBService().query(
+      `INSERT INTO uploadBy (PID, UID) VALUES (?)`,
+      [[productId, userId]]
+    )
+
+    return resUploadBy.results
+  }
+
+  /**
+   * Remove a collaborator from the project. Does not change the project's `createdBy`-field, only the `uploadBy`-table.
+   * @param pid Project ID (as string)
+   * @param uid Collaborator to remove from Project (as string)
+   * @returns The results of the query
+   */
+  static async removeCollaborator(pid: string, uid: string) {
+    const productId = getIntIDFromHash(pid)
+    const userId = getIntIDFromHash(uid)
+
+    const resUploadBy = await new DBService().query(
+      `DELETE FROM uploadBy WHERE PID = ? AND UID = ?`,
+      [productId, userId]
+    )
+
+    return resUploadBy.results
   }
 }
