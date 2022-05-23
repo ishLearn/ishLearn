@@ -7,9 +7,27 @@
   --orange: #E59D23;
   --almost-white: #F3FAFF;
 }
+html[data-theme='light']{
+  --background-color: var(--almost-white);
+  --text-color: var(--darkest-blau);
+  --link-color: var(--lighter-blau);
+}
+html[data-theme='dark']{
+  --background-color: var(--darkest-blau);
+  --text-color: var(--almost-white);
+  --link-color: var(--orange);
+}
 
-body {
-  margin: 0px;
+.usual-color {
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+.usual-color a {
+  color: var(--link-color);
+}
+.contrast-color {
+  background-color: var(--hansenberg-blau) !important;
+  color: var(--almost-white) !important;
 }
 
 #app {
@@ -20,15 +38,7 @@ body {
   color: var(--lighter-blau);
 }
 
-nav {
-  padding: 30px;
-}
-
-nav a {
-  font-weight: bold;
-  color: #2c3e50;
-}
-
-nav a.router-link-exact-active {
-  color: var(--orange);
+:root body {
+  margin: 0px;
+  background-color: var(--background-color);
 }
