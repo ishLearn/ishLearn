@@ -31,29 +31,38 @@ export const createBucket = async (bucketParams: BucketParams) => {
 /** Remove the Amazon S3 bucket.*/
 export const deleteBucket = async (
   bucketParams: BucketParams,
-  clearBucketParam: boolean
+  clearBucketParam: boolean,
+  expectPresent: boolean = true
 ) => {
-  if (clearBucketParam) await clearBucket(bucketParams)
   try {
+    if (clearBucketParam) await clearBucket(bucketParams, expectPresent)
     const data = await s3Client.send(new DeleteBucketCommand(bucketParams))
     return data
   } catch (err) {
-    new Logger().error(
-      'AWS S3 Client',
-      `DELETE Bucket with params: ${JSON.stringify(bucketParams)}`,
-      err
-    )
-    throw new Error('Could not delete bucket.')
+    if (expectPresent) {
+      new Logger().error(
+        'AWS S3 Client',
+        `DELETE Bucket with params: ${JSON.stringify(bucketParams)}`,
+        err
+      )
+      throw new Error('Could not delete bucket.')
+    } else throw new Error('Bucket does not appear to exist, so not deleted.')
   }
 }
 
-export const clearBucket = async (bucketParams: BucketParams) => {
-  const items: Array<{ Key: any }> = await listBucketObjects(bucketParams)
-
-  if (typeof items === 'undefined' || !(items.length > 0)) return null
-
-  console.log('Clearing ' + items.length + ' items')
+export const clearBucket = async (
+  bucketParams: BucketParams,
+  expectPresent: boolean = true
+) => {
   try {
+    const items: Array<{ Key: any }> = await listBucketObjects(
+      bucketParams,
+      expectPresent
+    )
+
+    if (typeof items === 'undefined' || !(items.length > 0)) return null
+
+    console.log('Clearing ' + items.length + ' items')
     const results = await Promise.all(
       items.map(async (item: { Key: any }) => {
         s3Client.send(
@@ -66,11 +75,13 @@ export const clearBucket = async (bucketParams: BucketParams) => {
     )
     return results
   } catch (err) {
-    new Logger().error(
-      'AWS S3 Client',
-      `CLEAR Bucket with params: ${JSON.stringify(bucketParams)}`,
-      err
-    )
-    throw new Error('Could not clear bucket.')
+    if (expectPresent) {
+      new Logger().error(
+        'AWS S3 Client',
+        `CLEAR Bucket with params: ${JSON.stringify(bucketParams)}`,
+        err
+      )
+      throw new Error('Could not clear bucket.')
+    } else throw new Error('Bucket does not appear to exist, so not cleared.')
   }
 }

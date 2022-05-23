@@ -18,7 +18,8 @@ const hasKeyProperty = (o: _Object): o is { Key: any } => {
 }
 
 export const listBucketObjects = async (
-  bucketParams: ListObjectsCommandInput
+  bucketParams: ListObjectsCommandInput,
+  expectPresent: boolean = true
 ): Promise<{ Key: any }[]> => {
   const result: { Key: any }[] = []
 
@@ -43,14 +44,16 @@ export const listBucketObjects = async (
         bucketParams.Marker = pageMarker
       }
     } catch (err) {
-      new Logger().error(
-        'AWS S3 Client',
-        `Listing Bucket Objects by Page Marker with params: ${JSON.stringify(
-          bucketParams
-        )}`,
-        err
-      )
-      truncated = false
+      if (expectPresent) {
+        new Logger().error(
+          'AWS S3 Client',
+          `Listing Bucket Objects by Page Marker with params: ${JSON.stringify(
+            bucketParams
+          )}`,
+          err
+        )
+        truncated = false
+      } else throw new Error('Bucket not present.')
     }
   }
   // At end of the list, response.truncated is false

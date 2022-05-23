@@ -6,15 +6,16 @@
   "scripts": {
     "start": "echo 'Not working yet!' node index.ts",
     "dev": "nodemon index.ts",
-    "initt": "nodemon init/initTables.ts",
     "build": "tsc index.ts ./dist",
-    "test": "jest"
+    "test": "jest",
+    "initt": "nodemon init/initTables.ts",
+    "setups3": "sh init/initDockerS3 && node setups3.ts"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ishLearn/ishLearn.git"
   },
-  "author": "Johann Gaulke, Sebastian Thomas",
+  "author": "Sebastian Thomas",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/ishLearn/ishLearn/issues"

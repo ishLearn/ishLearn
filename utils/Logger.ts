@@ -97,6 +97,14 @@ export default class Logger {
   }
 
   /**
+   * Log an S3 setup event to the console.
+   * @param task The specific task that was successfully executed
+   */
+  s3setup(task: string) {
+    console.log(chalk.bgBlue(`S3 Setup:`) + ' ' + chalk.blue(task))
+  }
+
+  /**
    * Logs the server's listening status to the console in bright green.
    *
    * @param {number | string} PORT Port the server is listening on
