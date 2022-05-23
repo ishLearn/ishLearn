@@ -1,10 +1,18 @@
+// Import server modules
 import express from 'express'
+import http from 'http'
+import { Server as SocketIOServer } from 'socket.io'
 
+// Config dotenv
 import dotenv from 'dotenv'
 dotenv.config()
 
+// Import socket.io handler
+import { socketIOConnectionHandler } from './socketio/socketIOConnectionHandler'
+
 // Import api routes
 import users from './routes/users'
+import products from './routes/products'
 
 // Initialize logger
 import Logger from './utils/Logger'
@@ -13,16 +21,19 @@ import Logger from './utils/Logger'
  */
 const logger = new Logger()
 // Initialize DBService (start DB connection pool)
-import DBService from './services/DBService'
+import DBService, { Visibility } from './services/DBService'
 import { exec } from 'child_process'
+
 /**
  * Global Service for DB connections
  */
-const dbService = new DBService()
+new DBService()
 
 // Express server and middleware:
-// Initialize Express server
+// Initialize Express and socket.io server with NodeJS HTTP module
 const app = express()
+const server = http.createServer(app)
+const io = new SocketIOServer(server)
 
 // Middleware: parse incoming json from HTTP-request body
 app.use(express.json())
@@ -30,15 +41,19 @@ app.use(express.json())
 app.use(logger.request)
 
 app.use('/api/users', users)
+app.use('/api/products', products)
 
 // Initial API-route
 app.get('/api', (_req, res) => {
   res.status(200).json({ message: 'OK, but nothing to do here.' })
 })
 
-// Bind server to port
+// Init socket.io connection
+io.on('connection', socketIOConnectionHandler)
+
+// Bind HTTP server to port (the one created with express and socket.io)
 const PORT = process.env.PORT || 5000
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   logger.listen(PORT)
 })
 
@@ -52,26 +67,3 @@ exec('ffmpeg -version', (err, _stdout, _stderr) => {
     throw err
   }
 })
-
-import { listAll } from './libs/aws/commands/listBuckets'
-import { uploadFile, uploadContent } from './libs/aws/commands/uploadFile'
-import { createBucket } from './libs/aws/commands/createBucket'
-;(async () => {
-  await listAll()
-  // console.log(await createBucket({ Bucket: 'test' }))
-  // console.log(
-  //   await uploadFile({
-  //     Bucket: 'test',
-  //     Key: 'test.txt',
-  //     FilePath: 'testsFolder/test.txt',
-  //   })
-  // )
-  // await listAll()
-  // console.log(
-  //   await uploadContent({
-  //     Bucket: 'test',
-  //     Key: 'test2.txt',
-  //     Body: 'This is a test',
-  //   })
-  // )
-})()

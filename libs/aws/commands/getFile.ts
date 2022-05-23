@@ -12,11 +12,9 @@ export const getFile = async (bucketParams: SearchFileBucketParams) => {
   try {
     // Get the object} from the Amazon S3 bucket. It is returned as a ReadableStream.
     const data = await s3Client.send(new GetObjectCommand(bucketParams))
-    console.log(data)
     // Convert the ReadableStream to a string.
     if (typeof data?.Body !== 'undefined') {
       const bodyContents = await streamToString(data.Body)
-      console.log(bodyContents)
       return bodyContents
     } else throw new Error('Object (file) could not be retrieved.')
   } catch (err) {

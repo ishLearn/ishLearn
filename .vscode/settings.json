@@ -9,7 +9,8 @@
     "hashids",
     "ishlearn",
     "scripthost",
-    "Gaulke"
+    "Gaulke",
+    "socketio"
   ],
   "html.format.wrapLineLength": 100
 }

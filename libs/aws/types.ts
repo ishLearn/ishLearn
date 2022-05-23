@@ -28,11 +28,6 @@ export type BucketParams = {
 }
 
 /**
- * Parameters for Bucket creation.
- */
-export type CreateBucketParams = { Bucket: BucketName }
-
-/**
  * Parameters for content upload.
  */
 export type UploadBucketParams = {
@@ -46,6 +41,9 @@ export type UploadBucketParams = {
 export type UploadFileBucketParams = {
   Bucket: BucketName
   Key: BucketKey
+  /**
+   * File Path relative to the root file path
+   */
   FilePath?: BucketFilePath
 }
 
