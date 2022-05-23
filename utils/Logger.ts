@@ -5,6 +5,7 @@ import express, { Request, Response, NextFunction } from 'express'
 import chalk from 'chalk'
 
 import { formatDate, formatTime } from './formatting'
+import { Socket } from 'socket.io'
 
 /**
  * @author @SebastianThomas
@@ -46,8 +47,20 @@ export default class Logger {
     next()
   }
 
+  newSocketConnection(socket: Socket): void {
+    console.log(
+      chalk.bgBlueBright(`New client socket connected:`) + chalk.red(socket.id)
+    )
+  }
+
+  socketDisconnect(socket: Socket): void {
+    console.log(
+      chalk.bgBlueBright(`Client socket disconnected:`) + chalk.red(socket.id)
+    )
+  }
+
   /**
-   * Log an error to the console.
+   * Log an successful event to the console.
    * @param category The part of the code that finished
    * @param task The specific task that successfully finished
    * @param directInfo Potential direct output from variable, not formatted
@@ -81,6 +94,14 @@ export default class Logger {
         ' \n' +
         error
     )
+  }
+
+  /**
+   * Log an S3 setup event to the console.
+   * @param task The specific task that was successfully executed
+   */
+  s3setup(task: string) {
+    console.log(chalk.bgBlue(`S3 Setup:`) + ' ' + chalk.blue(task))
   }
 
   /**

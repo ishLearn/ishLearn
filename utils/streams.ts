@@ -1,7 +1,9 @@
 /**
  * Helper function to convert a ReadableStream to a string.
  */
-export const streamToString = (stream: NodeJS.ReadableStream | any) =>
+export const streamToString = (
+  stream: NodeJS.ReadableStream | any
+): Promise<string> =>
   new Promise((resolve, reject) => {
     const chunks: any[] = []
     stream.on('data', (chunk: any) => chunks.push(chunk))
