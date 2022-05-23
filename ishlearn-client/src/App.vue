@@ -1,30 +1,19 @@
 <template>
-  <nav>
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
-  </nav>
-  <router-view/>
+  <div class="wrapper container">
+    <NavBar />
+    <router-view />
+  </div>
 </template>
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
+<script setup lang="ts">
+import { ref } from 'vue'
+import NavBar from '@/components/NavBar.vue'
 
-nav {
-  padding: 30px;
-}
+// TODO: Example, implement actual code and remove following two lines
+const staticNr = ref(0)
+console.log(staticNr)
+</script>
 
-nav a {
-  font-weight: bold;
-  color: #2c3e50;
-}
+<style scoped>
 
-nav a.router-link-exact-active {
-  color: #42b983;
-}
 </style>
