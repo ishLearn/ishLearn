@@ -15,5 +15,8 @@
     "skipLibCheck": true
   },
   "include": ["/**/*.ts"],
-  "exclude": ["node_modules", "dist", "test"]
+  "exclude": ["node_modules", "dist", "test"],
+  "lib": [
+    "esnext.bigint" // TODO: Working?
+  ]
 }

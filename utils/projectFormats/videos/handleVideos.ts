@@ -1,5 +1,5 @@
 import FFMpeg from 'ffmpeg'
-import Logger from '../../utils/Logger'
+import Logger from '../../Logger'
 
 /**
  * Create a thumbnail for a video.

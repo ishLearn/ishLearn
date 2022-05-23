@@ -1,4 +1,5 @@
 import mysql from 'mysql'
+import Hashids from 'hashids'
 
 /**
  * Service holding the database connection pool. Can be used to query the database or extract connections to perform complex operations on.
@@ -11,6 +12,7 @@ class DBService {
    * The singleton instance of this service, holding the pool connection.
    */
   static instance: DBService | null = null
+  static hashids = new Hashids(process.env.ID_HASH_SALT || 'enoN', 8)
 
   // Exclamation mark for ensuring this.pool is always set as a pool,
   // otherwise ts-node will complain about the first constructor line
@@ -120,20 +122,143 @@ class DBService {
   }
 }
 
+// ---------------------------------- IDs ----------------------------------
+// Documentation to ids: https://www.npmjs.com/package/hashids
+/**
+ * Converts number ID to string.
+ * @param intID The integer number to encode
+ * @returns The string hash
+ */
+export const getHashFromIntID = (intID: number) => {
+  const result = DBService.hashids.encode(intID)
+  if (result === '') throw new Error('Invalid input')
+  return result
+}
+/**
+ * Parse a string hash from an ID (to a string)
+ * @param hash The string hash to decode
+ * @returns The decoded number
+ */
+export const getIntIDFromHash = (hash: string) => {
+  const result = DBService.hashids.decode(hash)
+  if (typeof result[0] === undefined || result[0] < 0)
+    throw new Error('Invalid input')
+  return result[0]
+}
+
+// ---------------------------------- COLUMN ----------------------------------
+/**
+ * Column represents a column name and its associated type.
+ */
 export type Column = {
   name: string
   type?: string
 }
 
+/**
+ * Converts a column into a string
+ * @param c A column with name and potentially type, otherwise type is ignored
+ */
 export function columnToString(c: Column): string {
   return `${c.name} ${c.type || ''}`.trim()
 }
 
+// ---------------------------------- ENUMS ----------------------------------
+/**
+ * Project Visibilities
+ */
+export enum Visibility {
+  PRIVATE = 'private',
+  SCHOOL_PRIVATE = 'schoolPrivate',
+  LINK = 'link',
+  PUBLIC = 'public',
+}
+/**
+ * @return An array of all Visibilities
+ */
+export function getVisibilities() {
+  return Object.entries(Visibility).map(v => v[1])
+}
+
+/**
+ * The categories a tag can be part of
+ */
+enum Category {
+  SCHOOL = 'school',
+  GRADE_LEVEL = 'classLevel',
+  MEDIA_TYPE = 'mediaType',
+  SUBJECT = 'subject',
+}
+/**
+ * @return An array of all tag categories
+ */
+export function getCategories() {
+  return Object.entries(Category).map(v => v[1])
+}
+
+/**
+ * Status of a Project
+ */
+enum SupervisedByStatus {
+  SUBMISSION_OPEN = 'submissionOpen',
+  SUBMISSION_CLOSED = 'submissionClosed',
+  GRADED = 'graded',
+}
+/**
+ * @return An array of all supervised_by_status
+ */
+export function getSupervisedByStatus() {
+  return Object.entries(SupervisedByStatus).map(v => v[1])
+}
+
+/**
+ * All queries that can be executed against the DB.
+ */
 export const dbQueries = {
+  /**
+   * All CREATE TABLE queries for the DB
+   */
   exportTableQueries: {
-    products: `CREATE TABLE IF NOT EXISTS products (ID VARCHAR(16) PRIMARY KEY, title VARCHAR(255) NOT NULL, visibility ENUM('private', 'schoolPrivate', 'link', 'public') NOT NULL, createDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updatedDate Timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP);`,
-    media: `CREATE TABLE IF NOT EXISTS media (ID VARCHAR(16), filename VARCHAR(255) NOT NULL, URL VARCHAR(255) NOT NULL), uploadedDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP, product VARCHAR(16) FOREIGN KEY REFERENCES products(ID);`,
+    media: `CREATE TABLE IF NOT EXISTS media (ID INT(255) UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL, filename VARCHAR(255) NOT NULL, URL VARCHAR(255) NOT NULL, uploadedDate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP);`,
+    users: `CREATE TABLE IF NOT EXISTS users (ID INT(255) UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL, email VARCHAR(255) NOT NULL UNIQUE, emailTmp VARCHAR(255), password VARCHAR(255) NOT NULL, firstName VARCHAR(255) NOT NULL, lastName VARCHAR(255) NOT NULL, birthday Date, profilePicture INT(255) UNSIGNED DEFAULT NULL, profileText INT(255) UNSIGNED DEFAULT NULL, FOREIGN KEY (profilePicture) REFERENCES media(ID) ON UPDATE SET NULL ON DELETE SET NULL, FOREIGN KEY (profileText) REFERENCES media(ID) ON UPDATE SET NULL ON DELETE SET NULL);`,
+    products: `CREATE TABLE IF NOT EXISTS products (ID INT(255) UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL, title VARCHAR(255) NOT NULL, visibility ENUM(\"${getVisibilities().join(
+      '", "'
+    )}\") NOT NULL, createDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updatedDate Timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, createdBy INT(255) UNSIGNED NOT NULL REFERENCES users(ID), updatedBy INT(255) UNSIGNED NOT NULL REFERENCES users(ID));`,
+
+    mediaPartOfProduct: `CREATE TABLE IF NOT EXISTS mediaPartOfProduct (MID INT(255) UNSIGNED REFERENCES media(ID), PID INT(255) UNSIGNED REFERENCES products(ID));`,
+
+    tags: `CREATE TABLE IF NOT EXISTS tags (tag VARCHAR(255) NOT NULL PRIMARY KEY);`,
+    productHasTag: `CREATE TABLE IF NOT EXISTS productHasTag (tag VARCHAR(255) NOT NULL REFERENCES tags(tag), PID INT(255) UNSIGNED REFERENCES products(ID), PRIMARY KEY (tag, PID));`,
+    mediaHasTag: `CREATE TABLE IF NOT EXISTS mediaHasTag (tag VARCHAR(255) NOT NULL REFERENCES tags(tag), MID INT(255) UNSIGNED REFERENCES media(ID), PRIMARY KEY (tag, MID));`,
+    userHasTag: `CREATE TABLE IF NOT EXISTS userHasTag (tag VARCHAR(255) NOT NULL REFERENCES tags(tag), UID INT(255) UNSIGNED REFERENCES users(ID), PRIMARY KEY (tag, UID));`,
+
+    categories: `CREATE TABLE IF NOT EXISTS categories (tag VARCHAR(255) NOT NULL PRIMARY KEY REFERENCES tags(tag), category ENUM(\"${getCategories().join(
+      '", "'
+    )}\") NOT NULL)`,
+
+    supervisedBy: `CREATE TABLE IF NOT EXISTS supervisedBy (PID INT(255) UNSIGNED NOT NULL REFERENCES products(ID), TID INT(255) UNSIGNED NOT NULL REFERENCES users(ID), status ENUM(\"${getSupervisedByStatus().join(
+      '", "'
+    )}\") NOT NULL, grade VARCHAR(255), PRIMARY KEY (PID, TID))`,
+    uploadBy: `CREATE TABLE IF NOT EXISTS uploadBy (PID INT(255) UNSIGNED NOT NULL REFERENCES products(ID), UID INT(255) UNSIGNED NOT NULL REFERENCES users(ID), PRIMARY KEY (PID, UID))`,
+    rememberProject: `CREATE TABLE IF NOT EXISTS rememberProject (PID INT(255) UNSIGNED NOT NULL REFERENCES products(ID), SID INT(255) UNSIGNED NOT NULL REFERENCES users(ID), addedTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY (PID, SID))`,
+    comments: `CREATE TABLE IF NOT EXISTS comments (PID INT(255) UNSIGNED NOT NULL REFERENCES products(ID), UID INT(255) UNSIGNED NOT NULL REFERENCES users(ID), createdTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updatedTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP, rating INT(255) NOT NULL, commentText INT(255) UNSIGNED NOT NULL REFERENCES media(ID), PRIMARY KEY(PID, UID))`,
   },
+}
+
+export const createDefaultTables = async () => {
+  for (let q of Object.entries(dbQueries.exportTableQueries)) {
+    await new DBService().query(q[1])
+    console.log(q[1])
+    console.log()
+  }
+  return 'Finished'
+}
+export const dropAllTables = async () => {
+  const all = Object.keys(dbQueries.exportTableQueries)
+
+  all.reverse()
+
+  for (let q of all) await new DBService().query(`drop table ${q}`)
 }
 
 export default DBService
