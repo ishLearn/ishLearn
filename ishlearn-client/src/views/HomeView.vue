@@ -1,9 +1,14 @@
 <template>
+<div>
   <div class="home">
     <h2>Hier h2 </h2>
     <img alt="Vue logo" src="../assets/logo.png">
     <HelloWorld msg="Welcome to Your FIRST Vue.js + TypeScript App"/>
   </div>
+  <div class="one">
+    Some text for your x.
+  </div>
+</div>
 </template>
 
 <script lang="ts">
@@ -17,3 +22,10 @@ export default defineComponent({
   },
 });
 </script>
+
+<style scoped>
+.one {
+  background-color: var(--hansenberg-blau);
+  color: white;
+}
+</style>

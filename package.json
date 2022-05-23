@@ -6,8 +6,7 @@
   "scripts": {
     "start": "echo 'Not working yet!' node index.ts",
     "dev": "nodemon index.ts",
-    "build": "tsc index.ts ./dist",
-    "vidsmalltest": "nodemon smalltest/videotest.ts"
+    "build": "tsc index.ts ./dist"
   },
   "repository": {
     "type": "git",
@@ -20,21 +19,25 @@
   },
   "homepage": "https://github.com/ishLearn/ishLearn#readme",
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.92.0",
+    "async": "^3.2.3",
+    "axios": "^0.27.2",
     "bcrypt": "^5.0.1",
     "chalk": "^4.1.2",
     "dotenv": "^16.0.0",
     "express": "^4.17.3",
     "express-validator": "^6.14.0",
     "ffmpeg": "^0.0.4",
-    "mysql": "^2.18.1",
-    "uuid": "^8.3.2"
+    "hashids": "^2.2.10",
+    "mysql": "^2.18.1"
   },
   "devDependencies": {
+    "@types/async": "^3.2.13",
     "@types/bcrypt": "^5.0.0",
     "@types/express": "^4.17.13",
     "@types/ffmpeg": "^1.0.4",
     "@types/mysql": "^2.15.21",
-    "@types/node": "^17.0.23",
+    "@types/node": "^17.0.35",
     "@types/uuid": "^8.3.4",
     "nodemon": "^2.0.15",
     "ts-node": "^10.7.0",
