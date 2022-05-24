@@ -5,7 +5,7 @@ import Product from '../models/Product'
 const router = express.Router()
 
 // GET /api/products/
-// Get a list of the first fifty products
+// Get a list of the first fifty products that have a visibility of 'public'
 router.get('/', async (req: express.Request, res: express.Response) => {
   return res.json(await Product.getFirstProducts())
 })

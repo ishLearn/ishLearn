@@ -96,6 +96,7 @@ export default class Product {
     const cIdsExist = collaboratorNumberIds.length > 0
     const tagVExist = tagValues.length > 0
 
+    // Build query, based on cIdsExist and tagVExist
     const query = `
           SELECT ID, title, visibility, createDate, updatedDate, createdBy, updatedBy FROM products 
            ${
@@ -120,6 +121,7 @@ export default class Product {
       .replace(/\s/g, ' ')
       .replace(/\s{2,}/g, ' ')
       .replace(/\( /g, '(')
+    // Format the query not to include too many whitespace characters
 
     // Set SQL Query Params
     const params: Array<string | NumberLike[] | string[] | number> = []
@@ -129,8 +131,6 @@ export default class Product {
     params.push(conditionQuery)
     if (tagVExist) params.push(tagValues.length)
     if (cIdsExist) params.push(collaboratorNumberIds.length)
-
-    console.log(params)
 
     // Send Query and return result
     return (await new DBService().query(query, params)).results
