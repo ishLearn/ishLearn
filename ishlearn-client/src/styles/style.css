@@ -1,21 +1,48 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100&display=swap');
 
 :root {
+  --almost-black: #172531;
   --darkest-blau: #3A4856;
   --hansenberg-blau: #006b9e;
   --lighter-blau: #1c9cd9;
   --orange: #E59D23;
+  --orange-shade: #BA7900;
   --almost-white: #F3FAFF;
 }
 html[data-theme='light']{
   --background-color: var(--almost-white);
   --text-color: var(--darkest-blau);
+  /* Links */
   --link-color: var(--lighter-blau);
+  --link-color-hover: var(--hansenberg-blau);
+  /* Nav */
+  --nav-bg: var(--hansenberg-blau);
+  --nav-fg: var(--almost-white);
 }
 html[data-theme='dark']{
   --background-color: var(--darkest-blau);
   --text-color: var(--almost-white);
+  /* Links */
   --link-color: var(--orange);
+  --link-color-hover: var(--orange-shade);
+  /* Nav */
+  --nav-bg: var(--almost-black);
+  --nav-fg: var(--almost-white);
+}
+
+[data-theme='dark'] .form-control {
+  background-color: rgba(0, 0, 0, 0.6);
+  border-color: rgba(0, 0, 0, 0.6);
+  color: var(--text-color) !important;
+}
+
+[data-theme='dark'] .form-control:focus {
+  color: var(--text-color) !important;
+}
+
+[data-theme='light'] .d-block-light,
+[data-theme='dark'] .d-block-dark {
+    display: block !important;
 }
 
 .usual-color {
@@ -24,6 +51,9 @@ html[data-theme='dark']{
 }
 .usual-color a {
   color: var(--link-color);
+}
+.usual-color a:hover {
+  color: var(--link-color-hover);
 }
 .contrast-color {
   background-color: var(--hansenberg-blau) !important;

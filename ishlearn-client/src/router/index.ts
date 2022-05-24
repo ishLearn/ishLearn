@@ -15,10 +15,27 @@ const routes: Array<RouteRecordRaw> = [
     // which is lazy-loaded when the route is visited.
     component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue'),
   },
+  // Alles für die Projekte
   {
     path: '/projects',
     name: 'AllProjects',
-    component: () => import('../views/AllProjectsView.vue'),
+    component: () => import('../views/ProjectsAllView.vue'),
+  },
+  {
+    path: '/projects/add',
+    name: 'AddProject',
+    component: () => import('../views/ProjectAdd.vue'),
+  },
+  {
+    path: '/projects/view/:id',
+    name: 'ViewProject',
+    component: () => import('../views/ProjectDetail.vue'),
+  },
+  // Alles rund um den Benutzer
+  {
+    path: '/user/:id',
+    name: 'UserDetail',
+    component: () => import('../views/UserProfileView.vue'),
   },
 ];
 
