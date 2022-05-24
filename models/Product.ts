@@ -272,6 +272,13 @@ export default class Product {
 
   // UPDATE PRODUCT
 
+  static async setLastModified(productId: NumberLike, userId: NumberLike) {
+    return await new DBService().query(
+      `UPDATE products SET updatedBy = ? WHERE ID = ?`,
+      [userId, productId]
+    )
+  }
+
   static async update(
     productId: string,
     collaboratorId: string,
@@ -314,19 +321,51 @@ export default class Product {
     throw new Error(`User is not valid; has not been entered`)
   }
 
-  static async addTags(
+  static async updateTags(
     productId: string,
     collaboratorId: string,
-    tags: string[]
+    tags: string[],
+    add: boolean
   ) {
-    return { results: { affectedRows: 0, msg: 'TODO:' } }
+    const pid = getIntIDFromHash(productId)
+    const cid = getIntIDFromHash(collaboratorId)
+    const validationRequest = await new DBService().query(
+      'SELECT PID, UID FROM uploadBy WHERE PID = ? AND UID = ?',
+      [pid, cid]
+    )
+
+    const valid = validationRequest.results.length > 0
+
+    if (valid) {
+      return add
+        ? await this.addTags(pid, cid, tags)
+        : await this.removeTags(pid, cid, tags)
+    }
+    throw new Error(`User is not valid; has not been entered`)
   }
-  static async removeTags(
-    productId: string,
-    collaboratorId: string,
-    tags: string[]
-  ) {
-    return { results: { affectedRows: 0, msg: 'TODO:' } }
+
+  static async addTags(pid: NumberLike, cid: NumberLike, tags: string[]) {
+    const query = 'INSERT INTO productHasTag (PID, tag) VALUES (?, ?)'
+    return await Promise.all([
+      ...tags.map(async tag => {
+        return await new DBService().query(query, [pid, tag])
+      }),
+      async () => {
+        return await Product.setLastModified(cid, cid)
+      },
+    ])
+  }
+
+  static async removeTags(pid: NumberLike, cid: NumberLike, tags: string[]) {
+    const query = 'DELETE FROM productHasTag WHERE PID = ? AND UID = ?'
+    return await Promise.all([
+      ...tags.map(async tag => {
+        return await new DBService().query(query, [pid, tag])
+      }),
+      async () => {
+        return await Product.setLastModified(cid, cid)
+      },
+    ])
   }
 
   static async addMedia(

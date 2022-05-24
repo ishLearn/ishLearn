@@ -94,7 +94,7 @@ router.put('/:pid', async (req, res) => {
   } = req.body
 
   try {
-    const result = (
+    const result: any = (
       await Product.update(productId, collaborator, fieldsToUpdate)
     ).results
 
@@ -130,15 +130,10 @@ router.put('/:id/tags', async (req, res) => {
       .status(400)
       .json({ msg: 'Should the collaborator be added or removed?' })
 
-  const result = (
-    add
-      ? await Product.addTags(productId, collaboratorId, tags)
-      : await Product.removeTags(productId, collaboratorId, tags)
-  ).results
+  await Product.updateTags(productId, collaboratorId, tags, add)
   return res.status(200).json({
     success: true,
     productId,
-    affectedRows: result.affectedRows,
   })
 })
 
