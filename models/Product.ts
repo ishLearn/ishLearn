@@ -54,6 +54,39 @@ export default class Product {
   }
 
   /**
+   * Map all ids from a product result (from DB) to HashIDs
+   * @param result the DB query's result
+   * @returns The result. with hashed ids
+   */
+  static mapResultsToHash(result: {
+    id: NumberLike
+    title: string
+    visibility: Visibility | string
+    updatedBy: number
+    createdBy: number
+    createDate?: Date
+    updatedDate?: Date
+  }) {
+    const id = getHashFromIntID(result.id)
+    const createdBy = getHashFromIntID(result.createdBy)
+    const updatedBy = getHashFromIntID(result.updatedBy)
+    const tmp: {
+      id?: any
+      title: string
+      visibility: Visibility | string
+      updatedBy?: any
+      createdBy?: any
+      createDate?: Date
+      updatedDate?: Date
+    } = result
+
+    delete tmp.id
+    delete tmp.updatedBy
+    delete tmp.createdBy
+    return { ...tmp, id, createdBy, updatedBy }
+  }
+
+  /**
    * Retrieve the specified fields from a Product from the DB, and return it.
    *
    * @param idInput The ID to search for. Can be provided as either number (search for the exact number ID in the DB) or string (search for the decoded ID in the DB).
@@ -71,11 +104,10 @@ export default class Product {
         fields,
         id,
       ])
-    ).results
+    ).results.map(Product.mapResultsToHash)
   }
 
   /**
-   * TODO: Heavily test this search function
    * Retrieve the specified fields from a Product from the DB, and return it.
    *
    * @param tags The tags to search for.
@@ -133,11 +165,13 @@ export default class Product {
     if (cIdsExist) params.push(collaboratorNumberIds.length)
 
     // Send Query and return result
-    return (await new DBService().query(query, params)).results
+    return (await new DBService().query(query, params)).results.map(
+      Product.mapResultsToHash
+    )
   }
 
   /**
-   * Retrieve a User from the DB, and return it.
+   * Retrieve a Product from the DB, and return it.
    * Retrieved fields:
    * - title
    * - visibility
@@ -147,7 +181,7 @@ export default class Product {
    *
    * @param id The ID to search for
    * @returns The found Product in the DB
-   * @throws Error if the User is not found
+   * @throws Error if the Product is not found
    */
   static async getFullProductById(id: number | string): Promise<Product> {
     const r = await Product.getProductById(id, [
@@ -181,27 +215,29 @@ export default class Product {
     )
 
     const { results } = res
-    return results.map(
-      (line: {
-        ID: number
-        title: string
-        visibility: string
-        createdDate: Date
-        updatedDate: Date
-        createdBy: number
-        updatedBy: number
-      }) => {
-        return new Product(
-          line.title,
-          line.visibility,
-          line.updatedBy,
-          line.createdBy,
-          line.createdDate,
-          line.updatedDate,
-          line.ID
-        )
-      }
-    )
+    return results
+      .map(
+        (line: {
+          ID: number
+          title: string
+          visibility: string
+          createdDate: Date
+          updatedDate: Date
+          createdBy: number
+          updatedBy: number
+        }) => {
+          return new Product(
+            line.title,
+            line.visibility,
+            line.updatedBy,
+            line.createdBy,
+            line.createdDate,
+            line.updatedDate,
+            line.ID
+          )
+        }
+      )
+      .map(Product.mapResultsToHash)
   }
 
   /**
