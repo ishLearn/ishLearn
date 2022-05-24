@@ -1,8 +1,9 @@
 <template>
 <div>
   <div class="home">
+    <h2>Hier h2 </h2>
     <img alt="Vue logo" src="../assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js + TypeScript App"/>
+    <HelloWorld msg="Welcome to Your FIRST Vue.js + TypeScript App"/>
   </div>
   <div class="one">
     Some text for your x.

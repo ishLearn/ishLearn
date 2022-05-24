@@ -75,6 +75,68 @@ export default class Product {
   }
 
   /**
+   * TODO: Heavily test this search function
+   * Retrieve the specified fields from a Product from the DB, and return it.
+   *
+   * @param tags The tags to search for.
+   * @param queryString The query string to search for in the title
+   * @param collaborators The collaborator IDs to search for
+   * @returns The found Product in the DB
+   */
+  static async search(
+    tags?: string[],
+    queryString?: string,
+    collaborators?: string[]
+  ): Promise<Product> {
+    const conditionQuery: string = queryString || ''
+    const collaboratorNumberIds: NumberLike[] =
+      collaborators?.map(v => getIntIDFromHash(v)) || []
+    const tagValues: string[] = tags || []
+
+    const cIdsExist = collaboratorNumberIds.length > 0
+    const tagVExist = tagValues.length > 0
+
+    // Build query, based on cIdsExist and tagVExist
+    const query = `
+          SELECT ID, title, visibility, createDate, updatedDate, createdBy, updatedBy FROM products 
+           ${
+             cIdsExist
+               ? `LEFT JOIN (SELECT PID, UID FROM uploadBy WHERE UID IN (?)) AS ub ON (products.ID = ub.PID) `
+               : ''
+           }
+          ${
+            tagVExist
+              ? `LEFT JOIN (SELECT tag, PID FROM pt WHERE tag IN ?) AS pt ON (products.ID = pt.PID)`
+              : ''
+          } WHERE title REGEXP ?
+          GROUP BY products.ID ${
+            tagVExist || cIdsExist
+              ? `HAVING ${tagVExist ? `COUNT(pt.tag) = ? ` : ''}${
+                  tagVExist && cIdsExist ? 'AND' : ''
+                } ${cIdsExist ? `COUNT(ub.UID) = ?` : ''}
+            `
+              : ''
+          } LIMIT 50
+        `
+      .replace(/\s/g, ' ')
+      .replace(/\s{2,}/g, ' ')
+      .replace(/\( /g, '(')
+    // Format the query not to include too many whitespace characters
+
+    // Set SQL Query Params
+    const params: Array<string | NumberLike[] | string[] | number> = []
+
+    if (collaboratorNumberIds.length > 0) params.push(collaboratorNumberIds)
+    if (tagValues.length > 0) params.push(tagValues)
+    params.push(conditionQuery)
+    if (tagVExist) params.push(tagValues.length)
+    if (cIdsExist) params.push(collaboratorNumberIds.length)
+
+    // Send Query and return result
+    return (await new DBService().query(query, params)).results
+  }
+
+  /**
    * Retrieve a User from the DB, and return it.
    * Retrieved fields:
    * - title
@@ -172,6 +234,12 @@ export default class Product {
     return res.results.insertId
   }
 
+  /**
+   * Add a collaborator from to project. Updates the `uploadBy`-table.
+   * @param pid Project ID (as string)
+   * @param uid Collaborator to add to Project (as string)
+   * @returns The results of the query
+   */
   static async addCollaborator(pid: string, uid: string) {
     const productId = getIntIDFromHash(pid)
     const userId = getIntIDFromHash(uid)
@@ -200,5 +268,79 @@ export default class Product {
     )
 
     return resUploadBy.results
+  }
+
+  // UPDATE PRODUCT
+
+  static async update(
+    productId: string,
+    collaboratorId: string,
+    fieldsToUpdate: {
+      title?: string
+      visibility?: string
+    }
+  ) {
+    if (
+      typeof fieldsToUpdate.visibility !== 'undefined' &&
+      Object.values(Visibility).filter(v => v === fieldsToUpdate.visibility)
+        .length < 1
+    )
+      throw new Error('Visibility is not valid')
+
+    const pid = getIntIDFromHash(productId)
+    const cid = getIntIDFromHash(collaboratorId)
+    const validationRequest = await new DBService().query(
+      'SELECT PID, UID FROM uploadBy WHERE PID = ? AND UID = ?',
+      [pid, cid]
+    )
+
+    const valid = validationRequest.results.length > 0
+
+    if (valid) {
+      const setTitle = typeof fieldsToUpdate.title !== 'undefined'
+      const setVis = typeof fieldsToUpdate.visibility !== 'undefined'
+      const query = `UPDATE products SET ${setTitle ? `title = ?` : ''}${
+        setTitle && setVis ? ', ' : ''
+      }${setVis ? `visibility = ?` : ''} WHERE ID = ?`
+
+      const params = []
+
+      if (setTitle) params.push(fieldsToUpdate.title)
+      if (setVis) params.push(fieldsToUpdate.visibility)
+      params.push(pid)
+
+      return await new DBService().query(query, params)
+    }
+    throw new Error(`User is not valid; has not been entered`)
+  }
+
+  static async addTags(
+    productId: string,
+    collaboratorId: string,
+    tags: string[]
+  ) {
+    return { results: { affectedRows: 0, msg: 'TODO:' } }
+  }
+  static async removeTags(
+    productId: string,
+    collaboratorId: string,
+    tags: string[]
+  ) {
+    return { results: { affectedRows: 0, msg: 'TODO:' } }
+  }
+
+  static async addMedia(
+    productId: string,
+    collaboratorId: string,
+    tags: string
+  ) {
+    return { results: { affectedRows: 0, msg: 'TODO:' } }
+  }
+  static async removeMedia(
+    productId: string,
+    collaboratorId: string,
+    tags: string
+  ) {
+    return { results: { affectedRows: 0, msg: 'TODO:' } }
   }
 }

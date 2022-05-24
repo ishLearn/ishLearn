@@ -43,7 +43,7 @@ router.put('/', (req: express.Request, res: express.Response) => {})
 /**
  * Update current User's email.
  *
- * TODO: Set the data flow, will there be a temp table for storing the new email that is currently being validated?
+ * TODO: Set the data flow, with the temp variable for storing the new email that is currently being validated?
  */
 router.put('/email', (req: express.Request, res: express.Response) => {})
 
