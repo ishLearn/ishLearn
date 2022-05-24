@@ -269,4 +269,78 @@ export default class Product {
 
     return resUploadBy.results
   }
+
+  // UPDATE PRODUCT
+
+  static async update(
+    productId: string,
+    collaboratorId: string,
+    fieldsToUpdate: {
+      title?: string
+      visibility?: string
+    }
+  ) {
+    if (
+      typeof fieldsToUpdate.visibility !== 'undefined' &&
+      Object.values(Visibility).filter(v => v === fieldsToUpdate.visibility)
+        .length < 1
+    )
+      throw new Error('Visibility is not valid')
+
+    const pid = getIntIDFromHash(productId)
+    const cid = getIntIDFromHash(collaboratorId)
+    const validationRequest = await new DBService().query(
+      'SELECT PID, UID FROM uploadBy WHERE PID = ? AND UID = ?',
+      [pid, cid]
+    )
+
+    const valid = validationRequest.results.length > 0
+
+    if (valid) {
+      const setTitle = typeof fieldsToUpdate.title !== 'undefined'
+      const setVis = typeof fieldsToUpdate.visibility !== 'undefined'
+      const query = `UPDATE products SET ${setTitle ? `title = ?` : ''}${
+        setTitle && setVis ? ', ' : ''
+      }${setVis ? `visibility = ?` : ''} WHERE ID = ?`
+
+      const params = []
+
+      if (setTitle) params.push(fieldsToUpdate.title)
+      if (setVis) params.push(fieldsToUpdate.visibility)
+      params.push(pid)
+
+      return await new DBService().query(query, params)
+    }
+    throw new Error(`User is not valid; has not been entered`)
+  }
+
+  static async addTags(
+    productId: string,
+    collaboratorId: string,
+    tags: string[]
+  ) {
+    return { results: { affectedRows: 0, msg: 'TODO:' } }
+  }
+  static async removeTags(
+    productId: string,
+    collaboratorId: string,
+    tags: string[]
+  ) {
+    return { results: { affectedRows: 0, msg: 'TODO:' } }
+  }
+
+  static async addMedia(
+    productId: string,
+    collaboratorId: string,
+    tags: string
+  ) {
+    return { results: { affectedRows: 0, msg: 'TODO:' } }
+  }
+  static async removeMedia(
+    productId: string,
+    collaboratorId: string,
+    tags: string
+  ) {
+    return { results: { affectedRows: 0, msg: 'TODO:' } }
+  }
 }
