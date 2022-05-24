@@ -47,4 +47,22 @@ router.get('/:id', async (req: express.Request, res: express.Response) => {
   return res.json(await Product.getFullProductById(req.params.id))
 })
 
+// POST /api/products/filter
+// Search (filter) products following the body parameters, namely:
+// - tags
+// - query string (this searches the title) | TODO: Add search for description?
+// - collaborators (ids)
+router.post('/filter', async (req: express.Request, res: express.Response) => {
+  const {
+    tags,
+    queryString,
+    collaborators,
+  }: { tags?: string[]; queryString?: string; collaborators?: string[] } =
+    req.body
+
+  const products = await Product.search(tags, queryString, collaborators)
+
+  return res.json({ tags, products })
+})
+
 export default router
