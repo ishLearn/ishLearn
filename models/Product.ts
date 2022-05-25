@@ -104,7 +104,8 @@ export default class Product {
         fields,
         id,
       ])
-    ).results.map(Product.mapResultsToHash)
+    ).results
+    // .map(Product.mapResultsToHash)
   }
 
   /**
@@ -237,7 +238,6 @@ export default class Product {
           )
         }
       )
-      .map(Product.mapResultsToHash)
   }
 
   /**
