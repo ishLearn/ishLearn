@@ -6,11 +6,12 @@
   "prettier.singleQuote": true,
   "prettier.semi": false,
   "cSpell.words": [
+    "Gaulke",
     "hashids",
     "ishlearn",
     "scripthost",
-    "Gaulke",
-    "socketio"
+    "socketio",
+    "unhashed"
   ],
   "html.format.wrapLineLength": 100
 }

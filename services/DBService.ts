@@ -1,5 +1,6 @@
 import mysql from 'mysql'
 import Hashids from 'hashids'
+import { NumberLike } from 'hashids/cjs/util'
 
 /**
  * Service holding the database connection pool. Can be used to query the database or extract connections to perform complex operations on.
@@ -129,7 +130,7 @@ class DBService {
  * @param intID The integer number to encode
  * @returns The string hash
  */
-export const getHashFromIntID = (intID: number) => {
+export const getHashFromIntID = (intID: number | NumberLike) => {
   const result = DBService.hashids.encode(intID)
   if (result === '') throw new Error('Invalid input')
   return result
