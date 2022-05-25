@@ -140,6 +140,7 @@ router.put('/:id/tags', async (req, res) => {
 // ADD / REMOVE MEDIA
 
 // POST /api/products/:id/media
+// Should this route be exposed
 // Add a new media to product (id as param)
 router.post('/:id/media', async (req, res) => {
   const productId: string = req.params.id
@@ -148,6 +149,10 @@ router.post('/:id/media', async (req, res) => {
     mediaId,
     add,
   }: { collaboratorId: string; mediaId: string; add: boolean } = req.body
+  if (add)
+    return res.status(400).json({
+      msg: 'Cannot blindly add media, will automatically be linked with product when upload is successful.',
+    })
 
   if (typeof add !== 'boolean')
     return res
@@ -158,11 +163,11 @@ router.post('/:id/media', async (req, res) => {
     add
       ? await Product.addMedia(productId, collaboratorId, mediaId)
       : await Product.removeMedia(productId, collaboratorId, mediaId)
-  ).results
+  )[0]?.results
   return res.status(200).json({
     success: true,
     productId,
-    affectedRows: result.affectedRows,
+    affectedRows: result?.affectedRows,
   })
 })
 

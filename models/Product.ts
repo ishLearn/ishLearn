@@ -270,6 +270,8 @@ export default class Product {
     return res.results.insertId
   }
 
+  // UPDATE PRODUCT
+
   /**
    * Add a collaborator from to project. Updates the `uploadBy`-table.
    * @param pid Project ID (as string)
@@ -306,8 +308,6 @@ export default class Product {
     return resUploadBy.results
   }
 
-  // UPDATE PRODUCT
-
   static async setLastModified(productId: NumberLike, userId: NumberLike) {
     return await new DBService().query(
       `UPDATE products SET updatedBy = ? WHERE ID = ?`,
@@ -315,6 +315,12 @@ export default class Product {
     )
   }
 
+  /**
+   * Update the visibility or the title of a product.
+   * @param productId the hashed product ID
+   * @param collaboratorId the hashed user ID
+   * @param fieldsToUpdate the fields to update; may contain title and visibility, but both can be undefined
+   */
   static async update(
     productId: string,
     collaboratorId: string,
@@ -357,6 +363,14 @@ export default class Product {
     throw new Error(`User is not valid; has not been entered`)
   }
 
+  /**
+   * Update tags for the product.
+   * @param productId the hashed product id
+   * @param collaboratorId the hashed collaborator
+   * @param tags the tags to add or remove, should always be an array of strings
+   * @param add whether to add or to remove the tags
+   * @returns am array of all Promise results
+   */
   static async updateTags(
     productId: string,
     collaboratorId: string,
@@ -380,6 +394,13 @@ export default class Product {
     throw new Error(`User is not valid; has not been entered`)
   }
 
+  /**
+   * Update: Add tags for the product.
+   * @param pid the unhashed product id
+   * @param cid the unhashed collaborator id
+   * @param tags the tags to add, should always be an array of strings
+   * @returns an array of all Promise results
+   */
   static async addTags(pid: NumberLike, cid: NumberLike, tags: string[]) {
     const query = 'INSERT INTO productHasTag (PID, tag) VALUES (?, ?)'
     return await Promise.all([
@@ -392,6 +413,13 @@ export default class Product {
     ])
   }
 
+  /**
+   * Update: Remove tags for the product.
+   * @param pid the unhashed product id
+   * @param cid the unhashed collaborator id
+   * @param tags the tags to remove, should always be an array of strings
+   * @returns an array of all Promise results
+   */
   static async removeTags(pid: NumberLike, cid: NumberLike, tags: string[]) {
     const query = 'DELETE FROM productHasTag WHERE PID = ? AND UID = ?'
     return await Promise.all([
@@ -404,18 +432,59 @@ export default class Product {
     ])
   }
 
+  /**
+   * Update: Add an existing media to the product
+   * @param productId the hashed product id
+   * @param collaboratorId the hashed collaborator id
+   * @param mediaId the hashed media id to add
+   * @returns an array of all Promise results
+   */
   static async addMedia(
     productId: string,
     collaboratorId: string,
-    tags: string
+    mediaId: string
   ) {
-    return { results: { affectedRows: 0, msg: 'TODO:' } }
+    const pid = getIntIDFromHash(productId)
+    const cid = getIntIDFromHash(collaboratorId)
+    const mid = getIntIDFromHash(mediaId)
+
+    const result = [
+      await new DBService().query(
+        'INSERT INTO mediaPartOfProduct SET PID = ?, MID = ?',
+        [pid, mid]
+      ),
+    ]
+
+    result.push(await Product.setLastModified(pid, cid))
+
+    return result
   }
+
+  /**
+   * Update: Add an existing media to the product
+   * @param productId the hashed product id
+   * @param collaboratorId the hashed collaborator id
+   * @param mediaId the hashed media id to add
+   * @returns an array of all Promise results
+   */
   static async removeMedia(
     productId: string,
     collaboratorId: string,
-    tags: string
+    mediaId: string
   ) {
-    return { results: { affectedRows: 0, msg: 'TODO:' } }
+    const pid = getIntIDFromHash(productId)
+    const cid = getIntIDFromHash(collaboratorId)
+    const mid = getIntIDFromHash(mediaId)
+
+    const result = [
+      await new DBService().query(
+        'INSERT INTO mediaPartOfProduct SET PID = ?, MID = ?',
+        [pid, mid]
+      ),
+    ]
+
+    result.push(await Product.setLastModified(pid, cid))
+
+    return result
   }
 }

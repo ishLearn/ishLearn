@@ -1,4 +1,5 @@
 import { Socket } from 'socket.io'
+import Media from '../models/Media'
 import Logger from '../utils/Logger'
 
 export const activeSockets: Map<string, Socket> = new Map<string, Socket>()
@@ -25,6 +26,18 @@ addSocketEventHandler('disconnect', socket => {
     console.log(
       `The socket with ID ${socket.id} successfully disconnected but was not removed from activeSockets-Map.`
     )
+})
+
+addSocketEventHandler('uploadStart', (socket, { id }: { id: string }) => {
+  const current = Media.uploads.get(id)?.u
+
+  if (current) {
+    Media.uploads.set(id, {
+      u: current,
+      c: socket,
+    })
+    console.log('Set client listening socket to uploadStart')
+  }
 })
 
 export const socketIOConnectionHandler = (socket: Socket) => {
