@@ -7,7 +7,7 @@ export type BucketName = string
 /**
  * Content of the new object.
  */
-export type BucketBody = string | fs.ReadStream
+export type BucketBody = string | fs.ReadStream | Buffer
 /**
  * Content of the new object.
  */

@@ -94,7 +94,7 @@ router.put('/:pid', async (req, res) => {
   } = req.body
 
   try {
-    const result = (
+    const result: any = (
       await Product.update(productId, collaborator, fieldsToUpdate)
     ).results
 
@@ -130,21 +130,17 @@ router.put('/:id/tags', async (req, res) => {
       .status(400)
       .json({ msg: 'Should the collaborator be added or removed?' })
 
-  const result = (
-    add
-      ? await Product.addTags(productId, collaboratorId, tags)
-      : await Product.removeTags(productId, collaboratorId, tags)
-  ).results
+  await Product.updateTags(productId, collaboratorId, tags, add)
   return res.status(200).json({
     success: true,
     productId,
-    affectedRows: result.affectedRows,
   })
 })
 
 // ADD / REMOVE MEDIA
 
 // POST /api/products/:id/media
+// Should this route be exposed
 // Add a new media to product (id as param)
 router.post('/:id/media', async (req, res) => {
   const productId: string = req.params.id
@@ -153,6 +149,10 @@ router.post('/:id/media', async (req, res) => {
     mediaId,
     add,
   }: { collaboratorId: string; mediaId: string; add: boolean } = req.body
+  if (add)
+    return res.status(400).json({
+      msg: 'Cannot blindly add media, will automatically be linked with product when upload is successful.',
+    })
 
   if (typeof add !== 'boolean')
     return res
@@ -163,11 +163,11 @@ router.post('/:id/media', async (req, res) => {
     add
       ? await Product.addMedia(productId, collaboratorId, mediaId)
       : await Product.removeMedia(productId, collaboratorId, mediaId)
-  ).results
+  )[0]?.results
   return res.status(200).json({
     success: true,
     productId,
-    affectedRows: result.affectedRows,
+    affectedRows: result?.affectedRows,
   })
 })
 
