@@ -9,7 +9,9 @@
     "Gaulke",
     "hashids",
     "ishlearn",
+    "refreshtokens",
     "scripthost",
+    "signin",
     "socketio",
     "unhashed"
   ],

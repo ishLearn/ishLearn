@@ -65,8 +65,7 @@ export default class User {
    *
    * @param idInput The ID to search for. Can be provided as either number (search for the exact number ID in the DB) or string (search for the decoded ID in the DB).
    * @param fields The fields (columns) to retrieve
-   * @returns The found User in the DB
-   * @throws Error if the user is not found
+   * @returns The found User in the DB or undefined if the user is not found
    */
   static async getUserById(
     idInput: number | string,
@@ -78,7 +77,25 @@ export default class User {
         fields,
         id,
       ])
-    ).results
+    ).results[0]
+  }
+
+  /**
+   * Retrieve a user from the DB identified by the Email address, and return it.
+   *
+   * @param email The Email to search for.
+   * @param fields The fields (columns) to retrieve
+   * @returns The found User in the DB or `undefined` if the user is not found.
+   */
+  static async findByEmail(email: string, fields?: string[]): Promise<User> {
+    if (typeof fields === 'undefined')
+      fields = ['id', 'email', 'emailTmp', 'profilePicture', 'profileText']
+    return (
+      await new DBService().query('SELECT ?? FROM users WHERE email = ?', [
+        fields,
+        email,
+      ])
+    ).results[0]
   }
 
   /**
@@ -146,6 +163,12 @@ export default class User {
     })
   }
 
+  /**
+   * Compare two passwords (text and hash) and return the result.
+   * @param pwd The clear text input password from client
+   * @param hash The has to validate the password against
+   * @returns A promise resolving when the password has been compared; boolean indicating whether the password is correct (true) or not (false)
+   */
   static comparePwd(pwd: string, hash: string): Promise<boolean> {
     return new Promise<boolean>((resolve, reject) => {
       bcrypt.compare(pwd, hash, (err: any, result: boolean) => {
@@ -182,8 +205,7 @@ export default class User {
     )
     console.log(res.results)
 
-    // TODO: Set this.id, this.createdDate, this.updatedDate
-
-    return res.results[0] as User
+    this.id = res.results[0].ID || res.results[0].id
+    return this
   }
 }
