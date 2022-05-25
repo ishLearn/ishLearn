@@ -1,5 +1,6 @@
 import express from 'express'
 import { body, validationResult } from 'express-validator'
+import Logger from '../utils/Logger'
 
 const router = express.Router()
 
@@ -46,5 +47,11 @@ router.put('/', (req: express.Request, res: express.Response) => {})
  * TODO: Set the data flow, with the temp variable for storing the new email that is currently being validated?
  */
 router.put('/email', (req: express.Request, res: express.Response) => {})
+
+router.post('/login', (req: express.Request, res: express.Response) => {
+  new Logger().event('Login', 'New login try')
+
+  const { username } = req.body
+})
 
 export default router
