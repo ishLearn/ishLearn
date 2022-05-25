@@ -44,6 +44,11 @@ export default class RefreshToken {
     return token.expiryDate.getTime() < new Date().getTime()
   }
 
+  /**
+   * Find the refresh token's entry in the DB.
+   * @param token the refresh token to search for
+   * @returns The `RefreshToken` object representing the DB-entry
+   */
   static async findByToken(token: string) {
     const results = (
       await new DBService().query(
@@ -59,12 +64,15 @@ export default class RefreshToken {
     return new RefreshToken(res.token, res.UID, res.expiryDate)
   }
 
+  /**
+   * Remove the token from the DB (equal to a logout)
+   * @param token the refresh token to remove
+   */
   static async removeTokenByToken(token: string) {
     const res = (
       await new DBService().query(`DELETE FROM refreshtokens where token = ?`, [
         token,
       ])
     ).results[0]
-    return new RefreshToken(res.token, res.UID, res.expiryDate)
   }
 }

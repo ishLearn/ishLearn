@@ -12,6 +12,7 @@
     "refreshtokens",
     "scripthost",
     "signin",
+    "signout",
     "socketio",
     "unhashed"
   ],
