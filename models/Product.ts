@@ -21,8 +21,8 @@ export default class Product {
   id?: ID
   title: string
   visibility: Visibility | string
-  updatedBy: number
-  createdBy: number
+  updatedBy: number | string
+  createdBy: number | string
   createDate?: Date
   updatedDate?: Date
 
@@ -38,19 +38,28 @@ export default class Product {
   constructor(
     title: string,
     visibility: Visibility | string,
-    updatedBy: number,
-    createdBy: number,
+    updatedBy: NumberLike | string,
+    createdBy: NumberLike | string,
     createDate?: Date,
     updatedDate?: Date,
-    id?: ID | number
+    id?: ID | NumberLike
   ) {
     this.title = title
     this.visibility = visibility
     this.createDate = createDate
     this.updatedDate = updatedDate
-    this.updatedBy = updatedBy
-    this.createdBy = createdBy
-    this.id = typeof id === 'number' ? getHashFromIntID(id) : id
+    this.updatedBy =
+      typeof updatedBy === 'string' || typeof updatedBy === 'undefined'
+        ? updatedBy
+        : getHashFromIntID(updatedBy)
+    this.createdBy =
+      typeof createdBy === 'string' || typeof createdBy === 'undefined'
+        ? createdBy
+        : getHashFromIntID(createdBy)
+    this.id =
+      typeof id === 'string' || typeof id === 'undefined'
+        ? id
+        : getHashFromIntID(id)
   }
 
   /**
@@ -59,31 +68,23 @@ export default class Product {
    * @returns The result. with hashed ids
    */
   static mapResultsToHash(result: {
-    id: NumberLike
+    id: NumberLike | string
     title: string
     visibility: Visibility | string
-    updatedBy: number
-    createdBy: number
+    updatedBy: NumberLike | string
+    createdBy: NumberLike | string
     createDate?: Date
     updatedDate?: Date
   }) {
-    const id = getHashFromIntID(result.id)
-    const createdBy = getHashFromIntID(result.createdBy)
-    const updatedBy = getHashFromIntID(result.updatedBy)
-    const tmp: {
-      id?: any
-      title: string
-      visibility: Visibility | string
-      updatedBy?: any
-      createdBy?: any
-      createDate?: Date
-      updatedDate?: Date
-    } = result
-
-    delete tmp.id
-    delete tmp.updatedBy
-    delete tmp.createdBy
-    return { ...tmp, id, createdBy, updatedBy }
+    return new Product(
+      result.title,
+      result.visibility,
+      result.updatedBy,
+      result.createdBy,
+      result.createDate,
+      result.updatedDate,
+      result.id
+    )
   }
 
   /**
@@ -190,6 +191,8 @@ export default class Product {
       'createDate',
       'updatedDate',
       'updatedBy',
+      'createdBy',
+      'id',
     ])
     return r
   }
@@ -215,29 +218,27 @@ export default class Product {
     )
 
     const { results } = res
-    return results
-      .map(
-        (line: {
-          ID: number
-          title: string
-          visibility: string
-          createdDate: Date
-          updatedDate: Date
-          createdBy: number
-          updatedBy: number
-        }) => {
-          return new Product(
-            line.title,
-            line.visibility,
-            line.updatedBy,
-            line.createdBy,
-            line.createdDate,
-            line.updatedDate,
-            line.ID
-          )
-        }
-      )
-      .map(Product.mapResultsToHash)
+    return results.map(
+      (line: {
+        ID: number
+        title: string
+        visibility: string
+        createdDate: Date
+        updatedDate: Date
+        createdBy: number
+        updatedBy: number
+      }) => {
+        return new Product(
+          line.title,
+          line.visibility,
+          line.updatedBy,
+          line.createdBy,
+          line.createdDate,
+          line.updatedDate,
+          line.ID
+        )
+      }
+    )
   }
 
   /**
