@@ -16,26 +16,32 @@ function toggleTheme() {
 
 <template>
   <div>
-    <nav class="navbar navbar-expand-sm p-2 navbar-dark nav-colors">
-      <!-- Brand -->
-      <a class="navbar-brand logo" href="#">ISH/learn</a>
+    <nav
+      class="navbar navbar-expand-sm p-2 navbar-dark nav-colors"
+      style="display: flex; justify-content: space-between"
+    >
+      <div class="" id="" style="display: flex">
+        <!-- Brand -->
+        <router-link :to="{ name: 'Home' }" class="navbar-brand logo" id="definitely-white"
+          >ISH/learn</router-link
+        >
 
-      <!-- Navbar links -->
-      <div class="" id="">
-        <ul class="navbar-nav me-auto no-scrollbar">
-          <li class="nav-item active">
-            <router-link :to="{ name: 'Home' }" class="nav-link">Home</router-link>
-          </li>
+        <!-- Navbar links -->
+        <ul class="navbar-nav no-scrollbar">
           <li class="nav-item">
             <router-link :to="{ name: 'About' }" class="nav-link">About</router-link>
           </li>
           <li class="nav-item">
             <router-link :to="{ name: 'AllProjects' }" class="nav-link">Projekte</router-link>
           </li>
-
+        </ul>
+      </div>
+      <!-- right part navbar -->
+      <div style="margin-right: 1rem">
+        <ul class="navbar-nav no-scrollbar">
           <li class="nav-item">
             <router-link :to="{ name: 'UserDetail', params: { id: 0 } }" class="nav-link"
-              >User</router-link
+              >Einloggen</router-link
             >
           </li>
           <li class="nav-item">
@@ -94,6 +100,7 @@ function toggleTheme() {
 nav a {
   font-weight: bold;
   color: var(--nav-fg);
+  height: 100%;
 }
 nav a:hover {
   font-weight: bold;
@@ -103,10 +110,12 @@ nav a:hover {
 nav a.router-link-exact-active {
   color: var(--orange) !important;
 }
-
 .logo {
-  font-size: 16pt;
   font-family: monospace;
+  margin-left: 1rem;
+}
+#definitely-white {
+  color: var(--nav-fg) !important;
 }
 
 .bigger {
