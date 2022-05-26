@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
-const count = ref(0)
-
 function toggleTheme() {
   const currentTheme = document.documentElement.getAttribute('data-theme')
   let targetTheme = 'light'
@@ -18,80 +16,113 @@ function toggleTheme() {
 
 <template>
   <div>
-    <nav class="navbar navbar-expand-sm bg-light navbar-light">
-      <a class="navbar-brand btn contrast-color" href="#">ISH/learn</a>
-      <ul class="navbar-nav">
-        <li class="nav-item active">
-          <router-link :to="{ name: 'Home' }" class="nav-link">Home</router-link>
-        </li>
-        <li class="nav-item">
-          <router-link :to="{ name: 'About' }" class="nav-link">About</router-link>
-        </li>
-        <li class="nav-item">
-          <router-link :to="{ name: 'AllProjects' }" class="nav-link">Projekte</router-link>
-        </li>
-        <li class="nav-item">
-          <button class="btn btn-primary" @click="toggleTheme">darkmode</button>
-        </li>
-        <li class="nav-item">
-          <button @click="count++" class="btn btn-secondary">{{ count }} clicker</button>
-        </li>
-      </ul>
-      <div class="nav-item dropdown">
-        <a
-          class="nav-link dropdown-toggle btn contrast-color bigger"
-          href="#"
-          id="navbarDropdownUser"
-          role="button"
-          data-toggle="dropdown"
-          aria-haspopup="true"
-          aria-expanded="false"
+    <nav
+      class="navbar navbar-expand-sm p-2 navbar-dark nav-colors"
+      style="display: flex; justify-content: space-between"
+    >
+      <div class="" id="" style="display: flex">
+        <!-- Brand -->
+        <router-link :to="{ name: 'Home' }" class="navbar-brand logo" id="definitely-white"
+          >ISH/learn</router-link
         >
-          User
-          <svg
-            width="1em"
-            height="1em"
-            viewBox="0 0 16 16"
-            class="bi bi-person-circle"
-            fill="currentColor"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M13.468 12.37C12.758 11.226 11.195 10 8 10s-4.757
-              1.225-5.468 2.37A6.987 6.987 0 0 0 8 15a6.987 6.987 0 0 0 5.468-2.63z"
-            />
-            <path fill-rule="evenodd" d="M8 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" />
-            <path
-              fill-rule="evenodd"
-              d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zM0
-               8a8 8 0 1 1 16 0A8 8 0 0 1 0 8z"
-            />
-          </svg>
-        </a>
-        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownUser">
-          <a class="" href="/accounts/login/">Login</a>
-          <a class="" href="/accounts/signup/">Sign up</a>
-        </div>
+
+        <!-- Navbar links -->
+        <ul class="navbar-nav no-scrollbar">
+          <li class="nav-item">
+            <router-link :to="{ name: 'About' }" class="nav-link">About</router-link>
+          </li>
+          <li class="nav-item">
+            <router-link :to="{ name: 'AllProjects' }" class="nav-link">Projekte</router-link>
+          </li>
+        </ul>
+      </div>
+      <!-- right part navbar -->
+      <div style="margin-right: 1rem">
+        <ul class="navbar-nav no-scrollbar">
+          <li class="nav-item">
+            <router-link :to="{ name: 'UserDetail', params: { id: 0 } }" class="nav-link"
+              >Einloggen</router-link
+            >
+          </li>
+          <li class="nav-item">
+            <button id="theme-toggle" class="nav-colors bigger" @click="toggleTheme">
+              <span class="d-block-light d-none">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  fill="currentColor"
+                  class="bi bi-moon"
+                  viewBox="0 0 16 16"
+                >
+                  <path
+                    d="M6 .278a.768.768 0 0 1 .08.858 7.208 7.208 0 0 0-.878 3.46c0 4.021
+                   3.278 7.277 7.318 7.277.527 0 1.04-.055 1.533-.16a.787.787 0 0 1
+                    .81.316.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0
+                     12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.752.752 0 0 1 6 .278zM4.858
+                      1.311A7.269 7.269 0 0 0 1.025 7.71c0 4.02 3.279 7.276 7.319 7.276a7.316
+                       7.316 0 0 0 5.205-2.162c-.337.042-.68.063-1.029.063-4.61
+                        0-8.343-3.714-8.343-8.29 0-1.167.242-2.278.681-3.286z"
+                  />
+                </svg>
+              </span>
+              <span class="d-block-dark d-none">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  fill="currentColor"
+                  class="bi bi-moon-fill"
+                  viewBox="0 0 16 16"
+                >
+                  <path
+                    d="M6 .278a.768.768 0 0 1 .08.858 7.208 7.208 0 0 0-.878 3.46c0 4.021
+                   3.278 7.277 7.318 7.277.527 0 1.04-.055 1.533-.16a.787.787 0 0 1
+                    .81.316.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0
+                     12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.752.752 0 0 1 6 .278z"
+                  />
+                </svg>
+              </span>
+            </button>
+          </li>
+        </ul>
       </div>
     </nav>
   </div>
 </template>
 
 <style scoped>
-nav {
-  padding: 30px;
+.nav-colors {
+  background-color: var(--nav-bg);
+  color: var(--nav-fg);
 }
 
 nav a {
   font-weight: bold;
-  color: #2c3e50;
+  color: var(--nav-fg);
+  height: 100%;
+}
+nav a:hover {
+  font-weight: bold;
+  color: var(--orange-shade);
 }
 
 nav a.router-link-exact-active {
   color: var(--orange) !important;
 }
+.logo {
+  font-family: monospace;
+  margin-left: 1rem;
+}
+#definitely-white {
+  color: var(--nav-fg) !important;
+}
 
 .bigger {
-  font-size: larger;
+  font-size: 16pt;
+}
+
+button {
+  border: none;
 }
 </style>

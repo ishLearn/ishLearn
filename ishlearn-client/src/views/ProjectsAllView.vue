@@ -15,7 +15,11 @@ onMounted(() => {
 
 <template>
   <div class="usual-color all-projects">
-    {{ allProjects }}
+    <div class="jumbotron">
+      <h1>Hier werden alle Projekte angezeigt</h1>
+      <p>{{ allProjects }}</p>
+      <p><router-link :to="{ name: 'AddProject' }">Füge ein Projekt hinzu.</router-link></p>
+    </div>
     <ShowAllProducts :projects="allProjects" />
   </div>
 </template>
