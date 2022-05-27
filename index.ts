@@ -14,6 +14,7 @@ import { socketIOConnectionHandler } from './socketio/socketIOConnectionHandler'
 import users from './routes/users'
 import products from './routes/products'
 import uploads from './routes/files/uploads'
+import downloads from './routes/files/downloads'
 
 // Initialize logger
 import Logger from './utils/Logger'
@@ -44,6 +45,7 @@ app.use(logger.request)
 app.use('/api/users', users)
 app.use('/api/products', products)
 app.use('/api/files/upload', uploads)
+app.use('/api/files/download', downloads)
 
 // Initial API-route
 app.get('/api', (_req, res) => {
