@@ -12,8 +12,8 @@ const router = express.Router()
 // TODO: Setup pagination
 router.get(
   '/',
-  async (req: express.Request, res: express.Response<{}, UserRecord>) => {
-    return res.json(await Product.getFirstProducts())
+  async (_req: express.Request, res: express.Response<{}, UserRecord>) => {
+    return res.json(await Product.getFirstProducts(res.locals.user))
   }
 )
 

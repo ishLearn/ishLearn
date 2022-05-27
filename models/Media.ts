@@ -123,7 +123,7 @@ export default class Media {
     filename: string,
     res: express.Response<{}, UserRecord>
   ) {
-    // TODO: One minute for testing, what time to use?
+    // TODO: Testing needed One minute for testing, what time to use?
     const cacheExpiration = 1000 * 60
     const streamTags = true
 
@@ -177,11 +177,11 @@ export default class Media {
 
       const stream = body as Readable
 
-      let chunkid = 0
+      let chunkId = 0
       stream.on('data', chunk => {
-        console.log('Sending chunk: ' + chunkid)
+        console.log('Sending chunk: ' + chunkId)
         res.write(chunk)
-        chunkid++
+        chunkId++
       })
       stream.once('end', () => {
         return res.end()

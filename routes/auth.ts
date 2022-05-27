@@ -50,14 +50,12 @@ router.post(
 
       const otherUserTokens = await RefreshToken.findTokensByID(userInfo.id)
 
-      return res
-        .status(200)
-        .json({
-          refreshToken,
-          accessToken,
-          userInfo,
-          otherUserTokens: otherUserTokens.length,
-        })
+      return res.status(200).json({
+        refreshToken,
+        accessToken,
+        userInfo,
+        otherUserTokens: otherUserTokens.length,
+      })
     } catch (err: any) {
       console.log(err.statusCode)
       console.log(err.message)
@@ -101,7 +99,12 @@ router.post(
     if (!errors.isEmpty())
       return res.status(400).json({ error: errors.array() })
 
-    const token = req.body.refreshToken // TODO: Get token from header?
+    const token = res.locals.refreshToken
+
+    if (typeof token !== 'string')
+      return res.status(401).json({
+        error: 'You are not logged in.',
+      })
 
     await RefreshToken.removeTokenByToken(token)
     return res.status(200).json({

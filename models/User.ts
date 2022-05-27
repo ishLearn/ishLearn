@@ -47,7 +47,7 @@ export default class User {
     lastName: string,
     profilePicture: string | null,
     profileText: string | null,
-    birthday?: Date, // TODO: Can this be undefined, or is the possibility between 'Date | null' ?
+    birthday?: Date | null,
     id?: ID | number
   ) {
     this.email = email

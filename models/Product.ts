@@ -6,6 +6,7 @@ import DBService, {
 
 import { ID } from '../types/ids'
 import { NumberLike } from 'hashids/cjs/util'
+import User from './User'
 
 /**
  * A Product is a unit of files, comments and other content and information.
@@ -199,21 +200,25 @@ export default class Product {
    * Find some products from the DB.
    * @returns the 50 first products from the DB
    */
-  static async getFirstProducts(): Promise<Product[]> {
-    const res = await new DBService().query(
-      `SELECT ?? FROM products WHERE visibility="public" LIMIT 50`,
+  static async getFirstProducts(loggedInUser?: User): Promise<Product[]> {
+    const normalQuery = `SELECT ?? FROM products WHERE products.visibility = "public" LIMIT 50`
+    const studentQuery = `SELECT ?? FROM products INNER JOIN uploadBy ON products.ID = uploadBy.PID WHERE products.visibility = "public" OR uploadBy.UID = ? LIMIT 50`
+    const teachersQuery = `SELECT ?? FROM products INNER JOIN supervisedBy ON products.ID = supervisedBy.PID WHERE products.visibility = "public" OR supervisedBy.TID = ? LIMIT 50`
+
+    const query =
+      typeof loggedInUser === 'undefined' ? normalQuery : studentQuery
+    const res = await new DBService().query(query, [
       [
-        [
-          'ID',
-          'title',
-          'visibility',
-          'createDate',
-          'updatedDate',
-          'updatedBy',
-          'createdBy',
-        ],
-      ]
-    )
+        'products.ID',
+        'products.title',
+        'products.visibility',
+        'products.createDate',
+        'products.updatedDate',
+        'products.updatedBy',
+        'products.createdBy',
+      ],
+      loggedInUser?.id,
+    ])
 
     const { results } = res
     return results.map(
