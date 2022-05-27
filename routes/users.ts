@@ -10,7 +10,6 @@ router.get(
   '/',
   (_req: express.Request, res: express.Response<{}, UserRecord>) => {
     res.status(200).json({
-      message: 'TODO: Send the current logged in user',
       ok: true,
       user: res.locals.user,
     })
@@ -27,16 +26,39 @@ router.post(
   // to validate the request body
   body('email').isEmail().normalizeEmail(), //TODO: Sanitize email or just leave it as is?
   body('password').trim().isLength({ min: 8 }),
-
-  (req: express.Request, res: express.Response<{}, UserRecord>) => {
+  body('firstName').trim().isLength({ min: 1 }),
+  body('lastName').trim().isLength({ min: 1 }),
+  body('birthday').isDate(),
+  async (req: express.Request, res: express.Response<{}, UserRecord>) => {
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() })
     }
 
-    const { email, password } = req.body // TODO: More params, !!!: validator
+    const { email, password, firstName, lastName, birthday } = req.body
 
-    // const newUser = new User(email, password)
+    const newUser = new User(
+      email,
+      password,
+      firstName,
+      lastName,
+      null,
+      null,
+      birthday
+    )
+
+    try {
+      // TODO: Double emails? => will MySQL throw an error that is caught below? Then change error msg to clear "already taken"
+      const results = await newUser.save()
+
+      return res.status(200).json({
+        success: true,
+      })
+    } catch (err) {
+      return res
+        .status(400)
+        .json({ error: 'Could not be saved. Is the email already taken?' })
+    }
   }
 )
 
