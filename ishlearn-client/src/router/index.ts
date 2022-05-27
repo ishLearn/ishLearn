@@ -34,8 +34,8 @@ const routes: Array<RouteRecordRaw> = [
   // Alles rund um den Benutzer
   {
     path: '/user/:id',
-    name: 'UserDetail',
-    component: () => import('../views/UserProfileView.vue'),
+    name: 'UserLogin',
+    component: () => import('../views/UserLoginView.vue'),
   },
 ];
 
