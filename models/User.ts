@@ -23,6 +23,7 @@ export default class User {
   email: string
   emailTmp: string | null = null
   password: string
+  rank: string
   firstName: string
   lastName: string
   birthday: Date | null
@@ -33,6 +34,7 @@ export default class User {
    * Create a User based on
    * @param email the User's email
    * @param password the User's password hash
+   * @param rank the User's rank, can be one of the enum
    * @param firstName the User's first name
    * @param lastName the User's last name
    * @param profilePicture the User's profile picture's links
@@ -43,15 +45,17 @@ export default class User {
   constructor(
     email: string,
     password: string,
+    rank: string,
     firstName: string,
     lastName: string,
     profilePicture: string | null,
     profileText: string | null,
-    birthday?: Date, // TODO: Can this be undefined, or is the possibility between 'Date | null' ?
+    birthday?: Date | null,
     id?: ID | number
   ) {
     this.email = email
     this.password = password
+    this.rank = rank
     this.firstName = firstName
     this.lastName = lastName
     this.profilePicture = profilePicture
@@ -89,13 +93,32 @@ export default class User {
    */
   static async findByEmail(email: string, fields?: string[]): Promise<User> {
     if (typeof fields === 'undefined')
-      fields = ['id', 'email', 'emailTmp', 'profilePicture', 'profileText']
-    return (
+      fields = [
+        'id',
+        'email',
+        'rank',
+        'emailTmp',
+        'profilePicture',
+        'profileText',
+      ]
+    const result = (
       await new DBService().query('SELECT ?? FROM users WHERE email = ?', [
         fields,
         email,
       ])
     ).results[0]
+
+    return new User(
+      result.email,
+      result.password,
+      result.rank,
+      result.firstName,
+      result.lastName,
+      result.profilePicture,
+      result.profileText,
+      result.birthday,
+      result.id
+    )
   }
 
   /**
@@ -117,6 +140,7 @@ export default class User {
     return await User.getUserById(id, [
       'email',
       'password',
+      'rank',
       'firstName',
       'lastName',
       'profilePictures',
@@ -131,13 +155,14 @@ export default class User {
    */
   getNormalData(): {
     id: ID
+    rank: string
     firstName: string
     lastName: string
     profilePicture: string | null
     profileText: string | null
   } {
-    const { id, firstName, lastName, profilePicture, profileText } = this
-    return { id, firstName, lastName, profilePicture, profileText }
+    const { id, rank, firstName, lastName, profilePicture, profileText } = this
+    return { id, rank, firstName, lastName, profilePicture, profileText }
   }
 
   /**
@@ -190,11 +215,12 @@ export default class User {
     if (typeof this.id !== 'undefined')
       throw new Error('Product has already been saved')
     const res = await new DBService().query(
-      `INSERT INTO users (email, password, firstName, lastName, profileText, profilePicture, birthday) VALUES (?)`,
+      `INSERT INTO users (email, password, rank, firstName, lastName, profileText, profilePicture, birthday) VALUES (?)`,
       [
         [
           this.email,
           this.password,
+          this.rank,
           this.firstName,
           this.lastName,
           this.profileText,

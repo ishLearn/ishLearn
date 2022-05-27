@@ -41,7 +41,9 @@ export default class Logger {
       chalk.blue(formatDate('/', now) + ' ' + formatTime(':', now) + ': ') +
         chalk.red(req.method) +
         ' ' +
-        chalk.green(req.path)
+        chalk.green(req.path) +
+        '; LoggedIn: ' +
+        _res.locals.user?.id || false
     )
 
     next()
@@ -79,7 +81,7 @@ export default class Logger {
 
   /**
    * Log an error to the console.
-   * TODO: Send information to another server / log to a file to preserve stack trace?
+   * TODO: _for later_ Send information to another server / log to a file to preserve stack trace?
    * @param category The part of the code where the error occurred (e.g., "Hashing password", "Handling request")
    * @param task The specific task that failed
    * @param error The original error log
