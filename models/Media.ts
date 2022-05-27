@@ -62,7 +62,6 @@ export default class Media {
 
     const newUploadId = uuid()
     Media.uploads.set(newUploadId, { u: upload })
-    // TODO: Documentation for 'uploadDataUpdate'-event, 'uploadDone'-event emitted to socket client
 
     let client: socket.Socket | undefined = undefined
 
@@ -124,7 +123,7 @@ export default class Media {
     filename: string,
     res: express.Response<{}, UserRecord>
   ) {
-    // TODO: One minute for testing
+    // TODO: One minute for testing, what time to use?
     const cacheExpiration = 1000 * 60
     const streamTags = true
 

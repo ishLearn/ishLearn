@@ -90,12 +90,23 @@ export default class User {
   static async findByEmail(email: string, fields?: string[]): Promise<User> {
     if (typeof fields === 'undefined')
       fields = ['id', 'email', 'emailTmp', 'profilePicture', 'profileText']
-    return (
+    const result = (
       await new DBService().query('SELECT ?? FROM users WHERE email = ?', [
         fields,
         email,
       ])
     ).results[0]
+
+    return new User(
+      result.email,
+      result.password,
+      result.firstName,
+      result.lastName,
+      result.profilePicture,
+      result.profileText,
+      result.birthday,
+      result.id
+    )
   }
 
   /**

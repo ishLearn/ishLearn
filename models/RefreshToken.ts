@@ -1,5 +1,9 @@
+import { NumberLike } from 'hashids/cjs/util'
 import { v4 as uuid } from 'uuid'
-import DBService, { getIntIDFromHash } from '../services/DBService'
+import DBService, {
+  getHashFromIntID,
+  getIntIDFromHash,
+} from '../services/DBService'
 
 /**
  * Information about a (currently valid) refresh token.
@@ -83,6 +87,27 @@ export default class RefreshToken {
     }
     const res = results[0]
     return new RefreshToken(res.token, res.UID, res.expiryDate)
+  }
+
+  /**
+   * Find the refresh tokens entries in the DB for the current user.
+   * @param id the user ID to search for
+   * @returns The `RefreshToken`[] objects representing the DB-entry
+   */
+  static async findTokensByID(id: string) {
+    const results = (
+      await new DBService().query(`SELECT * FROM refreshtokens where id = ?`, [
+        getIntIDFromHash(id),
+      ])
+    ).results
+
+    if (!(results.length > 0)) {
+      throw new Error('The token is not valid')
+    }
+    return results.map(
+      (res: { token: string; UID: NumberLike; expiryDate: Date }) =>
+        new RefreshToken(res.token, getHashFromIntID(res.UID), res.expiryDate)
+    ) as RefreshToken[]
   }
 
   /**

@@ -9,11 +9,14 @@ export default async (
   res: Response<{}, UserRecord>,
   next: NextFunction
 ) => {
+  // Get access token and user
   if (req.headers['Authorization']) {
     const authHeader = req.headers['Authorization']
     const bearerToken =
       typeof authHeader === 'string' ? authHeader : authHeader[0]
     const token = bearerToken.split(' ')[1]
+
+    res.locals.accessToken = token
 
     console.log(
       `authHeader: ${authHeader}, bearerToken: ${bearerToken}, token: ${token}`
@@ -29,9 +32,17 @@ export default async (
         res.locals.user = await User.getFullUserById(decoded)
     }
     if (!res.locals.user) res.locals.wrongToken = true
+    else res.locals.wrongToken = false
   }
   if (!res.locals.user) res.locals.unauthenticated = true
   else res.locals.unauthenticated = false
+
+  if (req.body?.refreshToken) res.locals.refreshToken = req.body.refreshToken
+
+  if (res.locals.wrongToken)
+    return res.status(403).json({
+      err: 'Token not valid!',
+    })
 
   next()
 }

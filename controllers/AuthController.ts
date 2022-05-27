@@ -29,20 +29,18 @@ export const performSignin = async (email: string, password: string) => {
     throw err
   }
 
-  console.log(user)
-
   const accessToken = genAccessToken(user.id)
   const refreshToken = RefreshToken.createToken({ id: user.id })
 
+  await refreshToken.save()
+
+  const normalData = user.getNormalData()
   return {
     refreshToken,
     accessToken,
     userInfo: {
-      id: user.id,
-      email: user.email,
+      ...normalData,
       emailTmp: user.emailTmp,
-      profilePicture: user.profilePicture,
-      profileText: user.profileText,
     },
   }
 }
@@ -82,6 +80,11 @@ export const refreshAccessToken = async (reqToken: string) => {
   }
 }
 
+/**
+ * Generate a new JWT (Access Token) for a user
+ * @param userId the user id to generate token with and for
+ * @returns The new JWT
+ */
 const genAccessToken = (userId: string) => {
   const accessTokenJWTSecret = process.env.ACCESS_TOKEN_JWT_SECRET || ''
   const expiresInAccessToken = process.env.EXPIRES_IN_ACCESS_TOKEN || 60
