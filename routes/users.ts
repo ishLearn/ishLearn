@@ -26,6 +26,7 @@ router.post(
   // to validate the request body
   body('email').isEmail().normalizeEmail(), //TODO: Sanitize email or just leave it as is?
   body('password').trim().isLength({ min: 8 }),
+  body('rank').trim().isLength({ min: 5, max: 7 }),
   body('firstName').trim().isLength({ min: 1 }),
   body('lastName').trim().isLength({ min: 1 }),
   body('birthday').isDate(),
@@ -35,11 +36,15 @@ router.post(
       return res.status(400).json({ errors: errors.array() })
     }
 
-    const { email, password, firstName, lastName, birthday } = req.body
+    const { email, password, rank, firstName, lastName, birthday } = req.body
+
+    if (rank !== 'teacher' || rank !== 'student')
+      return res.status(400).json({ error: 'Invalid rank' })
 
     const newUser = new User(
       email,
       password,
+      rank,
       firstName,
       lastName,
       null,
@@ -50,14 +55,19 @@ router.post(
     try {
       // TODO: Double emails? => will MySQL throw an error that is caught below? Then change error msg to clear "already taken"
       const results = await newUser.save()
+      const id = results.id
 
       return res.status(200).json({
         success: true,
+        id,
       })
     } catch (err) {
       return res
         .status(400)
-        .json({ error: 'Could not be saved. Is the email already taken?' })
+        .json({
+          error:
+            'Could not be saved. Is the email already taken or is the rank invalid?',
+        })
     }
   }
 )

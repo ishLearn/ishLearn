@@ -201,12 +201,17 @@ export default class Product {
    * @returns the 50 first products from the DB
    */
   static async getFirstProducts(loggedInUser?: User): Promise<Product[]> {
-    const normalQuery = `SELECT ?? FROM products WHERE products.visibility = "public" LIMIT 50`
+    const normalQuery = `SELECT ?? FROM products AS products WHERE products.visibility = "public" LIMIT 50`
     const studentQuery = `SELECT ?? FROM products INNER JOIN uploadBy ON products.ID = uploadBy.PID WHERE products.visibility = "public" OR uploadBy.UID = ? LIMIT 50`
     const teachersQuery = `SELECT ?? FROM products INNER JOIN supervisedBy ON products.ID = supervisedBy.PID WHERE products.visibility = "public" OR supervisedBy.TID = ? LIMIT 50`
 
     const query =
-      typeof loggedInUser === 'undefined' ? normalQuery : studentQuery
+      typeof loggedInUser === 'undefined'
+        ? normalQuery
+        : loggedInUser.rank === 'student'
+        ? studentQuery
+        : teachersQuery
+
     const res = await new DBService().query(query, [
       [
         'products.ID',

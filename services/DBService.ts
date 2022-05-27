@@ -213,6 +213,21 @@ export function getSupervisedByStatus() {
 }
 
 /**
+ * Status of a Project
+ */
+enum UserRank {
+  ADMIN = 'admin',
+  STUDENT = 'student',
+  TEACHER = 'teacher',
+}
+/**
+ * @return An array of all user_ranks
+ */
+export function getUserRanks() {
+  return Object.entries(UserRank).map(v => v[1])
+}
+
+/**
  * All queries that can be executed against the DB.
  */
 export const dbQueries = {
@@ -221,7 +236,10 @@ export const dbQueries = {
    */
   exportTableQueries: {
     media: `CREATE TABLE IF NOT EXISTS media (ID INT(255) UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL, filename VARCHAR(255) NOT NULL, URL VARCHAR(255) NOT NULL, uploadedDate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP);`,
-    users: `CREATE TABLE IF NOT EXISTS users (ID INT(255) UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL, email VARCHAR(255) NOT NULL UNIQUE, emailTmp VARCHAR(255), password VARCHAR(255) NOT NULL, firstName VARCHAR(255) NOT NULL, lastName VARCHAR(255) NOT NULL, birthday Date, profilePicture INT(255) UNSIGNED DEFAULT NULL, profileText INT(255) UNSIGNED DEFAULT NULL, FOREIGN KEY (profilePicture) REFERENCES media(ID) ON UPDATE SET NULL ON DELETE SET NULL, FOREIGN KEY (profileText) REFERENCES media(ID) ON UPDATE SET NULL ON DELETE SET NULL);`,
+    users: `CREATE TABLE IF NOT EXISTS users (ID INT(255) UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL, email VARCHAR(255) NOT NULL UNIQUE, rank ENUM(\"${getUserRanks().join(
+      '", "'
+    )}\") NOT NULL, emailTmp VARCHAR(255), password VARCHAR(255) NOT NULL, firstName VARCHAR(255) NOT NULL, lastName VARCHAR(255) NOT NULL, birthday Date, profilePicture INT(255) UNSIGNED DEFAULT NULL, profileText INT(255) UNSIGNED DEFAULT NULL, FOREIGN KEY (profilePicture) REFERENCES media(ID) ON UPDATE SET NULL ON DELETE SET NULL, FOREIGN KEY (profileText) REFERENCES media(ID) ON UPDATE SET NULL ON DELETE SET NULL);`,
+
     products: `CREATE TABLE IF NOT EXISTS products (ID INT(255) UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL, title VARCHAR(255) NOT NULL, visibility ENUM(\"${getVisibilities().join(
       '", "'
     )}\") NOT NULL, createDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updatedDate Timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, createdBy INT(255) UNSIGNED NOT NULL REFERENCES users(ID), updatedBy INT(255) UNSIGNED NOT NULL REFERENCES users(ID));`,
@@ -260,7 +278,12 @@ export const dropAllTables = async () => {
 
   all.reverse()
 
-  for (let q of all) await new DBService().query(`drop table ${q}`)
+  for (let q of all) await new DBService().query(`drop table if exists ${q}`)
 }
 
 export default DBService
+
+// ;(async () => {
+//   await dropAllTables()
+//   await createDefaultTables()
+// })()

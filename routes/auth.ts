@@ -18,6 +18,7 @@ const router = express.Router()
 //     userInfo: {
 //         emailTmp: string | null;
 //         id: ID;
+//         rank: string;
 //         firstName: string;
 //         lastName: string;
 //         profilePicture: string | null;
