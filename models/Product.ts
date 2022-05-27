@@ -4,8 +4,6 @@ import DBService, {
   Visibility,
 } from '../services/DBService'
 
-import Logger from '../utils/Logger'
-
 import { ID } from '../types/ids'
 import { NumberLike } from 'hashids/cjs/util'
 
@@ -15,7 +13,7 @@ import { NumberLike } from 'hashids/cjs/util'
  * hashed with the {@link https://www.npmjs.com/package/hashids hashids} package.
  *
  * @see {@link Product.id}
- * @author Sebastian Thomas
+ * @author @SebastianThomas
  */
 export default class Product {
   id?: ID

@@ -15,6 +15,8 @@ import users from './routes/users'
 import products from './routes/products'
 import uploads from './routes/files/uploads'
 import downloads from './routes/files/downloads'
+// Import middleware
+import authMiddleware from './middleware/authMiddleware'
 
 // Initialize logger
 import Logger from './utils/Logger'
@@ -23,7 +25,7 @@ import Logger from './utils/Logger'
  */
 const logger = new Logger()
 // Initialize DBService (start DB connection pool)
-import DBService, { Visibility } from './services/DBService'
+import DBService from './services/DBService'
 import { exec } from 'child_process'
 
 /**
@@ -39,18 +41,16 @@ const io = new SocketIOServer(server)
 
 // Middleware: parse incoming json from HTTP-request body
 app.use(express.json())
+// Use custom Authentication middleware
+app.use(authMiddleware)
 // Middleware: Log all requests
 app.use(logger.request)
 
+// Use routes
 app.use('/api/users', users)
 app.use('/api/products', products)
 app.use('/api/files/upload', uploads)
 app.use('/api/files/download', downloads)
-
-// Initial API-route
-app.get('/api', (_req, res) => {
-  res.status(200).json({ message: 'OK, but nothing to do here.' })
-})
 
 // Init socket.io connection
 io.on('connection', socketIOConnectionHandler)
@@ -61,6 +61,7 @@ server.listen(PORT, () => {
   logger.listen(PORT)
 })
 
+// Test if `ffmpeg` cli is installed on the system
 exec('ffmpeg -version', (err, _stdout, _stderr) => {
   if (err) {
     logger.error(

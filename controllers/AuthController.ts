@@ -1,5 +1,4 @@
 import User from '../models/User'
-import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import RefreshToken from '../models/RefreshToken'
 import Logger from '../utils/Logger'
@@ -87,7 +86,7 @@ const genAccessToken = (userId: string) => {
   const accessTokenJWTSecret = process.env.ACCESS_TOKEN_JWT_SECRET || ''
   const expiresInAccessToken = process.env.EXPIRES_IN_ACCESS_TOKEN || 60
 
-  return jwt.sign({ id: userId }, accessTokenJWTSecret, {
+  return jwt.sign(userId, accessTokenJWTSecret, {
     expiresIn: expiresInAccessToken,
   })
 }

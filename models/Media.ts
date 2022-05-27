@@ -14,17 +14,41 @@ import {
   HeadObjectCommand,
 } from '@aws-sdk/client-s3'
 import { Readable } from 'stream'
+import { UserRecord } from '../types/users'
 
 type UploadClient = { u: Upload; c?: socket.Socket }
 
+/**
+ * Handle Media up- and downloads.
+ *
+ * @author @SebastianThomas
+ */
 export default class Media {
+  /**
+   * The map to save currently active upload sessions and Socket.io clients to.
+   */
   static uploads: Map<string, UploadClient> = new Map<string, UploadClient>()
 
+  /**
+   * Get client from the uploads map.
+   * @param id the Upload ID to search for (uuid given on init)
+   * @returns the found Entry from the Map (UploadClient)
+   */
   static getUpload(id: string): UploadClient | undefined {
     return Media.uploads.get(id)
   }
 
-  static uploadMedia(fileName: string, buf: Buffer, res: express.Response) {
+  /**
+   * Upload a File to S3
+   * @param fileName The filename to save the Media to.
+   * @param buf The Buffer to save
+   * @param res The express response object to send success or error to client.
+   */
+  static uploadMedia(
+    fileName: string,
+    buf: Buffer,
+    res: express.Response<{}, UserRecord>
+  ) {
     if (typeof process.env.MAIN_BUCKET === 'undefined')
       throw new Error('Process env is not correctly set up for S3')
 
@@ -43,8 +67,7 @@ export default class Media {
     let client: socket.Socket | undefined = undefined
 
     upload.on('httpUploadProgress', stream => {
-      console.log('Uploaded more data')
-      console.log(stream)
+      console.log('Uploaded more data ' + stream.Key + '; ID: ' + newUploadId)
 
       if (typeof client === 'undefined') {
         client = Media.uploads.get(newUploadId)?.c
@@ -91,7 +114,16 @@ export default class Media {
     })
   }
 
-  static async downloadMedia(filename: string, res: express.Response) {
+  /**
+   * Send a file to client with the specified filename.
+   * @param filename The filename (complete path!) to search for in default bucket
+   * @param res the Express response object to return data to client
+   * @returns The express response object after sending headers and body content
+   */
+  static async downloadMedia(
+    filename: string,
+    res: express.Response<{}, UserRecord>
+  ) {
     // TODO: One minute for testing
     const cacheExpiration = 1000 * 60
     const streamTags = true
@@ -153,10 +185,10 @@ export default class Media {
         chunkid++
       })
       stream.once('end', () => {
-        res.end()
+        return res.end()
       })
       stream.once('error', () => {
-        res.end()
+        return res.end()
       })
     } catch (err: any) {
       if (err['$metadata'].httpStatusCode === 404)

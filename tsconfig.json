@@ -18,5 +18,6 @@
   "exclude": ["node_modules", "dist", "test"],
   "lib": [
     "esnext.bigint" // TODO: Working?
-  ]
+  ],
+  "typeRoots": ["@types", "./node_modules/@types"]
 }

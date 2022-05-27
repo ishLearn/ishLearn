@@ -41,7 +41,9 @@ export default class Logger {
       chalk.blue(formatDate('/', now) + ' ' + formatTime(':', now) + ': ') +
         chalk.red(req.method) +
         ' ' +
-        chalk.green(req.path)
+        chalk.green(req.path) +
+        '; LoggedIn: ' +
+        _res.locals.user?.id || false
     )
 
     next()
