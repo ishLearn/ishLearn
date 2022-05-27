@@ -12,6 +12,11 @@ const socketOnEventHandlers: Map<string, (...args: any[]) => void> = new Map<
   (...args: any) => void
 >()
 
+/**
+ * Add a socket.io event handler for a specific event
+ * @param event The event to listen for
+ * @param handler The handler to call when the event is raised
+ */
 export const addSocketEventHandler = (
   event: string,
   handler: (socket: Socket, ...args: any[]) => void
@@ -40,6 +45,10 @@ addSocketEventHandler('uploadStart', (socket, { id }: { id: string }) => {
   }
 })
 
+/**
+ * Set connection handlers for socket.io client events
+ * @param socket the new connecting socket
+ */
 export const socketIOConnectionHandler = (socket: Socket) => {
   new Logger().newSocketConnection(socket)
 

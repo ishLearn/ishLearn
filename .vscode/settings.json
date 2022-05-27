@@ -9,8 +9,12 @@
     "Gaulke",
     "hashids",
     "ishlearn",
+    "refreshtokens",
     "scripthost",
+    "signin",
+    "signout",
     "socketio",
+    "taggings",
     "unhashed"
   ],
   "html.format.wrapLineLength": 100
