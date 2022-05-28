@@ -38,5 +38,6 @@ The upload was successful
 ```json
 {
   "id": "_upload ID the user asked for"
+  "mediaId": "_the new Media's ID (in SQL)_"
 }
 ```
