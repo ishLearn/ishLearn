@@ -25,6 +25,13 @@ export default class Product {
   createDate?: Date
   updatedDate?: Date
 
+  static QUERY_LIMIT = '50'
+
+  static normalQuery = `SELECT ?? FROM products AS products WHERE products.visibility = "public"`
+  static adminQuery = `SELECT ?? FROM products AS products`
+  static studentQuery = `SELECT ?? FROM products INNER JOIN uploadBy ON products.ID = uploadBy.PID WHERE (products.visibility = "public" OR uploadBy.UID = ?)`
+  static teachersQuery = `SELECT ?? FROM products INNER JOIN supervisedBy ON products.ID = supervisedBy.PID (WHERE products.visibility = "public" OR supervisedBy.TID = ?)`
+
   /**
    * Create a Product based on
    * @param title the title of the Product
@@ -96,15 +103,22 @@ export default class Product {
    */
   static async getProductById(
     idInput: number | string,
-    fields: string[]
+    fields: string[],
+    loggedInUser: User
   ): Promise<Product> {
     const id = typeof idInput === 'string' ? getIntIDFromHash(idInput) : idInput
-    return (
-      await new DBService().query('SELECT ?? FROM products WHERE id = ?', [
-        fields,
-        id,
-      ])
-    ).results.map(Product.mapResultsToHash)
+    const query =
+      (typeof loggedInUser === 'undefined'
+        ? Product.normalQuery
+        : loggedInUser.rank === 'student'
+        ? Product.studentQuery
+        : loggedInUser.rank === 'admin'
+        ? Product.adminQuery
+        : Product.teachersQuery) + ` AND ID = ? LIMIT 1`
+
+    return (await new DBService().query(query, [fields, id])).results.map(
+      Product.mapResultsToHash
+    )
   }
 
   /**
@@ -183,16 +197,23 @@ export default class Product {
    * @returns The found Product in the DB
    * @throws Error if the Product is not found
    */
-  static async getFullProductById(id: number | string): Promise<Product> {
-    const r = await Product.getProductById(id, [
-      'title',
-      'visibility',
-      'createDate',
-      'updatedDate',
-      'updatedBy',
-      'createdBy',
-      'id',
-    ])
+  static async getFullProductById(
+    id: number | string,
+    loggedInUser: User
+  ): Promise<Product> {
+    const r = await Product.getProductById(
+      id,
+      [
+        'title',
+        'visibility',
+        'createDate',
+        'updatedDate',
+        'updatedBy',
+        'createdBy',
+        'id',
+      ],
+      loggedInUser
+    )
     return r
   }
 
@@ -201,17 +222,16 @@ export default class Product {
    * @returns the 50 first products from the DB
    */
   static async getFirstProducts(loggedInUser?: User): Promise<Product[]> {
-    const normalQuery = `SELECT ?? FROM products AS products WHERE products.visibility = "public" LIMIT 50`
-    const studentQuery = `SELECT ?? FROM products INNER JOIN uploadBy ON products.ID = uploadBy.PID WHERE products.visibility = "public" OR uploadBy.UID = ? LIMIT 50`
-    const teachersQuery = `SELECT ?? FROM products INNER JOIN supervisedBy ON products.ID = supervisedBy.PID WHERE products.visibility = "public" OR supervisedBy.TID = ? LIMIT 50`
-
     const query =
-      typeof loggedInUser === 'undefined'
-        ? normalQuery
+      (typeof loggedInUser === 'undefined'
+        ? Product.normalQuery
         : loggedInUser.rank === 'student'
-        ? studentQuery
-        : teachersQuery
+        ? Product.studentQuery
+        : loggedInUser.rank === 'admin'
+        ? Product.adminQuery
+        : Product.teachersQuery) + ' LIMIT 50'
 
+    console.log(query)
     const res = await new DBService().query(query, [
       [
         'products.ID',
