@@ -104,7 +104,7 @@ export default class Product {
   static async getProductById(
     idInput: number | string,
     fields: string[],
-    loggedInUser: User
+    loggedInUser?: User
   ): Promise<Product> {
     const id = typeof idInput === 'string' ? getIntIDFromHash(idInput) : idInput
     const query =
@@ -199,7 +199,7 @@ export default class Product {
    */
   static async getFullProductById(
     id: number | string,
-    loggedInUser: User
+    loggedInUser?: User
   ): Promise<Product> {
     const r = await Product.getProductById(
       id,
