@@ -15,6 +15,8 @@ import {
 } from '@aws-sdk/client-s3'
 import { Readable } from 'stream'
 import { UserRecord } from '../types/users'
+import DBService, { getIntIDFromHash } from '../services/DBService'
+import chalk from 'chalk'
 
 type UploadClient = { u: Upload; c?: socket.Socket }
 
@@ -28,6 +30,38 @@ export default class Media {
    * The map to save currently active upload sessions and Socket.io clients to.
    */
   static uploads: Map<string, UploadClient> = new Map<string, UploadClient>()
+
+  /**
+   * Get the filename to a file belonging to a project.
+   *
+   * TODO:? Filename may not be unique
+   *
+   * @param file Filename of the new file
+   * @param project Project ID (hashed) the new media belongs to
+   * @returns The complete file path including the project ID and the name
+   */
+  static getFilename(file: string, project: string) {
+    return `${project}/${file}`
+  }
+
+  /**
+   * Save a new Media to SQL; into `media` and into `mediaPartOfProduct` table
+   * @param filename name of the file
+   * @param filePath file path including name of the file
+   * @param project ProjectID (hashed)
+   * @returns The new Media's ID
+   */
+  static async save(filename: string, filePath: string, project: string) {
+    const mediaPartOfProduct = await new DBService().query(
+      `INSERT INTO media (filename, URL) VALUES (?)`,
+      [filename, filePath]
+    )
+    await new DBService().query(
+      `INSERT INTO mediaPartOfProduct (PID, MID) VALUES (?)`,
+      [getIntIDFromHash(project), mediaPartOfProduct.results.ID]
+    )
+    return mediaPartOfProduct.results.ID
+  }
 
   /**
    * Get client from the uploads map.
@@ -46,15 +80,23 @@ export default class Media {
    */
   static uploadMedia(
     fileName: string,
+    project: string,
     buf: Buffer,
     res: express.Response<{}, UserRecord>
   ) {
+    if (fileName === '' || project === '')
+      return res
+        .status(400)
+        .json({ error: 'Please specify filename and project.' })
+
+    const filePathName = Media.getFilename(fileName, project)
+
     if (typeof process.env.MAIN_BUCKET === 'undefined')
       throw new Error('Process env is not correctly set up for S3')
 
     const params: UploadBucketParams = {
       Bucket: process.env.MAIN_BUCKET,
-      Key: `${fileName}`,
+      Key: `${filePathName}`,
       Body: buf,
     }
 
@@ -98,10 +140,19 @@ export default class Media {
     })
 
     // Wait for upload to finish and then emit finish event to socket, if present
-    upload.done().then(() => {
+    upload.done().then(async () => {
+      console.log(
+        'Inserting product into DB after file upload to S3 is complete'
+      )
+      const newId = await Media.save(fileName, filePathName, project)
+      console.log(
+        'Upload and insert into DB complete for Media: ' + chalk.bgGreen(newId)
+      )
+
       try {
         client?.emit('uploadDone', {
           id: newUploadId,
+          mediaId: newId,
         })
       } catch (err) {
         new Logger().error(
