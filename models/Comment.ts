@@ -1,5 +1,8 @@
 import { NumberLike } from 'hashids/cjs/util'
-import DBService, { getIntIDFromHash } from '../services/DBService'
+import DBService, {
+  getHashFromIntID,
+  getIntIDFromHash,
+} from '../services/DBService'
 import Media from './Media'
 
 /**
@@ -13,6 +16,33 @@ export default class Comments {
   }
   static getCommentFilePath(pid: string, filename: string) {
     return Media.getFilename(`comments/${filename}`, pid)
+  }
+
+  /**
+   * Replace all comments' IDs with "hashed" IDs.
+   * @param c Comment to map
+   * @returns The mapped comment
+   */
+  static async commentMapper(c: {
+    PID: NumberLike
+    UID: NumberLike
+    MID: NumberLike
+    createdTime: Date
+    updatedTime: Date
+    rating: number
+    filename: string
+    URL: string
+  }) {
+    return {
+      pid: getHashFromIntID(c.PID),
+      uid: getHashFromIntID(c.UID),
+      mid: getHashFromIntID(c.MID),
+      createdTime: c.createdTime,
+      updatedTime: c.updatedTime,
+      rating: c.rating,
+      filename: c.filename,
+      URL: c.URL,
+    }
   }
 
   /**
@@ -75,10 +105,10 @@ export default class Comments {
   static async getCommentsForProduct(pid: string) {
     return (
       await new DBService().query(
-        `SELECT PID, UID, MID, createdTime, updatedTime, rating FROM comments WHERE pid = ?`,
+        `SELECT products.PID AS PID, products.UID AS UID, products.MID AS MID, products.createdTime AS createdTime, products.updatedTime AS updatedTime, products.rating AS rating, media.filename AS filename, media.URL AS URL FROM comments INNER JOIN media ON media.ID = comments.MID WHERE pid = ?`,
         [getIntIDFromHash(pid)]
       )
-    ).results
+    ).results.map(Comments.commentMapper)
   }
 
   /**
@@ -89,9 +119,11 @@ export default class Comments {
   static async getCommentsForUser(uid: string) {
     return (
       await new DBService().query(
-        `SELECT PID, UID, MID, createdTime, updatedTime, rating FROM comments WHERE uid = ?`,
+        `SELECT products.PID AS PID, products.UID AS UID, products.MID AS MID, products.createdTime AS createdTime, products.updatedTime AS updatedTime, products.rating AS rating, media.filename AS filename, media.URL AS URL FROM comments INNER JOIN media ON media.ID = comments.MID WHERE uid = ?`,
         [getIntIDFromHash(uid)]
       )
-    ).results
+    ).results.map(Comments.commentMapper)
   }
+
+  // GET comments not needed, since they can be retrieved by `/api/files/download` with the file path
 }
