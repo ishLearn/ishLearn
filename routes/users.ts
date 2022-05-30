@@ -2,7 +2,7 @@ import express from 'express'
 import { body, validationResult } from 'express-validator'
 import User from '../models/User'
 import { UserRecord } from '../types/users'
-import Logger from '../utils/Logger'
+import bcrypt from 'bcrypt'
 
 const router = express.Router()
 
@@ -29,7 +29,7 @@ router.post(
   body('rank').trim().isLength({ min: 5, max: 7 }),
   body('firstName').trim().isLength({ min: 1 }),
   body('lastName').trim().isLength({ min: 1 }),
-  body('birthday').isDate(),
+  // body('birthday').isDate(),
   async (req: express.Request, res: express.Response<{}, UserRecord>) => {
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
@@ -38,12 +38,14 @@ router.post(
 
     const { email, password, rank, firstName, lastName, birthday } = req.body
 
-    if (rank !== 'teacher' || rank !== 'student')
+    if (rank !== 'teacher' && rank !== 'student')
       return res.status(400).json({ error: 'Invalid rank' })
+
+    const newPassword = await User.hashPwd(password)
 
     const newUser = new User(
       email,
-      password,
+      newPassword,
       rank,
       firstName,
       lastName,
@@ -62,12 +64,10 @@ router.post(
         id,
       })
     } catch (err) {
-      return res
-        .status(400)
-        .json({
-          error:
-            'Could not be saved. Is the email already taken or is the rank invalid?',
-        })
+      return res.status(400).json({
+        error:
+          'Could not be saved. Is the email already taken or is the rank invalid?',
+      })
     }
   }
 )
