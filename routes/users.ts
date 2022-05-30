@@ -55,7 +55,6 @@ router.post(
     )
 
     try {
-      // TODO: Double emails? => will MySQL throw an error that is caught below? Then change error msg to clear "already taken"
       const results = await newUser.save()
       const id = results.id
 

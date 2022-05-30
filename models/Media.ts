@@ -17,6 +17,7 @@ import { Readable } from 'stream'
 import { UserRecord } from '../types/users'
 import DBService, { getIntIDFromHash } from '../services/DBService'
 import chalk from 'chalk'
+import { NumberLike } from 'hashids/cjs/util'
 
 type UploadClient = { u: Upload; c?: socket.Socket }
 
@@ -58,9 +59,9 @@ export default class Media {
     )
     await new DBService().query(
       `INSERT INTO mediaPartOfProduct (PID, MID) VALUES (?)`,
-      [getIntIDFromHash(project), mediaPartOfProduct.results.ID]
+      [getIntIDFromHash(project), mediaPartOfProduct.results.insertId]
     )
-    return mediaPartOfProduct.results.ID
+    return mediaPartOfProduct.results.insertId as NumberLike
   }
 
   /**

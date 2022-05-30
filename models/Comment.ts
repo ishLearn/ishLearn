@@ -1,3 +1,4 @@
+import { NumberLike } from 'hashids/cjs/util'
 import DBService, { getIntIDFromHash } from '../services/DBService'
 import Media from './Media'
 
@@ -8,7 +9,7 @@ import Media from './Media'
  */
 export default class Comments {
   static getCommentFileName(pid: string, uid: string) {
-    return `comment-${pid}-${uid}`
+    return `comment-${pid}-${uid}.md`
   }
   static getCommentFilePath(pid: string, filename: string) {
     return Media.getFilename(`comments/${filename}`, pid)
@@ -36,6 +37,8 @@ export default class Comments {
 
     const path = Comments.getCommentFilePath(pid, filename)
     const m = await Media.save(filename, path, pid)
+
+    return await Comments.save(pid, uid, m, rating)
   }
 
   /**
@@ -46,17 +49,22 @@ export default class Comments {
    * @param rating number indicating this comment's rating of the product, may be null
    * @returns The new Comment's ID
    */
-  static async save(pid: string, uid: string, mid: string, rating?: number) {
+  static async save(
+    pid: string,
+    uid: string,
+    mid: string | NumberLike,
+    rating?: number
+  ) {
     const mediaPartOfProduct = await new DBService().query(
       `INSERT INTO comments (PID, UID, MID, rating) VALUES (?)`,
       [
         getIntIDFromHash(pid),
         getIntIDFromHash(uid),
-        getIntIDFromHash(mid),
+        typeof mid === 'string' ? getIntIDFromHash(mid) : mid,
         rating,
       ]
     )
-    return mediaPartOfProduct.results.ID
+    return mediaPartOfProduct.results.insertId
   }
 
   /**
