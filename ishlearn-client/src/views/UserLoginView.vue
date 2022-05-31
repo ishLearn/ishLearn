@@ -23,7 +23,7 @@ const onSignup = (e) => {
 </script>
 
 <template>
-  <div class="random-class">
+  <div class="">
     <h2>Hier kannst du dich einloggen</h2>
 
     <form @submit="onLogin" class="login-form">

@@ -1,40 +1,81 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import AuthService from '@/services/auth.service'
+import { GenericInputs } from '@/types/GenericInputData'
 import GenericInput from '@/components/GenericInput.vue'
 
-const username = ref('')
-const email = ref('')
-const password = ref('')
-const passwordwdh = ref('')
-const isSchueler = ref(true)
-
-let testV = ''
-testV = 'a'
-const test = {
-  label: 'Dein Benutzername',
-  id: 'username',
-  name: 'Username',
-  value: testV,
-  mandatory: true,
-  placeholder: '',
+const inputs: GenericInputs = {
+  username: {
+    value: ref(''),
+    type: 'text',
+    label: 'Dein Benutzername',
+    id: 'username',
+    name: 'Username',
+    mandatory: true,
+    placeholder: '',
+  },
+  email: {
+    value: ref('@gmail.com'),
+    type: 'text',
+    label: 'Deine Email',
+    id: 'email',
+    name: 'Email',
+    mandatory: true,
+    placeholder: '',
+  },
+  passwort: {
+    value: ref(''),
+    type: 'password',
+    label: 'Dein Passwort',
+    id: 'pwd',
+    name: 'pwd',
+    mandatory: true,
+    placeholder: '',
+  },
+  passwort2: {
+    value: ref(''),
+    type: 'password2',
+    label: 'Dein Passwort wiederholen',
+    id: 'pwd2',
+    name: 'pwd2',
+    mandatory: true,
+    placeholder: '',
+  },
+  isSchueler: {
+    value: ref(true),
+    type: 'checkbox',
+    label: 'Bist du Schüler?',
+    id: 'issus',
+    name: 'issus',
+    mandatory: false,
+    placeholder: '',
+  },
 }
 
 const onSignup = (e) => {
   e.preventDefault()
 
-  console.log(testV)
+  console.log('Signup Pressed')
+  console.log(inputs.isSchueler)
 
-  if (!username.value || !email.value || !password.value) {
+  if (
+    Object.keys(inputs).reduce((result, k) => {
+      const input = inputs[k]
+      if (input.mandatory && !input.value.value) {
+        result = true
+      }
+      return result
+    }, false)
+  ) {
     alert('Bitte Fülle alle Felder aus!')
     return
   }
 
-  console.log(`${username.value} pwd: ${password.value}`)
+  console.log(`${inputs.username.value.value} pwd: ${inputs.username.value.value}`)
   AuthService.register({
-    username: username.value,
-    email: email.value,
-    password: password.value,
+    username: inputs.username.value.value,
+    email: inputs.email.value.value,
+    password: inputs.passwort.value.value,
   })
   console.log('Register successful!')
 }
@@ -48,34 +89,12 @@ const onSignup = (e) => {
       <p>Trage dich hier ein</p>
 
       <form @submit="onSignup" class="form-input-group">
-        <GenericInput :InputData="test" />
-        <div class="form-control">
-          <label for="username">Benutzername</label>
-          <input
-            type="text"
-            id="username"
-            v-model="username"
-            name="username"
-            placeholder="Dein Benutzername"
-            class="textinput textInput form-control"
-          />
-        </div>
-        <div class="form-control">
-          <label for="email">Email</label>
-          <input type="text" id="email" v-model="email" name="Email" />
-        </div>
-        <div class="form-control">
-          <label for="password">Passwort</label>
-          <input type="password" id="password" v-model="password" name="Passwort" />
-        </div>
-        <div class="form-control">
-          <label for="password-wdh">Passwort wiederholen</label>
-          <input type="password" id="password-wdh" v-model="passwordwdh" name="Passwort2" />
-        </div>
-        <div class="form-control">
-          <label for="isSchueler">Bist du ein Schüler?</label>
-          <input type="checkbox" id="schueler" v-model="isSchueler" name="schueler" />
-        </div>
+        <GenericInput
+          v-for="input in inputs"
+          :key="input.id"
+          v-model="input.value.value"
+          :inputProps="input"
+        />
 
         <input type="submit" value="Sign Up" class="btn btn-primary" />
       </form>
@@ -99,7 +118,8 @@ const onSignup = (e) => {
 .form-control label {
   display: block;
 }
-.form-control input {
+.form-control input[type='text'],
+.form-control input[type='passwort'] {
   width: 100%;
   height: 40px;
   margin: 5px;
