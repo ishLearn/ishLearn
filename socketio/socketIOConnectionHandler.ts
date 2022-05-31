@@ -26,6 +26,9 @@ export const addSocketEventHandler = (
 
 addSocketEventHandler('disconnect', socket => {
   const worked = activeSockets.delete(socket.id)
+  Media.uploads.forEach((uploadClient, key: string) => {
+    if (uploadClient.c?.id === socket.id) Media.uploads.delete(key)
+  })
   if (worked) new Logger().socketDisconnect(socket)
   else
     console.log(

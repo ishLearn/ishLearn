@@ -10,7 +10,7 @@ router.use(fileUpload)
 // POST /api/files/upload/
 //
 router.post('/', (req, res) => {
-  const { filename } = req.body
+  const { filename, projectId } = req.body
 
   if (
     typeof req.files === 'undefined' ||
@@ -26,7 +26,7 @@ router.post('/', (req, res) => {
   const fileContent = Buffer.from(file.data) // 'binary' option not working?
 
   // res status and json done inside of upload
-  Media.uploadMedia(filename, fileContent, res)
+  Media.uploadMedia(filename, projectId, fileContent, res)
 })
 
 export default router

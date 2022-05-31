@@ -22,7 +22,9 @@ router.get(
 router.get(
   '/:id',
   async (req: express.Request, res: express.Response<{}, UserRecord>) => {
-    return res.json(await Product.getFullProductById(req.params.id))
+    return res.json(
+      await Product.getFullProductById(req.params.id, res.locals.user)
+    )
   }
 )
 

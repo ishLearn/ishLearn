@@ -229,9 +229,8 @@ export default class User {
         ],
       ]
     )
-    console.log(res.results)
 
-    this.id = res.results[0].ID || res.results[0].id
+    this.id = res.results.insertId
     return this
   }
 }
