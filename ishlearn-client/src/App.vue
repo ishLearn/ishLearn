@@ -1,10 +1,10 @@
 <template>
-<div class="usual-color">
-  <NavBar />
-  <div class="wrapper container">
-    <router-view />
+  <div class="usual-color">
+    <NavBar />
+    <div class="wrapper container">
+      <router-view />
+    </div>
   </div>
-</div>
 </template>
 
 <script setup lang="ts">
@@ -16,12 +16,10 @@ const staticNr = ref(0)
 console.log(staticNr)
 
 // Code
-const storedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+const storedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
 if (storedTheme) {
   document.documentElement.setAttribute('data-theme', storedTheme)
 }
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

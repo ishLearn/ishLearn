@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "echo 'Not working yet!' node index.ts",
-    "dev": "nodemon index.ts",
+    "dev": "nodemon index.ts --ignore ishlearn-client",
     "build": "tsc index.ts ./dist",
     "test": "jest",
     "initt": "nodemon init/initTables.ts",

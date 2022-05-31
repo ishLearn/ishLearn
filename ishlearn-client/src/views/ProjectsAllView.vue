@@ -14,7 +14,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="usual-color all-projects">
+  <div class="all-projects">
     <div class="jumbotron">
       <h1>Hier werden alle Projekte angezeigt</h1>
       <p>{{ allProjects }}</p>
