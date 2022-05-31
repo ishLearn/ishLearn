@@ -233,4 +233,22 @@ export default class User {
     this.id = res.results.insertId
     return this
   }
+
+  /**
+   * Update the password of a user.
+   * @param uid User ID to update password for
+   * @param password New password, unhashed
+   * @returns The number of affected DB rows
+   */
+  static async updatePwd(uid: ID, password: string) {
+    if (typeof uid === 'undefined') throw new Error('Invalid UID')
+    const res = await new DBService().query(
+      `UPDATE products SET pwd = ? WHERE id = ?`,
+      [
+        User.hashPwd(password),
+        typeof uid === 'string' ? getIntIDFromHash(uid) : uid,
+      ]
+    )
+    return res.results.affectedRows
+  }
 }

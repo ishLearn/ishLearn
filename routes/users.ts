@@ -95,4 +95,24 @@ router.put(
   }
 )
 
+/**
+ * Update password for current user.
+ */
+router.put(
+  '/password',
+  body('password').trim().isLength({ min: 8 }),
+  body('passwordCtrl').trim().isLength({ min: 8 }),
+  async (req, res: express.Response<{}, UserRecord>) => {
+    const user = res.locals.user
+    if (typeof user === 'undefined')
+      return res.status(403).json({ error: 'User is not authenticated!' })
+    const { password, passwordCtrl } = req.body
+    if (!password || !passwordCtrl || password === passwordCtrl)
+      return res.status(400).json({ error: 'The passwords must match!' })
+
+    const affectedRows = await User.updatePwd(user.id, password)
+    return res.status(200).json({ msg: 'Update complete', affectedRows })
+  }
+)
+
 export default router
