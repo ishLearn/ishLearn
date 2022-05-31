@@ -17,6 +17,7 @@ import { Readable } from 'stream'
 import { UserRecord } from '../types/users'
 import DBService, { getIntIDFromHash } from '../services/DBService'
 import chalk from 'chalk'
+import { NumberLike } from 'hashids/cjs/util'
 
 type UploadClient = { u: Upload; c?: socket.Socket }
 
@@ -58,9 +59,9 @@ export default class Media {
     )
     await new DBService().query(
       `INSERT INTO mediaPartOfProduct (PID, MID) VALUES (?)`,
-      [getIntIDFromHash(project), mediaPartOfProduct.results.ID]
+      [getIntIDFromHash(project), mediaPartOfProduct.results.insertId]
     )
-    return mediaPartOfProduct.results.ID
+    return mediaPartOfProduct.results.insertId as NumberLike
   }
 
   /**
@@ -78,15 +79,15 @@ export default class Media {
    * @param buf The Buffer to save
    * @param res The express response object to send success or error to client.
    */
-  static uploadMedia(
+  static async uploadMedia(
     fileName: string,
     project: string,
     buf: Buffer,
-    res: express.Response<{}, UserRecord>
+    res?: express.Response<{}, UserRecord>
   ) {
     if (fileName === '' || project === '')
       return res
-        .status(400)
+        ?.status(400)
         .json({ error: 'Please specify filename and project.' })
 
     const filePathName = Media.getFilename(fileName, project)
@@ -101,6 +102,12 @@ export default class Media {
     }
 
     const upload = createParallelUploads3(params)
+
+    // If called from backend, wait for the result and return
+    if (!res) {
+      await upload.done()
+      return { worked: true }
+    }
 
     const newUploadId = uuid()
     Media.uploads.set(newUploadId, { u: upload })
