@@ -16,7 +16,7 @@ import products from './routes/products'
 import uploads from './routes/files/uploads'
 import downloads from './routes/files/downloads'
 // Import middleware
-import authMiddleware from './middleware/authMiddleware'
+import { authMiddleware } from './middleware/authMiddleware'
 
 // Initialize logger
 import Logger from './utils/Logger'
@@ -24,14 +24,17 @@ import Logger from './utils/Logger'
  * Global Logger for logging to console
  */
 const logger = new Logger()
-// Initialize DBService (start DB connection pool)
+// Initialize DBService (start DB connection pool) and Redis Server
 import DBService from './services/DBService'
+import { connectRedisClient as startRedis } from './services/RedisService'
+
 import { exec } from 'child_process'
 
 /**
  * Global Service for DB connections
  */
 new DBService()
+startRedis()
 
 // Express server and middleware:
 // Initialize Express and socket.io server with NodeJS HTTP module
