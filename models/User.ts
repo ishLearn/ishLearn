@@ -278,7 +278,10 @@ export default class User {
    * @param password New password, unhashed
    * @returns The number of affected DB rows
    */
-  static async updatePwd(uid: ID, password: string) {
+  static async updatePwd(
+    uid: ID,
+    password: string
+  ): Promise<number | undefined> {
     if (typeof uid === 'undefined') throw new Error('Invalid UID')
     const res = await new DBService().query(
       `UPDATE users SET pwd = ? WHERE id = ?`,
