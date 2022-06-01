@@ -40,7 +40,7 @@ function toggleTheme() {
       <div style="margin-right: 1rem">
         <ul class="navbar-nav no-scrollbar">
           <li class="nav-item">
-            <router-link :to="{ name: 'UserSignup' }" class="nav-link">Sign Up</router-link>
+            <router-link :to="{ name: 'UserSignup' }" class="nav-link">Registrierung</router-link>
             <!-- <router-link :to="{ name: 'UserDetail', params: { id: 0 } }" class="nav-link"
               >Sign Up</router-link
             > -->

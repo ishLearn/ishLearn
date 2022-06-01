@@ -1,27 +1,34 @@
 <!-- GenericInput.vue -->
 <script setup lang="ts">
-import { defineProps, defineEmits } from 'vue'
+// eslint-disable-next-line
+import { defineProps, defineEmits, watch, ref } from 'vue'
 
 const props = defineProps(['modelValue', 'inputProps'])
 defineEmits(['update:modelValue'])
 
-console.log('in generic input')
-console.log(props.modelValue)
-
-const checkMandatory = (event) => {
-  console.log('Here bin ich in der funtkion')
-  console.log(props.modelValue)
-  if (props.inputProps.mandatory) {
-    console.log('Mand')
-  }
+const mandWarn = ref(false)
+if (props.inputProps.mandatory) {
+  watch(props.inputProps.value, (oldV, newV) => {
+    if (!props.inputProps.value.value) {
+      mandWarn.value = true
+    } else {
+      mandWarn.value = false
+    }
+  })
 }
 </script>
 
 <template>
-  <div class="form-group p-2 input-box">
+  <div
+    :class="`form-group p-2 input-box ${
+      inputProps.type === 'checkbox' ? 'form control-check' : ''
+    }`"
+  >
     <label
       :for="inputProps.id"
-      :class="`${inputProps.type === 'checkbox' ? 'form-check-label' : ''}`"
+      :class="`${
+        inputProps.type === 'checkbox' ? 'form-check-label form-label-check' : 'form-label-text'
+      }`"
       >{{ inputProps.label }}<span v-show="inputProps.mandatory">*</span></label
     >
     <input
@@ -31,8 +38,13 @@ const checkMandatory = (event) => {
       :placeholder="inputProps.placeholder"
       :value="modelValue"
       @input="$emit('update:modelValue', $event.target.value)"
-      :class="`${inputProps.type === 'checkbox' ? 'form-check-input' : 'form-control text-input'}`"
+      :class="`${
+        inputProps.type === 'checkbox'
+          ? 'form-check-input input-control-check'
+          : 'form-control text-input'
+      }`"
     />
+    <span v-show="mandWarn" class="text-danger">Dieses Feld ist Pflicht!</span>
   </div>
 </template>
 
@@ -48,34 +60,41 @@ const checkMandatory = (event) => {
   border-color: rgba(0, 0, 0, 0.6);
   color: var(--text-color);
 }
-
+[data-theme='dark'] .text-input:-webkit-autofill {
+  background-color: rgba(0, 0, 0, 0.6) !important;
+  border-color: var(--hansenberg-blau);
+  color: var(--text-color) !important;
+}
 .input-control {
   background-color: rgba(0, 0, 0, 0.5);
   margin: 20px 0px;
   width: 100%;
 }
 
-.form-control label {
+.form-label-text {
   display: block;
 }
-.form-control input [type='text'],
-.form-control input [type='password'] {
+.text-input {
   width: 100%;
   height: 40px;
   margin: 5px;
   padding: 3px 7px;
   font-size: 17px;
 }
-.input-control-check {
+
+.form-control-check {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
-.form-control-check label {
+
+.form-label-check {
   flex: 1;
+  display: block;
 }
-.form-control-check input {
+.input-control-check {
   flex: 2;
   height: 20px;
+  width: 20px;
 }
 </style>

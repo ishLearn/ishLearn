@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import AuthService from '@/services/auth.service'
 import { GenericInputs } from '@/types/GenericInputData'
-import GenericInput from '@/components/GenericInput.vue'
+import SmallForm from '@/components/SmallForm.vue'
 
 const inputs: GenericInputs = {
   username: {
@@ -15,7 +15,7 @@ const inputs: GenericInputs = {
     placeholder: '',
   },
   email: {
-    value: ref('@gmail.com'),
+    value: ref(''),
     type: 'text',
     label: 'Deine Email',
     id: 'email',
@@ -34,7 +34,7 @@ const inputs: GenericInputs = {
   },
   passwort2: {
     value: ref(''),
-    type: 'password2',
+    type: 'password',
     label: 'Dein Passwort wiederholen',
     id: 'pwd2',
     name: 'pwd2',
@@ -56,7 +56,8 @@ const onSignup = (e) => {
   e.preventDefault()
 
   console.log('Signup Pressed')
-  console.log(inputs.isSchueler)
+  console.log(inputs.username)
+  console.log(inputs.passwort.value)
 
   if (
     Object.keys(inputs).reduce((result, k) => {
@@ -67,11 +68,18 @@ const onSignup = (e) => {
       return result
     }, false)
   ) {
-    alert('Bitte Fülle alle Felder aus!')
+    alert('Bitte fülle alle Pflichtfelder aus!')
     return
   }
 
-  console.log(`${inputs.username.value.value} pwd: ${inputs.username.value.value}`)
+  if (inputs.passwort.value.value !== inputs.passwort2.value.value) {
+    alert('Deine Passwörter sind verschieden!')
+    return
+  }
+
+  console.log('Send Data to /api/auth/')
+  console.log(`username: ${inputs.username.value.value}`)
+  console.log(`password: ${inputs.passwort.value.value}`)
   AuthService.register({
     username: inputs.username.value.value,
     email: inputs.email.value.value,
@@ -83,25 +91,22 @@ const onSignup = (e) => {
 
 <template>
   <div>
-    <div class="container forms-small p-3">
-      <h2>Sign up</h2>
-
-      <p>Trage dich hier ein</p>
-
-      <form @submit="onSignup" class="form-input-group">
-        <GenericInput
-          v-for="input in inputs"
-          :key="input.id"
-          v-model="input.value.value"
-          :inputProps="input"
-        />
-
-        <input type="submit" value="Sign Up" class="btn btn-primary" />
-      </form>
-
-      Du has bereits einen account, dann logge dich
-      <router-link :to="{ name: 'UserLogin' }">hier</router-link> ein
-    </div>
+    <SmallForm
+      :title="`Registrierung`"
+      :inputs="inputs"
+      :submitMessage="'Account erstellen'"
+      @onSubmit="onSignup"
+    >
+      <template #subtitle>
+        <p>Erstelle dir hier einen Account</p>
+      </template>
+      <template #footer>
+        <p>
+          Du hast bereits einen Account? Dann logge dich
+          <router-link :to="{ name: 'UserLogin' }">hier</router-link> ein.
+        </p>
+      </template>
+    </SmallForm>
   </div>
 </template>
 
@@ -122,5 +127,10 @@ const onSignup = (e) => {
 
 .form-input-group {
   margin-bottom: 40px;
+}
+
+.tiny-font {
+  margin-top: 1rem;
+  font-size: 10px;
 }
 </style>

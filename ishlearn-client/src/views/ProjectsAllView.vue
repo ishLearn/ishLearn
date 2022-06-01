@@ -2,11 +2,20 @@
 import { onMounted, ref } from 'vue'
 import axios from 'axios'
 import ShowAllProducts from '@/components/ShowAllProducts.vue'
+import api from '@/services/api'
 
 const allProjects = ref([])
-onMounted(() => {
+/* onMounted(() => {
   console.log('foo')
   axios.get('/api/products/').then((res) => {
+    console.log(res)
+    allProjects.value = res.data
+  })
+})
+*/
+onMounted(() => {
+  console.log('Getting projects using the api service')
+  api.get('/products/').then((res) => {
     console.log(res)
     allProjects.value = res.data
   })

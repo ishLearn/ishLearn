@@ -29,7 +29,7 @@ class AuthService {
     email: string
     password: string
   }) {
-    return api.post('/auth/signup', {
+    return api.post('/auth/signup/', {
       username,
       email,
       password,
