@@ -83,7 +83,7 @@ const onSignup = (e) => {
 
 <template>
   <div>
-    <div class="container forms-small">
+    <div class="container forms-small p-3">
       <h2>Sign up</h2>
 
       <p>Trage dich hier ein</p>
@@ -109,33 +109,18 @@ const onSignup = (e) => {
 .forms-small {
   max-width: 540px;
 }
+[data-theme='light'] .forms-small {
+  background-color: white;
+  border: 1px solid lightgrey;
+  border-radius: 5px;
+}
+[data-theme='dark'] .forms-small {
+  background-color: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(0, 0, 0, 0.6);
+  border-radius: 5px;
+}
+
 .form-input-group {
   margin-bottom: 40px;
-}
-.form-control {
-  margin: 20px 0;
-}
-.form-control label {
-  display: block;
-}
-.form-control input[type='text'],
-.form-control input[type='passwort'] {
-  width: 100%;
-  height: 40px;
-  margin: 5px;
-  padding: 3px 7px;
-  font-size: 17px;
-}
-.form-control-check {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.form-control-check label {
-  flex: 1;
-}
-.form-control-check input {
-  flex: 2;
-  height: 20px;
 }
 </style>

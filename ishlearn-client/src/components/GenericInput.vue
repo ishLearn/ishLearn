@@ -18,8 +18,10 @@ const checkMandatory = (event) => {
 </script>
 
 <template>
-  <div :class="`form-control ${inputProps.type === 'checkbox' ? 'form-control-check' : ''}`">
-    <label :for="inputProps.id"
+  <div class="form-group p-2 input-box">
+    <label
+      :for="inputProps.id"
+      :class="`${inputProps.type === 'checkbox' ? 'form-check-label' : ''}`"
       >{{ inputProps.label }}<span v-show="inputProps.mandatory">*</span></label
     >
     <input
@@ -29,23 +31,30 @@ const checkMandatory = (event) => {
       :placeholder="inputProps.placeholder"
       :value="modelValue"
       @input="$emit('update:modelValue', $event.target.value)"
-      :class="`textinput textInput ${
-        inputProps.type === 'checkbox' ? 'form-control-check' : 'form-control'
-      }`"
+      :class="`${inputProps.type === 'checkbox' ? 'form-check-input' : 'form-control text-input'}`"
     />
   </div>
 </template>
 
 <style scoped>
-.forms-small {
-  max-width: 540px;
-}
-.form-input-group {
-  margin-bottom: 40px;
+.input-box {
+  margin: 10px 0px;
 }
 .form-control {
   margin: 20px 0px;
 }
+[data-theme='dark'] .text-input {
+  background-color: rgba(0, 0, 0, 0.6);
+  border-color: rgba(0, 0, 0, 0.6);
+  color: var(--text-color);
+}
+
+.input-control {
+  background-color: rgba(0, 0, 0, 0.5);
+  margin: 20px 0px;
+  width: 100%;
+}
+
 .form-control label {
   display: block;
 }
@@ -57,7 +66,7 @@ const checkMandatory = (event) => {
   padding: 3px 7px;
   font-size: 17px;
 }
-.form-control-check {
+.input-control-check {
   display: flex;
   align-items: center;
   justify-content: space-between;
