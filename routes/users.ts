@@ -143,10 +143,32 @@ router.put(
       return res.status(403).json({ error: 'User is not authenticated!' })
     const { email, emailCtrl } = req.body
     if (!email || !emailCtrl || email === emailCtrl)
-      return res.status(400).json({ error: 'The passwords must match!' })
+      return res.status(400).json({ error: 'The emails must match!' })
 
     try {
       const affectedRows = await User.updateEmail(user.id, email)
+      return res.status(200).json({ msg: 'Update complete', affectedRows })
+    } catch (err) {
+      return res.status(403).json({
+        error: `User is not logged in`,
+      })
+    }
+  }
+)
+
+/**
+ * Update current User's email.
+ */
+router.put(
+  '/email/confirm',
+  validateResult,
+  async (req: express.Request, res: express.Response<{}, UserRecord>) => {
+    const user = res.locals.user
+    if (typeof user === 'undefined' || typeof user.id === 'undefined')
+      return res.status(403).json({ error: 'User is not authenticated!' })
+
+    try {
+      const affectedRows = await User.confirmTmpEmail(user.id)
       return res.status(200).json({ msg: 'Update complete', affectedRows })
     } catch (err) {
       return res.status(400).json({
