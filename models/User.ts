@@ -7,6 +7,8 @@ import DBService, {
 import Logger from '../utils/Logger'
 
 import { ID } from '../types/ids'
+import Media from './Media'
+import { NumberLike } from 'hashids/cjs/util'
 
 const saltRounds = Number(process.env.SALT_ROUNDS) || 10
 
@@ -19,6 +21,19 @@ const saltRounds = Number(process.env.SALT_ROUNDS) || 10
  * @author Sebastian Thomas
  */
 export default class User {
+  static getProfilePictureFileName(uid: string) {
+    return `picture-${uid}.png`
+  }
+  static getProfilePictureFilePath(uid: string) {
+    return `profile/${User.getProfilePictureFileName(uid)}`
+  }
+  static getProfileTextFileName(uid: string) {
+    return `text-${uid}.md`
+  }
+  static getProfileTextFilePath(uid: string) {
+    return `profile/${User.getProfileTextFileName(uid)}`
+  }
+
   id: ID
   email: string
   emailTmp: string | null = null
@@ -138,7 +153,9 @@ export default class User {
    */
   static async getFullUserById(id: string): Promise<User> {
     return await User.getUserById(id, [
+      'ID',
       'email',
+      'emailTmp',
       'password',
       'rank',
       'firstName',
@@ -232,5 +249,140 @@ export default class User {
 
     this.id = res.results.insertId
     return this
+  }
+
+  /**
+   * Update the email of a user; temporarily store into emailTmp in DB.
+   * @param uid User ID to update email for
+   * @param email New email
+   * @returns The number of affected DB rows
+   */
+  static async updateEmail(uid: ID, email: string) {
+    if (typeof uid === 'undefined') throw new Error('Invalid UID')
+    const res = await new DBService().query(
+      `UPDATE users SET emailTmp = ? WHERE id = ?`,
+      [email, typeof uid === 'string' ? getIntIDFromHash(uid) : uid]
+    )
+    return res.results.affectedRows
+  }
+
+  /**
+   * Confirm the current `emailTmp` of a user.
+   * @param uid The (unhashed) ID of the user
+   * @returns The number of affected DB rows
+   */
+  static async confirmTmpEmail(uid: ID) {
+    if (typeof uid === 'undefined') throw new Error('Invalid UID')
+    const { emailTmp } = await User.getFullUserById(uid)
+    const id = typeof uid === 'string' ? getIntIDFromHash(uid) : uid
+
+    if (emailTmp === null) throw new Error('Email is not to be confirmed.')
+
+    const res = await new DBService().query(
+      `UPDATE users SET email = ?, emailTmp = NULL WHERE id = ?`,
+      [emailTmp, id]
+    )
+    return res.results.affectedRows
+  }
+
+  // TODO: Implement routes for email verification
+
+  /**
+   * Update the password of a user.
+   * @param uid User ID to update password for
+   * @param password New password, unhashed
+   * @returns The number of affected DB rows
+   */
+  static async updatePwd(
+    uid: ID,
+    password: string
+  ): Promise<number | undefined> {
+    if (typeof uid === 'undefined') throw new Error('Invalid UID')
+    const res = await new DBService().query(
+      `UPDATE users SET pwd = ? WHERE id = ?`,
+      [
+        User.hashPwd(password),
+        typeof uid === 'string' ? getIntIDFromHash(uid) : uid,
+      ]
+    )
+    return res.results.affectedRows
+  }
+
+  /**
+   * Update the birthday of a user.
+   * @param uid User ID to update birthday for
+   * @param birthday New birthday
+   * @returns The number of affected DB rows
+   */
+  static async updateBirthday(uid: ID, birthday: Date) {
+    if (typeof uid === 'undefined') throw new Error('Invalid UID')
+    const res = await new DBService().query(
+      `UPDATE users SET birthday = ? WHERE id = ?`,
+      [birthday, typeof uid === 'string' ? getIntIDFromHash(uid) : uid]
+    )
+    return res.results.affectedRows
+  }
+
+  // PROFILE PICTURE / TEXT
+  /**
+   *
+   * @param uid UserID (hashed)
+   * @param text Text content for user description
+   */
+  static async uploadProfilePictureThenSaveToDB(uid: string, text: string) {
+    const filepath = User.getProfilePictureFilePath(uid)
+
+    const res = await Media.uploadMedia(filepath, Buffer.from(text), {
+      useNameAsPath: true,
+    })
+
+    if (typeof res === 'undefined' || !('worked' in res) || !res.worked)
+      throw new Error(`Could not upload comment to S3`)
+
+    const mId = await Media.saveToMediaOnly(
+      User.getProfilePictureFileName(uid),
+      filepath
+    )
+
+    return await User.saveProfilePicture(uid, mId)
+  }
+
+  static async saveProfilePicture(uid: string, mid: NumberLike) {
+    const mediaPartOfProduct = await new DBService().query(
+      `UPDATE users SET profilePicture = ? WHERE id = ?`,
+      [mid, getIntIDFromHash(uid)]
+    )
+    return mediaPartOfProduct.results.insertId as NumberLike
+  }
+
+  /**
+   *
+   * @param uid UserID (hashed)
+   * @param text Text content for user description
+   */
+  static async uploadProfileTextThenSaveToDB(uid: string, text: string) {
+    const filepath = User.getProfileTextFilePath(uid)
+
+    const res = await Media.uploadMedia(filepath, Buffer.from(text), {
+      useNameAsPath: true,
+    })
+
+    if (typeof res === 'undefined' || !('worked' in res) || !res.worked)
+      throw new Error(`Could not upload comment to S3`)
+
+    const mId = await Media.saveToMediaOnly(
+      User.getProfileTextFileName(uid),
+      filepath
+    )
+
+    return await User.saveProfileText(uid, mId)
+  }
+
+  static async saveProfileText(uid: string, mid: NumberLike) {
+    const mediaPartOfProduct = await new DBService().query(
+      `UPDATE users SET profileText = ? WHERE id = ?`,
+      [mid, getIntIDFromHash(uid)]
+    )
+    return mediaPartOfProduct.results.insertId as NumberLike
   }
 }

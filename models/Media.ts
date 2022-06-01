@@ -64,6 +64,14 @@ export default class Media {
     return mediaPartOfProduct.results.insertId as NumberLike
   }
 
+  static async saveToMediaOnly(filename: string, filePath: string) {
+    const newMedia = await new DBService().query(
+      `INSERT INTO media (filename, URL), VALUE (?)`,
+      [filename, filePath]
+    )
+    return newMedia.results.insertId as NumberLike
+  }
+
   /**
    * Get client from the uploads map.
    * @param id the Upload ID to search for (uuid given on init)
@@ -77,20 +85,26 @@ export default class Media {
    * Upload a File to S3
    * @param fileName The filename to save the Media to.
    * @param buf The Buffer to save
-   * @param res The express response object to send success or error to client.
+   * @param config
+   * - `res`: The express response object to send success or error to client.
    */
   static async uploadMedia(
     fileName: string,
-    project: string,
     buf: Buffer,
-    res?: express.Response<{}, UserRecord>
+    config?: {
+      project?: string
+      res?: express.Response<{}, UserRecord>
+      useNameAsPath?: boolean
+    }
   ) {
-    if (fileName === '' || project === '')
-      return res
+    if (fileName === '')
+      return config?.res
         ?.status(400)
-        .json({ error: 'Please specify filename and project.' })
+        .json({ error: 'Please specify filename.' })
 
-    const filePathName = Media.getFilename(fileName, project)
+    const filePathName = config?.useNameAsPath
+      ? fileName
+      : Media.getFilename(fileName, config?.project || '')
 
     if (typeof process.env.MAIN_BUCKET === 'undefined')
       throw new Error('Process env is not correctly set up for S3')
@@ -104,7 +118,7 @@ export default class Media {
     const upload = createParallelUploads3(params)
 
     // If called from backend, wait for the result and return
-    if (!res) {
+    if (!config?.res) {
       await upload.done()
       return { worked: true }
     }
@@ -141,7 +155,7 @@ export default class Media {
     })
 
     // Send 'partial content'-header, success and uploadId
-    res.status(206).json({
+    config.res.status(206).json({
       success: true,
       uploadId: newUploadId,
     })
@@ -151,7 +165,11 @@ export default class Media {
       console.log(
         'Inserting product into DB after file upload to S3 is complete'
       )
-      const newId = await Media.save(fileName, filePathName, project)
+      const newId = await Media.save(
+        fileName,
+        filePathName,
+        config?.project || ''
+      )
       console.log(
         'Upload and insert into DB complete for Media: ' + chalk.bgGreen(newId)
       )
