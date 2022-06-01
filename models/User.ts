@@ -235,6 +235,40 @@ export default class User {
   }
 
   /**
+   * Update the email of a user; temporarily store into emailTmp in DB.
+   * @param uid User ID to update email for
+   * @param email New email
+   * @returns The number of affected DB rows
+   */
+  static async updateEmail(uid: ID, email: string) {
+    if (typeof uid === 'undefined') throw new Error('Invalid UID')
+    const res = await new DBService().query(
+      `UPDATE users SET emailTmp = ? WHERE id = ?`,
+      [email, typeof uid === 'string' ? getIntIDFromHash(uid) : uid]
+    )
+    return res.results.affectedRows
+  }
+
+  /**
+   * Confirm the current `emailTmp` of a user.
+   * @param uid The (unhashed) ID of the user
+   * @returns The number of affected DB rows
+   */
+  static async confirmTmpEmail(uid: ID) {
+    if (typeof uid === 'undefined') throw new Error('Invalid UID')
+    const { emailTmp } = await User.getFullUserById(uid)
+    const id = typeof uid === 'string' ? getIntIDFromHash(uid) : uid
+
+    if (emailTmp === null) throw new Error('Email is not to be confirmed.')
+
+    const res = await new DBService().query(
+      `UPDATE users SET email = ?, emailTmp = NULL WHERE id = ?`,
+      [emailTmp, id]
+    )
+    return res.results.affectedRows
+  }
+
+  /**
    * Update the password of a user.
    * @param uid User ID to update password for
    * @param password New password, unhashed
@@ -243,7 +277,7 @@ export default class User {
   static async updatePwd(uid: ID, password: string) {
     if (typeof uid === 'undefined') throw new Error('Invalid UID')
     const res = await new DBService().query(
-      `UPDATE products SET pwd = ? WHERE id = ?`,
+      `UPDATE users SET pwd = ? WHERE id = ?`,
       [
         User.hashPwd(password),
         typeof uid === 'string' ? getIntIDFromHash(uid) : uid,

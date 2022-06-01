@@ -85,13 +85,28 @@ router.put(
 
 /**
  * Update current User's email.
- *
- * TODO: Set the data flow, with the temp variable for storing the new email that is currently being validated?
  */
 router.put(
   '/email',
-  (req: express.Request, res: express.Response<{}, UserRecord>) => {
-    // TODO:
+  body('email').trim().isEmail(),
+  body('emailCtrl').trim().isEmail(),
+  async (req, res: express.Response<{}, UserRecord>) => {
+    const user = res.locals.user
+    if (typeof user === 'undefined')
+      return res.status(403).json({ error: 'User is not authenticated!' })
+    const { email, emailCtrl } = req.body
+    if (!email || !emailCtrl || email === emailCtrl)
+      return res.status(400).json({ error: 'The passwords must match!' })
+
+    try {
+      const affectedRows = await User.updateEmail(user.id, email)
+      return res.status(200).json({ msg: 'Update complete', affectedRows })
+    } catch (err) {
+      return res.status(400).json({
+        error: `If the User ID is correct, there is no confirmation of a new email address pending.`,
+        currentMail: user.email,
+      })
+    }
   }
 )
 
