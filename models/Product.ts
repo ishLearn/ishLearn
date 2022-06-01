@@ -245,17 +245,24 @@ export default class Product {
 
   /**
    * Find some products from the DB.
-   * @returns the 50 first products from the DB
+   * @returns the 20 first products from the DB
    */
-  static async getFirstProducts(loggedInUser?: User): Promise<Product[]> {
+  static async getFirstProducts(config: {
+    loggedInUser?: User
+    page?: number
+  }): Promise<Product[]> {
+    config.page = config.page || 0
+
     const query =
-      (typeof loggedInUser === 'undefined'
+      (typeof config.loggedInUser === 'undefined'
         ? Product.normalQuery
-        : loggedInUser.rank === 'student'
+        : config.loggedInUser.rank === 'student'
         ? Product.studentQuery
-        : loggedInUser.rank === 'admin'
+        : config.loggedInUser.rank === 'admin'
         ? Product.adminQuery
-        : Product.teachersQuery) + ' LIMIT 50'
+        : Product.teachersQuery) +
+      ' LIMIT 20 OFFSET ' +
+      config.page * 20
 
     console.log(query)
     const res = await new DBService().query(query, [
@@ -268,7 +275,7 @@ export default class Product {
         'products.updatedBy',
         'products.createdBy',
       ],
-      loggedInUser?.id,
+      config.loggedInUser?.id,
     ])
 
     const { results } = res
