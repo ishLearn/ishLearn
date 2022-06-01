@@ -1,7 +1,7 @@
 import { Ref } from 'vue'
 
-export type GenericInputData = {
-  value: Ref<string | boolean>
+export type GenericInputData<T> = {
+  value: Ref<T>
   type: string
   label: string
   id: string
@@ -10,6 +10,6 @@ export type GenericInputData = {
   placeholder: string
 }
 
-export type GenericInputs = {
-  [key: string]: GenericInputData
+export type GenericInputs<T> = {
+  [key: string]: GenericInputData<T>
 }

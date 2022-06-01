@@ -96,7 +96,7 @@ export default class RefreshToken {
    */
   static async findTokensByID(id: string) {
     const results = (
-      await new DBService().query(`SELECT * FROM refreshtokens where id = ?`, [
+      await new DBService().query(`SELECT * FROM refreshtokens where UID = ?`, [
         getIntIDFromHash(id),
       ])
     ).results

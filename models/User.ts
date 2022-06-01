@@ -95,11 +95,14 @@ export default class User {
     if (typeof fields === 'undefined')
       fields = [
         'id',
+        'password',
         'email',
         'rank',
         'emailTmp',
         'profilePicture',
         'profileText',
+        'firstName',
+        'lastName',
       ]
     const result = (
       await new DBService().query('SELECT ?? FROM users WHERE email = ?', [

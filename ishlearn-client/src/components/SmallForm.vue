@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { defineEmits, defineProps } from 'vue'
-import { GenericInputs } from '@/types/GenericInputData'
 import GenericInput from '@/components/GenericInput.vue'
 
 const props = defineProps(['title', 'inputs', 'submitMessage'])
@@ -14,7 +13,10 @@ const emit = defineEmits(['onSubmit'])
 
       <slot name="subtitle"></slot>
 
-      <form @submit="$emit('onSubmit', $event)" class="form-input-group">
+      <form
+        @submit.prevent="$emit('onSubmit', $event)"
+        class="form-input-group"
+      >
         <GenericInput
           v-for="input in props.inputs"
           :key="input.id"
@@ -22,7 +24,11 @@ const emit = defineEmits(['onSubmit'])
           :inputProps="input"
         />
 
-        <input type="submit" :value="props.submitMessage" class="btn btn-success" />
+        <input
+          type="submit"
+          :value="props.submitMessage"
+          class="btn btn-success"
+        />
       </form>
 
       <slot name="footer"></slot>
