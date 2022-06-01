@@ -4,7 +4,7 @@ import RefreshToken from '../models/RefreshToken'
 import User from '../models/User'
 import { UserRecord } from '../types/users'
 
-export default async (
+export const authMiddleware = async (
   req: Request,
   res: Response<{}, UserRecord>,
   next: NextFunction

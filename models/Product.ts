@@ -4,9 +4,13 @@ import DBService, {
   Visibility,
 } from '../services/DBService'
 
-import { ID } from '../types/ids'
 import { NumberLike } from 'hashids/cjs/util'
+import { ID } from '../types/ids'
+
+// User model import
 import User from './User'
+// RedisService import
+import { addProduct, searchProductById } from '../services/RedisService'
 
 /**
  * A Product is a unit of files, comments and other content and information.
@@ -106,6 +110,22 @@ export default class Product {
     fields: string[],
     loggedInUser?: User
   ): Promise<Product> {
+    const foundProduct = await searchProductById(
+      typeof idInput === 'string' ? idInput : getHashFromIntID(idInput)
+    )
+
+    let { ID } = foundProduct
+    if (
+      typeof ID !== 'undefined' &&
+      ID !== null &&
+      foundProduct.visibility === 'public'
+    ) {
+      if (typeof ID === 'number') ID = getHashFromIntID(ID)
+
+      // Resolve with redis hit
+      return Product.mapResultsToHash({ id: ID, ...foundProduct })
+    }
+
     const id = typeof idInput === 'string' ? getIntIDFromHash(idInput) : idInput
     const query =
       (typeof loggedInUser === 'undefined'
@@ -133,7 +153,7 @@ export default class Product {
     tags?: string[],
     queryString?: string,
     collaborators?: string[]
-  ): Promise<Product> {
+  ): Promise<Product[]> {
     const conditionQuery: string = queryString || ''
     const collaboratorNumberIds: NumberLike[] =
       collaborators?.map(v => getIntIDFromHash(v)) || []
@@ -179,9 +199,15 @@ export default class Product {
     if (cIdsExist) params.push(collaboratorNumberIds.length)
 
     // Send Query and return result
-    return (await new DBService().query(query, params)).results.map(
-      Product.mapResultsToHash
-    )
+    const results: Product[] = (
+      await new DBService().query(query, params)
+    ).results.map(Product.mapResultsToHash)
+
+    results.forEach(p => {
+      addProduct(p)
+    })
+
+    return results
   }
 
   /**
