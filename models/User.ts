@@ -268,6 +268,8 @@ export default class User {
     return res.results.affectedRows
   }
 
+  // TODO: Implement routes for email verification
+
   /**
    * Update the password of a user.
    * @param uid User ID to update password for
@@ -282,6 +284,21 @@ export default class User {
         User.hashPwd(password),
         typeof uid === 'string' ? getIntIDFromHash(uid) : uid,
       ]
+    )
+    return res.results.affectedRows
+  }
+
+  /**
+   * Update the birthday of a user.
+   * @param uid User ID to update birthday for
+   * @param birthday New birthday
+   * @returns The number of affected DB rows
+   */
+  static async updateBirthday(uid: ID, birthday: Date) {
+    if (typeof uid === 'undefined') throw new Error('Invalid UID')
+    const res = await new DBService().query(
+      `UPDATE users SET birthday = ? WHERE id = ?`,
+      [birthday, typeof uid === 'string' ? getIntIDFromHash(uid) : uid]
     )
     return res.results.affectedRows
   }
