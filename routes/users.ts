@@ -223,10 +223,14 @@ router.put(
  * Update the current profile picture
  */
 router.put('/profile/picture', (req, res: express.Response<{}, UserRecord>) => {
-  // TODO: Go over
-  // 1. S3,
-  // 2. new Media,
-  // 3. SET Users->profilePicture
+  const user = res.locals.user
+  if (typeof user === 'undefined' || typeof user.id === 'undefined')
+    return res.status(403).json({ error: 'User is not authenticated!' })
+  // TODO: Use picture instead of string, requires File Upload
+  const { picture } = req.body
+
+  const affectedRows = User.uploadProfilePictureThenSaveToDB(user.id, picture)
+  return res.status(200).json({ msg: 'Profile picture updated', affectedRows })
 })
 
 /**
@@ -234,10 +238,13 @@ router.put('/profile/picture', (req, res: express.Response<{}, UserRecord>) => {
  * Update the current profile picture
  */
 router.put('/profile/text', (req, res: express.Response<{}, UserRecord>) => {
-  // TODO: Go over
-  // 1. S3,
-  // 2. new Media,
-  // 3. SET Users->profileText
+  const user = res.locals.user
+  if (typeof user === 'undefined' || typeof user.id === 'undefined')
+    return res.status(403).json({ error: 'User is not authenticated!' })
+  const { text } = req.body
+
+  const affectedRows = User.uploadProfilePictureThenSaveToDB(user.id, text)
+  return res.status(200).json({ msg: 'Profile text updated', affectedRows })
 })
 
 export default router

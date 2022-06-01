@@ -1,7 +1,8 @@
-import { Router } from 'express'
+import express, { Router } from 'express'
 import fileUpload, { UploadedFile } from 'express-fileupload'
 
 import Media from '../../models/Media'
+import { UserRecord } from '../../types/users'
 
 const router: Router = Router()
 
@@ -9,7 +10,7 @@ router.use(fileUpload)
 
 // POST /api/files/upload/
 //
-router.post('/', (req, res) => {
+router.post('/', (req, res: express.Response<{}, UserRecord>) => {
   const { filename, projectId } = req.body
 
   if (
@@ -26,7 +27,10 @@ router.post('/', (req, res) => {
   const fileContent = Buffer.from(file.data) // 'binary' option not working?
 
   // res status and json done inside of upload
-  Media.uploadMedia(filename, projectId, fileContent, res)
+  Media.uploadMedia(filename, fileContent, {
+    res,
+    project: projectId,
+  })
 })
 
 export default router

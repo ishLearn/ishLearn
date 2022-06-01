@@ -7,6 +7,8 @@ import DBService, {
 import Logger from '../utils/Logger'
 
 import { ID } from '../types/ids'
+import Media from './Media'
+import { NumberLike } from 'hashids/cjs/util'
 
 const saltRounds = Number(process.env.SALT_ROUNDS) || 10
 
@@ -19,6 +21,19 @@ const saltRounds = Number(process.env.SALT_ROUNDS) || 10
  * @author Sebastian Thomas
  */
 export default class User {
+  static getProfilePictureFileName(uid: string) {
+    return `picture-${uid}.png`
+  }
+  static getProfilePictureFilePath(uid: string) {
+    return `profile/${User.getProfilePictureFileName(uid)}`
+  }
+  static getProfileTextFileName(uid: string) {
+    return `text-${uid}.md`
+  }
+  static getProfileTextFilePath(uid: string) {
+    return `profile/${User.getProfileTextFileName(uid)}`
+  }
+
   id: ID
   email: string
   emailTmp: string | null = null
@@ -306,5 +321,68 @@ export default class User {
       [birthday, typeof uid === 'string' ? getIntIDFromHash(uid) : uid]
     )
     return res.results.affectedRows
+  }
+
+  // PROFILE PICTURE / TEXT
+  /**
+   *
+   * @param uid UserID (hashed)
+   * @param text Text content for user description
+   */
+  static async uploadProfilePictureThenSaveToDB(uid: string, text: string) {
+    const filepath = User.getProfilePictureFilePath(uid)
+
+    const res = await Media.uploadMedia(filepath, Buffer.from(text), {
+      useNameAsPath: true,
+    })
+
+    if (typeof res === 'undefined' || !('worked' in res) || !res.worked)
+      throw new Error(`Could not upload comment to S3`)
+
+    const mId = await Media.saveToMediaOnly(
+      User.getProfilePictureFileName(uid),
+      filepath
+    )
+
+    return await User.saveProfilePicture(uid, mId)
+  }
+
+  static async saveProfilePicture(uid: string, mid: NumberLike) {
+    const mediaPartOfProduct = await new DBService().query(
+      `UPDATE users SET profilePicture = ? WHERE id = ?`,
+      [mid, getIntIDFromHash(uid)]
+    )
+    return mediaPartOfProduct.results.insertId as NumberLike
+  }
+
+  /**
+   *
+   * @param uid UserID (hashed)
+   * @param text Text content for user description
+   */
+  static async uploadProfileTextThenSaveToDB(uid: string, text: string) {
+    const filepath = User.getProfileTextFilePath(uid)
+
+    const res = await Media.uploadMedia(filepath, Buffer.from(text), {
+      useNameAsPath: true,
+    })
+
+    if (typeof res === 'undefined' || !('worked' in res) || !res.worked)
+      throw new Error(`Could not upload comment to S3`)
+
+    const mId = await Media.saveToMediaOnly(
+      User.getProfileTextFileName(uid),
+      filepath
+    )
+
+    return await User.saveProfileText(uid, mId)
+  }
+
+  static async saveProfileText(uid: string, mid: NumberLike) {
+    const mediaPartOfProduct = await new DBService().query(
+      `UPDATE users SET profileText = ? WHERE id = ?`,
+      [mid, getIntIDFromHash(uid)]
+    )
+    return mediaPartOfProduct.results.insertId as NumberLike
   }
 }

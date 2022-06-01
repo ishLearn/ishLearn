@@ -60,7 +60,9 @@ export default class Comments {
   ) {
     const filename = Comments.getCommentFileName(pid, uid)
 
-    const res = await Media.uploadMedia(filename, pid, Buffer.from(text))
+    const res = await Media.uploadMedia(filename, Buffer.from(text), {
+      project: pid,
+    })
 
     if (typeof res === 'undefined' || !('worked' in res) || !res.worked)
       throw new Error(`Could not upload comment to S3`)
