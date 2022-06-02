@@ -7,13 +7,19 @@ const router = express.Router()
 
 // GET / FIND PRODUCTS
 
-// GET /api/products/
+// GET /api/products/page/:page
 // Get a list of the first fifty products that have a visibility of 'public'
 // TODO: Setup pagination
 router.get(
-  '/',
-  async (_req: express.Request, res: express.Response<{}, UserRecord>) => {
-    return res.json(await Product.getFirstProducts(res.locals.user))
+  '/page/:page',
+  async (req: express.Request, res: express.Response<{}, UserRecord>) => {
+    const page = Number(req.params.page) || 0
+    return res.json(
+      await Product.getFirstProducts({
+        loggedInUser: res.locals.user,
+        page,
+      })
+    )
   }
 )
 
@@ -58,11 +64,17 @@ router.post(
   async (req: express.Request, res: express.Response<{}, UserRecord>) => {
     const { title, visibility, updatedBy, createdBy } = req.body
     const newP = new Product(title, visibility, updatedBy, createdBy)
-    const resultId = await newP.save(createdBy, req.body.users)
-    return res.json({
-      newP,
-      id: resultId,
-    })
+    try {
+      const resultId = await newP.save(createdBy, req.body.users)
+      return res.json({
+        newP,
+        id: resultId,
+      })
+    } catch (err) {
+      return res.status(400).json({
+        err: 'The product could not be saved. Are all fields filled out correctly?',
+      })
+    }
   }
 )
 
@@ -172,7 +184,7 @@ router.post('/:id/media', async (req, res) => {
   if (typeof add !== 'boolean')
     return res
       .status(400)
-      .json({ msg: 'Should the collaborator be added or removed?' })
+      .json({ msg: 'Should the media be added or removed?' })
 
   const result = (
     add

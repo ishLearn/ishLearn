@@ -4,9 +4,13 @@ import DBService, {
   Visibility,
 } from '../services/DBService'
 
-import { ID } from '../types/ids'
 import { NumberLike } from 'hashids/cjs/util'
+import { ID } from '../types/ids'
+
+// User model import
 import User from './User'
+// RedisService import
+import { addProduct, searchProductById } from '../services/RedisService'
 
 /**
  * A Product is a unit of files, comments and other content and information.
@@ -106,6 +110,22 @@ export default class Product {
     fields: string[],
     loggedInUser?: User
   ): Promise<Product> {
+    const foundProduct = await searchProductById(
+      typeof idInput === 'string' ? idInput : getHashFromIntID(idInput)
+    )
+
+    let { ID } = foundProduct
+    if (
+      typeof ID !== 'undefined' &&
+      ID !== null &&
+      foundProduct.visibility === 'public'
+    ) {
+      if (typeof ID === 'number') ID = getHashFromIntID(ID)
+
+      // Resolve with redis hit
+      return Product.mapResultsToHash({ id: ID, ...foundProduct })
+    }
+
     const id = typeof idInput === 'string' ? getIntIDFromHash(idInput) : idInput
     const query =
       (typeof loggedInUser === 'undefined'
@@ -133,7 +153,7 @@ export default class Product {
     tags?: string[],
     queryString?: string,
     collaborators?: string[]
-  ): Promise<Product> {
+  ): Promise<Product[]> {
     const conditionQuery: string = queryString || ''
     const collaboratorNumberIds: NumberLike[] =
       collaborators?.map(v => getIntIDFromHash(v)) || []
@@ -179,9 +199,15 @@ export default class Product {
     if (cIdsExist) params.push(collaboratorNumberIds.length)
 
     // Send Query and return result
-    return (await new DBService().query(query, params)).results.map(
-      Product.mapResultsToHash
-    )
+    const results: Product[] = (
+      await new DBService().query(query, params)
+    ).results.map(Product.mapResultsToHash)
+
+    results.forEach(p => {
+      addProduct(p)
+    })
+
+    return results
   }
 
   /**
@@ -219,17 +245,24 @@ export default class Product {
 
   /**
    * Find some products from the DB.
-   * @returns the 50 first products from the DB
+   * @returns the 20 first products from the DB
    */
-  static async getFirstProducts(loggedInUser?: User): Promise<Product[]> {
+  static async getFirstProducts(config: {
+    loggedInUser?: User
+    page?: number
+  }): Promise<Product[]> {
+    config.page = config.page || 0
+
     const query =
-      (typeof loggedInUser === 'undefined'
+      (typeof config.loggedInUser === 'undefined'
         ? Product.normalQuery
-        : loggedInUser.rank === 'student'
+        : config.loggedInUser.rank === 'student'
         ? Product.studentQuery
-        : loggedInUser.rank === 'admin'
+        : config.loggedInUser.rank === 'admin'
         ? Product.adminQuery
-        : Product.teachersQuery) + ' LIMIT 50'
+        : Product.teachersQuery) +
+      ' LIMIT 20 OFFSET ' +
+      config.page * 20
 
     console.log(query)
     const res = await new DBService().query(query, [
@@ -242,7 +275,7 @@ export default class Product {
         'products.updatedBy',
         'products.createdBy',
       ],
-      loggedInUser?.id,
+      config.loggedInUser?.id,
     ])
 
     const { results } = res
