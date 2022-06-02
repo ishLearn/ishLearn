@@ -3,8 +3,9 @@ import { ref } from 'vue'
 import AuthService from '@/services/auth.service'
 import { GenericInputs } from '@/types/GenericInputData'
 import SmallForm from '@/components/SmallForm.vue'
+import router from '@/router';
 
-const inputs: GenericInputs<string | boolean> = {
+const inputs: GenericInputs<string> = {
   firstName: {
     value: ref(''),
     type: 'text',
@@ -50,6 +51,8 @@ const inputs: GenericInputs<string | boolean> = {
     mandatory: true,
     placeholder: '',
   },
+}
+const isSchuelerInput: GenericInputs<boolean> = {
   isSchueler: {
     value: ref(true),
     type: 'checkbox',
@@ -64,12 +67,15 @@ const inputs: GenericInputs<string | boolean> = {
 const onSignup = async (e: Event) => {
   e.preventDefault()
 
-  console.log('Signup Pressed')
-  console.log(inputs.passwort.value)
-
   if (
     Object.keys(inputs).reduce((result, k) => {
       const input = inputs[k]
+      if (input.mandatory && !input.value.value) {
+        result = true
+      }
+      return result
+    }, false) || Object.keys(isSchuelerInput).reduce((result: boolean, k) => {
+      const input = isSchuelerInput[k]
       if (input.mandatory && !input.value.value) {
         result = true
       }
@@ -91,9 +97,9 @@ const onSignup = async (e: Event) => {
       lastName: inputs.lastName.value.value,
       email: inputs.email.value.value,
       password: inputs.passwort.value.value,
-      rank: inputs.isSchueler.value.value,
+      rank: isSchuelerInput.isSchueler.value.value,
     })
-    console.log('Register successful!')
+    router.push({ name: 'UserLogin' })
   } catch (err) {
     console.log('Error while Registering:')
     console.log(err)
@@ -105,7 +111,7 @@ const onSignup = async (e: Event) => {
   <div>
     <SmallForm
       :title="`Registrierung`"
-      :inputs="inputs"
+      :inputs="{ ...inputs, ...isSchuelerInput }"
       :submitMessage="'Account erstellen'"
       @onSubmit="onSignup"
     >

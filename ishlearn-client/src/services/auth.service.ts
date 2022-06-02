@@ -1,5 +1,12 @@
 import api from './api'
-import TokenService from './token.service'
+
+// Import types
+import { User } from '@/types/Users'
+import { RefreshToken } from '@/types/Tokens'
+
+// Setup store
+import useStore from '@/store/auth.module'
+const store = useStore()
 
 class AuthService {
   static async login({ email, password }: { email: string; password: string }) {
@@ -8,16 +15,25 @@ class AuthService {
         email,
         pwd: password,
       })
-      .then((response) => {
-        if (response.data.accessToken) {
-          TokenService.setUser(response.data)
-        }
-        return response.data
-      })
+      .then(
+        (response: {
+          data: {
+            refreshToken: RefreshToken
+            accessToken: string
+            userInfo: User
+            totalUserTokens: number
+          }
+        }) => {
+          if (response.data.accessToken) {
+            store.loginSuccessful(response.data)
+          }
+          return response.data
+        },
+      )
   }
 
   static logout() {
-    TokenService.removeUser()
+    store.removeUser()
   }
 
   static async register({
@@ -31,7 +47,7 @@ class AuthService {
     lastName: string
     email: string
     password: string
-    rank: string
+    rank: boolean
   }) {
     const r = rank ? 'student' : 'teacher'
     console.log(r)

@@ -1,29 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { storeToRefs } from 'pinia'
 import useUser from '@/store/auth.module'
-import useCounterStore from '@/store/counter'
 
-const store = useCounterStore()
-console.log('STore')
-console.log(store)
-console.log(store.count)
-store.count += 1
-console.log(store.count)
-
-console.log('Pinia USER')
 const user = useUser()
-console.log(user)
-console.log(user.state.status.loggedIn)
-
-// eslint-disable-next-line
-const { state, username, accessKey, refreshKey } = storeToRefs(user)
-
-console.log(state.value)
-
-console.log('USER!')
-console.log(state.value.user)
-console.log(user.state.user.userInfo.firstName)
 
 function toggleTheme() {
   const currentTheme = document.documentElement.getAttribute('data-theme')
@@ -46,17 +24,24 @@ function toggleTheme() {
     >
       <div class="" id="" style="display: flex">
         <!-- Brand -->
-        <router-link :to="{ name: 'Home' }" class="navbar-brand logo" id="definitely-white"
+        <router-link
+          :to="{ name: 'Home' }"
+          class="navbar-brand logo"
+          id="definitely-white"
           >ISH/learn</router-link
         >
 
         <!-- Navbar links -->
         <ul class="navbar-nav no-scrollbar">
           <li class="nav-item">
-            <router-link :to="{ name: 'About' }" class="nav-link">About</router-link>
+            <router-link :to="{ name: 'About' }" class="nav-link"
+              >About</router-link
+            >
           </li>
           <li class="nav-item">
-            <router-link :to="{ name: 'AllProjects' }" class="nav-link">Projekte</router-link>
+            <router-link :to="{ name: 'AllProjects' }" class="nav-link"
+              >Projekte</router-link
+            >
           </li>
         </ul>
       </div>
@@ -64,13 +49,19 @@ function toggleTheme() {
       <div style="margin-right: 1rem">
         <ul class="navbar-nav no-scrollbar">
           <li class="nav-item">
-            <router-link :to="{ name: 'UserSignup' }" class="nav-link">Registrierung</router-link>
+            <router-link :to="{ name: 'UserSignup' }" class="nav-link"
+              >Registrierung</router-link
+            >
             <!-- <router-link :to="{ name: 'UserDetail', params: { id: 0 } }" class="nav-link"
               >Sign Up</router-link
             > -->
           </li>
           <li class="nav-item">
-            <button id="theme-toggle" class="nav-colors bigger" @click="toggleTheme">
+            <button
+              id="theme-toggle"
+              class="nav-colors bigger"
+              @click="toggleTheme"
+            >
               <span class="d-block-light d-none">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"

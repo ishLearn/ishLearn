@@ -3,8 +3,9 @@ import { ref } from 'vue'
 import AuthService from '@/services/auth.service'
 import { GenericInputs } from '@/types/GenericInputData'
 import SmallForm from '@/components/SmallForm.vue'
+import router from '@/router';
 
-const inputs: GenericInputs = {
+const inputs: GenericInputs<string> = {
   email: {
     value: ref(''),
     type: 'text',
@@ -25,7 +26,7 @@ const inputs: GenericInputs = {
   },
 }
 
-const onSignup = (e) => {
+const onSignup = async (e: Event) => {
   e.preventDefault()
 
   console.log('Signup Pressed')
@@ -48,17 +49,24 @@ const onSignup = (e) => {
   console.log('Send Data to /api/auth/')
   console.log(`email: ${inputs.email.value.value}`)
   console.log(`pwd: ${inputs.passwort.value.value}`)
-  AuthService.login({
+  console.log('Login tried!')
+  const response = await AuthService.login({
     email: inputs.email.value.value,
     password: inputs.passwort.value.value,
   })
-  console.log('Login tried!')
+
+  router.push({ name: 'Home' })
 }
 </script>
 
 <template>
   <div>
-    <SmallForm :title="`Login`" :inputs="inputs" :submitMessage="'Einloggen'" @onSubmit="onSignup">
+    <SmallForm
+      :title="`Login`"
+      :inputs="inputs"
+      :submitMessage="'Einloggen'"
+      @onSubmit="onSignup"
+    >
       <template #subtitle>
         <p>Melde dich hier an!</p>
       </template>
