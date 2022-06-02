@@ -15,7 +15,7 @@ const allProjects = ref([])
 */
 onMounted(() => {
   console.log('Getting projects using the api service')
-  api.get('/products/').then((res) => {
+  api.get('/products/page/0').then((res) => {
     console.log(res)
     allProjects.value = res.data
   })

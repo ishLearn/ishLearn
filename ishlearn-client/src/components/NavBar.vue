@@ -1,5 +1,29 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { storeToRefs } from 'pinia'
+import useUser from '@/store/auth.module'
+import useCounterStore from '@/store/counter'
+
+const store = useCounterStore()
+console.log('STore')
+console.log(store)
+console.log(store.count)
+store.count += 1
+console.log(store.count)
+
+console.log('Pinia USER')
+const user = useUser()
+console.log(user)
+console.log(user.state.status.loggedIn)
+
+// eslint-disable-next-line
+const { state, username, accessKey, refreshKey } = storeToRefs(user)
+
+console.log(state.value)
+
+console.log('USER!')
+console.log(state.value.user)
+console.log(user.state.user.userInfo.firstName)
 
 function toggleTheme() {
   const currentTheme = document.documentElement.getAttribute('data-theme')
