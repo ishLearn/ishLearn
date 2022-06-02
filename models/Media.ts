@@ -129,8 +129,6 @@ export default class Media {
     let client: socket.Socket | undefined = undefined
 
     upload.on('httpUploadProgress', stream => {
-      console.log('Uploaded more data ' + stream.Key + '; ID: ' + newUploadId)
-
       if (typeof client === 'undefined') {
         client = Media.uploads.get(newUploadId)?.c
       }
@@ -162,16 +160,10 @@ export default class Media {
 
     // Wait for upload to finish and then emit finish event to socket, if present
     upload.done().then(async () => {
-      console.log(
-        'Inserting product into DB after file upload to S3 is complete'
-      )
       const newId = await Media.save(
         fileName,
         filePathName,
         config?.project || ''
-      )
-      console.log(
-        'Upload and insert into DB complete for Media: ' + chalk.bgGreen(newId)
       )
 
       try {
@@ -255,7 +247,6 @@ export default class Media {
 
       let chunkId = 0
       stream.on('data', chunk => {
-        console.log('Sending chunk: ' + chunkId)
         res.write(chunk)
         chunkId++
       })

@@ -1,5 +1,8 @@
 import { NumberLike } from 'hashids/cjs/util'
 import { v4 as uuid } from 'uuid'
+
+import moment from 'moment'
+
 import DBService, {
   getHashFromIntID,
   getIntIDFromHash,
@@ -35,7 +38,13 @@ export default class RefreshToken {
   async save() {
     const res = await new DBService().query(
       `INSERT INTO refreshtokens (token, UID, expiryDate) VALUES (?)`,
-      [[this.token, getIntIDFromHash(this.userId), this.expiryDate]]
+      [
+        [
+          this.token,
+          getIntIDFromHash(this.userId),
+          moment(this.expiryDate).format('YYYY-MM-DD HH:mm:ss'),
+        ],
+      ]
     )
 
     return res.results[0]

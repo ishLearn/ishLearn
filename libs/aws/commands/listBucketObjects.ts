@@ -76,11 +76,6 @@ export const listBucketObjectsPagination = async (
       totalFiles.push(...newFilesWithKey)
     }
     return totalFiles
-
-    // Old code for retrieving objects; only lists the first 1000 items (therefore, the code above uses the pagination function)
-    // const data = await s3Client.send(new ListObjectsCommand(bucketParams))
-    // console.log('Success', data)
-    // return data
   } catch (err) {
     new Logger().error(
       'AWS S3 Client',
