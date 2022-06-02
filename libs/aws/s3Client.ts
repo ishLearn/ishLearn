@@ -14,7 +14,4 @@ const s3Client = new S3Client({
   },
 })
 
-// Print region on creation
-// console.log(await s3Client.config.region())
-
 export { s3Client }

@@ -7,6 +7,8 @@ import chalk from 'chalk'
 import { formatDate, formatTime } from './formatting'
 import { Socket } from 'socket.io'
 
+import { UserRecord } from '../types/users'
+
 /**
  * @author @SebastianThomas
  */
@@ -35,7 +37,7 @@ export default class Logger {
    * @param _res The response object (unused)
    * @param {NextFunction} next The next middleware-function to be called after logging
    */
-  request(req: Request, _res: Response, next: NextFunction) {
+  request(req: Request, _res: Response<{}, UserRecord>, next: NextFunction) {
     const now = new Date()
     console.log(
       chalk.blue(formatDate('/', now) + ' ' + formatTime(':', now) + ': ') +
@@ -43,7 +45,7 @@ export default class Logger {
         ' ' +
         chalk.green(req.path) +
         '; LoggedIn: ' +
-        _res.locals.user?.id || false
+        _res.locals.user?.id || 'NO'
     )
 
     next()
@@ -74,8 +76,7 @@ export default class Logger {
         chalk.red(task) +
         ': ' +
         chalk.blue(category) +
-        ' \n' +
-        directInfo
+        (typeof directInfo !== 'undefined' ? ' \n' + directInfo : '')
     )
   }
 

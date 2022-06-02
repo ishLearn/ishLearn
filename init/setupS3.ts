@@ -15,7 +15,11 @@ export const setupResetS3 = async () => {
         })
     )
   } catch (err) {
-    console.log('S3 Buckets not found; so nothing to reset')
+    new Logger().error(
+      'S3 Reset',
+      'S3 Buckets not found; so nothing to reset',
+      err
+    )
   }
   new Logger().s3setup('Removed following S3 bucket(s): ' + buckets.join(', '))
 

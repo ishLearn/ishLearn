@@ -264,7 +264,6 @@ export default class Product {
       ' LIMIT 20 OFFSET ' +
       config.page * 20
 
-    console.log(query)
     const res = await new DBService().query(query, [
       [
         'products.ID',
