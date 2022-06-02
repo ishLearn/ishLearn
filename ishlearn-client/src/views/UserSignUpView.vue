@@ -4,13 +4,22 @@ import AuthService from '@/services/auth.service'
 import { GenericInputs } from '@/types/GenericInputData'
 import SmallForm from '@/components/SmallForm.vue'
 
-const inputs: GenericInputs = {
-  username: {
+const inputs: GenericInputs<string | boolean> = {
+  firstName: {
     value: ref(''),
     type: 'text',
-    label: 'Dein Benutzername',
-    id: 'username',
-    name: 'Username',
+    label: 'Dein Vorname',
+    id: 'firstName',
+    name: 'FirstName',
+    mandatory: true,
+    placeholder: '',
+  },
+  lastName: {
+    value: ref(''),
+    type: 'text',
+    label: 'Dein Nachname',
+    id: 'lastName',
+    name: 'LastName',
     mandatory: true,
     placeholder: '',
   },
@@ -52,11 +61,10 @@ const inputs: GenericInputs = {
   },
 }
 
-const onSignup = (e) => {
+const onSignup = async (e: Event) => {
   e.preventDefault()
 
   console.log('Signup Pressed')
-  console.log(inputs.username)
   console.log(inputs.passwort.value)
 
   if (
@@ -77,15 +85,19 @@ const onSignup = (e) => {
     return
   }
 
-  console.log('Send Data to /api/auth/')
-  console.log(`username: ${inputs.username.value.value}`)
-  console.log(`password: ${inputs.passwort.value.value}`)
-  AuthService.register({
-    username: inputs.username.value.value,
-    email: inputs.email.value.value,
-    password: inputs.passwort.value.value,
-  })
-  console.log('Register successful!')
+  try {
+    await AuthService.register({
+      firstName: inputs.firstName.value.value,
+      lastName: inputs.lastName.value.value,
+      email: inputs.email.value.value,
+      password: inputs.passwort.value.value,
+      rank: inputs.isSchueler.value.value,
+    })
+    console.log('Register successful!')
+  } catch (err) {
+    console.log('Error while Registering:')
+    console.log(err)
+  }
 }
 </script>
 

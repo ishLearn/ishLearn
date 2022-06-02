@@ -6,7 +6,7 @@ class AuthService {
     return api
       .post('/auth/signin', {
         email,
-        password,
+        pwd: password,
       })
       .then((response) => {
         if (response.data.accessToken) {
@@ -21,18 +21,26 @@ class AuthService {
   }
 
   static async register({
-    username,
+    firstName,
+    lastName,
     email,
     password,
+    rank,
   }: {
-    username: string
+    firstName: string
+    lastName: string
     email: string
     password: string
+    rank: string
   }) {
-    return api.post('/auth/signup/', {
-      username,
+    const r = rank ? 'student' : 'teacher'
+    console.log(r)
+    return api.post('/users/', {
+      firstName,
+      lastName,
       email,
       password,
+      rank: r,
     })
   }
 }

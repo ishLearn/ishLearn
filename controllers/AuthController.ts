@@ -87,9 +87,10 @@ export const refreshAccessToken = async (reqToken: string) => {
  */
 const genAccessToken = (userId: string) => {
   const accessTokenJWTSecret = process.env.ACCESS_TOKEN_JWT_SECRET || ''
-  const expiresInAccessToken = process.env.EXPIRES_IN_ACCESS_TOKEN || 60
+  const expiresInAccessToken =
+    Number(process.env.EXPIRES_IN_ACCESS_TOKEN) || 60 * 60 * 1000
 
-  return jwt.sign(userId, accessTokenJWTSecret, {
+  return jwt.sign({ id: userId }, accessTokenJWTSecret, {
     expiresIn: expiresInAccessToken,
   })
 }
