@@ -50,11 +50,10 @@ const onSignup = async (e: Event) => {
   console.log(`email: ${inputs.email.value.value}`)
   console.log(`pwd: ${inputs.passwort.value.value}`)
   console.log('Login tried!')
-  const response = await AuthService.login({
+  await AuthService.login({
     email: inputs.email.value.value,
     password: inputs.passwort.value.value,
   })
-
   router.push({ name: 'Home' })
 }
 </script>

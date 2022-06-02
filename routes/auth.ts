@@ -80,6 +80,7 @@ router.post(
 
     // Token in locals is from `req.body`
     const token = res.locals.refreshToken
+
     if (typeof token !== 'string')
       return res.status(401).json({
         error:
@@ -87,10 +88,7 @@ router.post(
       })
 
     const newToken = await refreshAccessToken(token)
-    return res.status(200).json({
-      refreshToken: token,
-      accessToken: newToken,
-    })
+    return res.status(200).json(newToken)
   }
 )
 

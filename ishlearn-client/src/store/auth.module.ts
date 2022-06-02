@@ -26,7 +26,12 @@ const useUser = defineStore('user', {
   },
   actions: {
     async initUser() {
-      const refreshToken: RefreshToken = JSON.parse(localStorage.getItem('refreshToken') as string)
+      const item = localStorage.getItem('refreshToken')
+      if (item == null) {
+        this.status.loggedIn = false
+        return
+      }
+      const refreshToken: RefreshToken = JSON.parse(item)
 
       if (refreshToken.token == null) this.status.loggedIn = false
       else {
@@ -43,17 +48,18 @@ const useUser = defineStore('user', {
 
         // Get new accessToken
         const result = (
-          await api.post('/refresh', {
+          await api.post('/auth/refresh', {
             refreshToken: refreshToken.token,
           })
         ).data
 
         // Set refresh and accessToken
-        this.refreshKey = result.refreshToken
+        this.refreshKey = result.tokenObject
         this.accessKey = result.accessToken
 
         // Get User info
-        this.user = (await api.get('/users')).data.user
+        const data = (await api.get('/users')).data
+        this.user = data.user
 
         // Set logged in status
         this.status.loggedIn = true
@@ -63,9 +69,12 @@ const useUser = defineStore('user', {
       }
     },
     loginSuccessful(data: { accessToken: string; refreshToken: RefreshToken; userInfo: User }) {
+      this.status.loggedIn = true
       this.accessKey = data.accessToken
       this.refreshKey = data.refreshToken
       this.user = data.userInfo
+
+      localStorage.setItem('refreshToken', JSON.stringify(data.refreshToken))
     },
     removeUser() {
       localStorage.removeItem('refreshToken')

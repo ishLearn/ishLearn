@@ -8,7 +8,7 @@ const setup = () => {
   axiosInstance.interceptors.request.use(
     (config) => {
       const token = store.localAccessToken
-      if (typeof token !== 'undefined' && token) {
+      if (typeof token !== 'undefined' && token.length > 0) {
         config.headers = config.headers || {}
         config.headers.Authorization = `Bearer ${token}`
       }

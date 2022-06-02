@@ -45,7 +45,7 @@ export default class Logger {
         ' ' +
         chalk.green(req.path) +
         '; LoggedIn: ' +
-        _res.locals.user?.id || 'NO'
+        _res.locals.user?.id
     )
 
     next()

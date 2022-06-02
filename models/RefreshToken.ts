@@ -57,7 +57,7 @@ export default class RefreshToken {
    */
   static createToken(user: { id: string }) {
     const expiresInRefreshToken: number =
-      Number(process.env.EXPIRES_IN_REFRESH_TOKEN) || 120
+      Number(process.env.EXPIRES_IN_REFRESH_TOKEN) || 60 * 60 * 24
 
     const expiredAt = new Date()
     expiredAt.setSeconds(expiredAt.getSeconds() + expiresInRefreshToken)

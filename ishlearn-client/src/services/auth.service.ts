@@ -10,26 +10,22 @@ const store = useStore()
 
 class AuthService {
   static async login({ email, password }: { email: string; password: string }) {
-    return api
-      .post('/auth/signin', {
+    const response: {
+      refreshToken: RefreshToken
+      accessToken: string
+      userInfo: User
+      totalUserTokens: number
+    } = (
+      await api.post('/auth/signin', {
         email,
         pwd: password,
       })
-      .then(
-        (response: {
-          data: {
-            refreshToken: RefreshToken
-            accessToken: string
-            userInfo: User
-            totalUserTokens: number
-          }
-        }) => {
-          if (response.data.accessToken) {
-            store.loginSuccessful(response.data)
-          }
-          return response.data
-        },
-      )
+    ).data
+    if (typeof response.accessToken !== 'undefined') {
+      store.loginSuccessful(response)
+    }
+
+    return response
   }
 
   static logout() {
@@ -50,7 +46,6 @@ class AuthService {
     rank: boolean
   }) {
     const r = rank ? 'student' : 'teacher'
-    console.log(r)
     return api.post('/users/', {
       firstName,
       lastName,
