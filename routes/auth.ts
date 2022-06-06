@@ -1,5 +1,8 @@
 import express from 'express'
 import { body, validationResult } from 'express-validator'
+
+import { validateResult } from './users'
+
 import {
   performSignin,
   refreshAccessToken,
@@ -29,13 +32,9 @@ const router = express.Router()
 router.post(
   '/signin',
   body('email').isEmail(),
-  body('pwd').isLength({ min: 1 }),
+  body('pwd').isLength({ min: 8 }),
+  validateResult,
   async (req: express.Request, res: express.Response<{}, UserRecord>) => {
-    const errors = validationResult(req)
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() })
-    }
-
     const { email, pwd } = req.body
 
     try {
@@ -73,11 +72,8 @@ router.post(
 // Acquire a new access token using a refresh token.
 router.post(
   '/refresh',
-  async (req: express.Request, res: express.Response<{}, UserRecord>) => {
-    const errors = validationResult(req)
-    if (!errors.isEmpty())
-      return res.status(400).json({ error: errors.array() })
-
+  validateResult,
+  async (_req: express.Request, res: express.Response<{}, UserRecord>) => {
     // Token in locals is from `req.body`
     const token = res.locals.refreshToken
 
@@ -96,11 +92,8 @@ router.post(
 // Sign out a user (remove refresh token from DB)
 router.post(
   '/signout',
-  async (req: express.Request, res: express.Response<{}, UserRecord>) => {
-    const errors = validationResult(req)
-    if (!errors.isEmpty())
-      return res.status(400).json({ error: errors.array() })
-
+  validateResult,
+  async (_req: express.Request, res: express.Response<{}, UserRecord>) => {
     const token = res.locals.refreshToken
 
     if (typeof token !== 'string')

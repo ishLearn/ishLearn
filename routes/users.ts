@@ -41,8 +41,8 @@ router.post(
   body('rank').trim().isLength({ min: 5, max: 7 }),
   body('firstName').trim().isLength({ min: 1 }),
   body('lastName').trim().isLength({ min: 1 }),
-  validateResult,
   body('birthday').isDate(),
+  validateResult,
   async (req: express.Request, res: express.Response<{}, UserRecord>) => {
     const { email, password, rank, firstName, lastName, birthday } = req.body
 
@@ -237,14 +237,18 @@ router.put('/profile/picture', (req, res: express.Response<{}, UserRecord>) => {
  * PUT /api/users/profile/text
  * Update the current profile picture
  */
-router.put('/profile/text', (req, res: express.Response<{}, UserRecord>) => {
-  const user = res.locals.user
-  if (typeof user === 'undefined' || typeof user.id === 'undefined')
-    return res.status(403).json({ error: 'User is not authenticated!' })
-  const { text } = req.body
+router.put(
+  '/profile/text',
+  body('text').trim(),
+  (req, res: express.Response<{}, UserRecord>) => {
+    const user = res.locals.user
+    if (typeof user === 'undefined' || typeof user.id === 'undefined')
+      return res.status(403).json({ error: 'User is not authenticated!' })
+    const { text } = req.body
 
-  const affectedRows = User.uploadProfilePictureThenSaveToDB(user.id, text)
-  return res.status(200).json({ msg: 'Profile text updated', affectedRows })
-})
+    const affectedRows = User.uploadProfilePictureThenSaveToDB(user.id, text)
+    return res.status(200).json({ msg: 'Profile text updated', affectedRows })
+  }
+)
 
 export default router
