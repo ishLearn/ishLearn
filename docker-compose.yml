@@ -1,0 +1,24 @@
+services:
+  web-client:
+    build: ./ishlearn-client
+  web-server:
+    build: .
+    restart: unless-stopped
+    ports:
+      - '80:80' # Map local PORT 80 to docker port 80
+    environment: # Configure ENV
+      PORT: 80
+      REDIS_URL: 'redis:6379'
+    depends_on:
+      - redis
+      - s3server
+  redis:
+    image: redislabs/redismod:preview
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+  s3server:
+    image: scality/s3server
+    restart: unless-stopped
+    ports:
+      - '8000:8000'

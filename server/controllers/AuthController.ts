@@ -16,32 +16,37 @@ import Logger from '../utils/Logger'
  * @throws Error with param `statusCode = 403` if user does not exists (username not found) or the password is incorrect
  */
 export const performSignin = async (email: string, password: string) => {
-  const user = await User.findByEmail(email)
-  if (typeof user === 'undefined' || typeof user.id === 'undefined') {
-    const err: any = new Error(`Password or username is wrong!`)
-    err.statusCode = '403'
-    throw err
-  }
+  try {
+    const user = await User.findByEmail(email)
 
-  if (!(await User.comparePwd(password, user.password))) {
-    const err: any = new Error(`Password or username is wrong!`)
-    err.statusCode = '403'
-    throw err
-  }
+    if (typeof user === 'undefined' || typeof user.id === 'undefined') {
+      const err: any = new Error(`Password or username is wrong!`)
+      err.statusCode = '403'
+      throw err
+    }
 
-  const accessToken = genAccessToken(user.id)
-  const refreshToken = RefreshToken.createToken({ id: user.id })
+    if (!(await User.comparePwd(password, user.password))) {
+      throw new Error('Pwd')
+    }
 
-  await refreshToken.save()
+    const accessToken = genAccessToken(user.id)
+    const refreshToken = RefreshToken.createToken({ id: user.id })
 
-  const normalData = user.getNormalData()
-  return {
-    refreshToken,
-    accessToken,
-    userInfo: {
-      ...normalData,
-      emailTmp: user.emailTmp,
-    },
+    await refreshToken.save()
+
+    const normalData = user.getNormalData()
+    return {
+      refreshToken,
+      accessToken,
+      userInfo: {
+        ...normalData,
+        emailTmp: user.emailTmp,
+      },
+    }
+  } catch (err) {
+    const error: any = new Error(`Password or username is wrong!`)
+    error.statusCode = '404'
+    throw error
   }
 }
 
