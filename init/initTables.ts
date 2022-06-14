@@ -1,8 +1,7 @@
 import dotenv from 'dotenv'
 dotenv.config()
 
-import DBService, { createDefaultTables } from '../services/DBService'
-
+import DBService, { createDefaultTables } from '../server/services/DBService'
 ;(async () => {
   await new DBService().ping(await new DBService().getConnection())
   const result = await createDefaultTables()

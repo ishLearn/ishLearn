@@ -2,11 +2,11 @@
   "name": "ishlearn",
   "version": "0.0.1",
   "description": "This contains the code to the web-DB project.",
-  "main": "index.js",
+  "main": "server/index.js",
   "scripts": {
-    "start": "echo 'Not working yet!' node index.ts",
-    "dev": "nodemon index.ts --ignore ishlearn-client",
-    "build": "tsc index.ts ./dist",
+    "start": "echo 'Not working yet!' node server/index.ts",
+    "dev": "nodemon server/index.ts --ignore ishlearn-client",
+    "build": "echo 'Not working yet!' tsc server/index.ts ./dist",
     "test": "jest",
     "initt": "nodemon init/initTables.ts",
     "setups3": "sh init/initDockerS3 && node setups3.ts"

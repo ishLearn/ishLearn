@@ -60,7 +60,7 @@ router.post(
     } catch (err: any) {
       new Logger().error(
         'Sign In',
-        'General route handler after body validation.',
+        'General route handler after body validation',
         err
       )
       res.status(err.statusCode || 400).json({ error: err.message })
