@@ -8,13 +8,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import useAuthStore from '@/store/auth.module'
-const store = useAuthStore()
-
-if (!store.status.loggedIn) store.initUser().then(() => console.log('Now logged in: ' + store.status.loggedIn))
-console.log(store.status.loggedIn)
-</script>
+<script setup lang="ts"></script>
 
 <style scoped>
 .one {

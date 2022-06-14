@@ -42,6 +42,11 @@ const routes: Array<RouteRecordRaw> = [
     name: 'UserLogin',
     component: () => import('../views/UserLoginView.vue'),
   },
+  {
+    path: '/user/:id',
+    name: 'UserDetail',
+    component: () => import('../views/UserProfileView.vue'),
+  },
 ]
 
 const router = createRouter({
