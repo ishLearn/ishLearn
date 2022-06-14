@@ -1,5 +1,8 @@
 import express from 'express'
-import { body, validationResult } from 'express-validator'
+import { body } from 'express-validator'
+
+import { validateResult } from './users'
+
 import Product from '../models/Product'
 import { UserRecord } from '../types/users'
 
@@ -61,6 +64,11 @@ router.post(
 // Insert a new Product into the database, returns the given product information and the new product's id.
 router.post(
   '/',
+  body('title').trim().isLength({ min: 3 }),
+  body('visibility').trim().isLength({ min: 5 }),
+  body('updatedBy').isDate(),
+  body('createdBy').isDate(),
+  validateResult,
   async (req: express.Request, res: express.Response<{}, UserRecord>) => {
     const { title, visibility, updatedBy, createdBy } = req.body
     const newP = new Product(title, visibility, updatedBy, createdBy)
@@ -84,6 +92,8 @@ router.post(
 // Add or remove a new collaborator to or from the database belonging to one project, in the `uploadBy`-table. Does not update the project's `createdBy`-field.
 router.put(
   '/collaborator/:pid',
+  body('newCollaboratorId').trim().isLength({ min: 6 }),
+  validateResult,
   async (req: express.Request, res: express.Response<{}, UserRecord>) => {
     const {
       newCollaboratorId,
@@ -106,96 +116,124 @@ router.put(
 
 // PUT /api/products/:pid/
 // Update a product's (id in param) title and/or visibility
-router.put('/:pid', async (req, res) => {
-  const productId = req.params.pid
+router.put(
+  '/:pid',
+  body('collaborator').trim().isLength({ min: 6 }),
+  validateResult,
+  async (
+    req: express.Request<{ pid: string }>,
+    res: express.Response<{}, UserRecord>
+  ) => {
+    const productId = req.params.pid
 
-  const {
-    collaborator,
-    fieldsToUpdate,
-  }: {
-    collaborator: string
-    fieldsToUpdate: {
-      title?: string
-      visibility?: string
-    }
-  } = req.body
+    const {
+      collaborator,
+      fieldsToUpdate,
+    }: {
+      collaborator: string
+      fieldsToUpdate: {
+        title?: string
+        visibility?: string
+      }
+    } = req.body
 
-  try {
-    const result: any = (
-      await Product.update(productId, collaborator, fieldsToUpdate)
-    ).results
+    try {
+      const result: any = (
+        await Product.update(productId, collaborator, fieldsToUpdate)
+      ).results
 
-    return res.status(200).json({
-      success: true,
-      productId,
-      affectedRows: result.affectedRows, // result.affectedRows
-    })
-  } catch (err: any) {
-    if ('Visibility is not valid' === err.message)
-      return res.status(400).json({
-        msg: 'Benutzer hat keine valide Sichtbarkeit ausgewählt.',
+      return res.status(200).json({
+        success: true,
+        productId,
+        affectedRows: result.affectedRows, // result.affectedRows
       })
-    return res.status(403).json({
-      msg: 'Benutzer hat keinen schreibenden Zugriff auf dieses Produkt.',
-    })
+    } catch (err: any) {
+      if ('Visibility is not valid' === err.message)
+        return res.status(400).json({
+          msg: 'Benutzer hat keine valide Sichtbarkeit ausgewählt.',
+        })
+      return res.status(403).json({
+        msg: 'Benutzer hat keinen schreibenden Zugriff auf dieses Produkt.',
+      })
+    }
   }
-})
+)
 
 // ADD / REMOVE TAGS
 
 // PUT /api/products/:id/tags
-router.put('/:id/tags', async (req, res) => {
-  const {
-    tags,
-    collaboratorId,
-    add,
-  }: { tags: string[]; collaboratorId: string; add: boolean } = req.body
-  const productId: string = req.params.id
+router.put(
+  '/:id/tags',
+  body('tags').isArray(),
+  body('collaboratorId').trim().isLength({ min: 6 }),
+  body('add').isBoolean(),
+  validateResult,
+  async (
+    req: express.Request<{ id: string }>,
+    res: express.Response<{}, UserRecord>
+  ) => {
+    const {
+      tags,
+      collaboratorId,
+      add,
+    }: { tags: string[]; collaboratorId: string; add: boolean } = req.body
+    const productId: string = req.params.id
 
-  if (typeof add !== 'boolean')
-    return res
-      .status(400)
-      .json({ msg: 'Should the collaborator be added or removed?' })
+    if (typeof add !== 'boolean')
+      return res
+        .status(400)
+        .json({ msg: 'Should the collaborator be added or removed?' })
 
-  await Product.updateTags(productId, collaboratorId, tags, add)
-  return res.status(200).json({
-    success: true,
-    productId,
-  })
-})
+    await Product.updateTags(productId, collaboratorId, tags, add)
+    return res.status(200).json({
+      success: true,
+      productId,
+    })
+  }
+)
 
 // ADD / REMOVE MEDIA
 
 // POST /api/products/:id/media
 // Should this route be exposed
 // Add a new media to product (id as param)
-router.post('/:id/media', async (req, res) => {
-  const productId: string = req.params.id
-  const {
-    collaboratorId,
-    mediaId,
-    add,
-  }: { collaboratorId: string; mediaId: string; add: boolean } = req.body
-  if (add)
-    return res.status(400).json({
-      msg: 'Cannot blindly add media, will automatically be linked with product when upload is successful.',
+router.post(
+  '/:id/media',
+  body('collaboratorId').trim().isLength({ min: 6 }),
+  body('mediaId').trim().isLength({ min: 6 }),
+  body('add').isBoolean(),
+  validateResult,
+  async (
+    req: express.Request<{ id: string }>,
+    res: express.Response<{}, UserRecord>
+  ) => {
+    const productId: string = req.params.id
+    const {
+      collaboratorId,
+      mediaId,
+      add,
+    }: { collaboratorId: string; mediaId: string; add: boolean } = req.body
+    if (add)
+      return res.status(400).json({
+        msg: 'Cannot blindly add media, will automatically be linked with product when upload is successful.',
+      })
+
+    if (typeof add !== 'boolean')
+      return res
+        .status(400)
+        .json({ msg: 'Should the media be added or removed?' })
+
+    const result = (
+      add
+        ? await Product.addMedia(productId, collaboratorId, mediaId)
+        : await Product.removeMedia(productId, collaboratorId, mediaId)
+    )[0]?.results
+    return res.status(200).json({
+      success: true,
+      productId,
+      affectedRows: result?.affectedRows,
     })
-
-  if (typeof add !== 'boolean')
-    return res
-      .status(400)
-      .json({ msg: 'Should the media be added or removed?' })
-
-  const result = (
-    add
-      ? await Product.addMedia(productId, collaboratorId, mediaId)
-      : await Product.removeMedia(productId, collaboratorId, mediaId)
-  )[0]?.results
-  return res.status(200).json({
-    success: true,
-    productId,
-    affectedRows: result?.affectedRows,
-  })
-})
+  }
+)
 
 export default router
