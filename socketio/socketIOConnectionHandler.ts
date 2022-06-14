@@ -31,8 +31,10 @@ addSocketEventHandler('disconnect', socket => {
   })
   if (worked) new Logger().socketDisconnect(socket)
   else
-    console.log(
-      `The socket with ID ${socket.id} successfully disconnected but was not removed from activeSockets-Map.`
+    new Logger().error(
+      'S3 disconnect',
+      `The socket with ID ${socket.id} successfully disconnected but was not removed from activeSockets-Map.`,
+      'DELETE from map did not work'
     )
 })
 
@@ -44,7 +46,6 @@ addSocketEventHandler('uploadStart', (socket, { id }: { id: string }) => {
       u: current,
       c: socket,
     })
-    console.log('Set client listening socket to uploadStart')
   }
 })
 

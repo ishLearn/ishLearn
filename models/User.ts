@@ -91,12 +91,24 @@ export default class User {
     fields: string[]
   ): Promise<User> {
     const id = typeof idInput === 'string' ? getIntIDFromHash(idInput) : idInput
-    return (
+    const gotUser = (
       await new DBService().query('SELECT ?? FROM users WHERE id = ?', [
         fields,
         id,
       ])
     ).results[0]
+
+    return new User(
+      gotUser.email,
+      gotUser.password,
+      gotUser.rank,
+      gotUser.firstName,
+      gotUser.lastName,
+      gotUser.profilePicture,
+      gotUser.profileText,
+      gotUser.birthday,
+      gotUser.ID
+    )
   }
 
   /**
@@ -110,11 +122,14 @@ export default class User {
     if (typeof fields === 'undefined')
       fields = [
         'id',
+        'password',
         'email',
         'rank',
         'emailTmp',
         'profilePicture',
         'profileText',
+        'firstName',
+        'lastName',
       ]
     const result = (
       await new DBService().query('SELECT ?? FROM users WHERE email = ?', [
@@ -160,7 +175,7 @@ export default class User {
       'rank',
       'firstName',
       'lastName',
-      'profilePictures',
+      'profilePicture',
       'profileText',
       'birthday',
     ])

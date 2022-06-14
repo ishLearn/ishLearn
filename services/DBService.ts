@@ -1,6 +1,7 @@
 import mysql from 'mysql'
 import Hashids from 'hashids'
 import { NumberLike } from 'hashids/cjs/util'
+import Logger from '../utils/Logger'
 
 /**
  * Service holding the database connection pool. Can be used to query the database or extract connections to perform complex operations on.
@@ -42,7 +43,11 @@ class DBService {
     this.getConnection().then(async connection => {
       try {
         if (await this.ping(connection))
-          console.log('Pinged MySQL-DB with new DBService successfully')
+          new Logger().event(
+            'DB Connection',
+            'Pinged MySQL-DB',
+            `${process.env.DB_USER}@${process.env.DB_CONNECTION_HOST}`
+          )
       } catch (err) {
         console.error(`MySQL ping on Pool connection failed!`)
         console.error(err)
@@ -261,15 +266,13 @@ export const dbQueries = {
     uploadBy: `CREATE TABLE IF NOT EXISTS uploadBy (PID INT(255) UNSIGNED NOT NULL REFERENCES products(ID), UID INT(255) UNSIGNED NOT NULL REFERENCES users(ID), PRIMARY KEY (PID, UID))`,
     rememberProject: `CREATE TABLE IF NOT EXISTS rememberProject (PID INT(255) UNSIGNED NOT NULL REFERENCES products(ID), SID INT(255) UNSIGNED NOT NULL REFERENCES users(ID), addedTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY (PID, SID))`,
     comments: `CREATE TABLE IF NOT EXISTS comments (PID INT(255) UNSIGNED NOT NULL REFERENCES products(ID), UID INT(255) UNSIGNED NOT NULL REFERENCES users(ID), createdTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updatedTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP, rating INT(255) NOT NULL, commentText INT(255) UNSIGNED NOT NULL REFERENCES media(ID), PRIMARY KEY(PID, UID))`,
-    refreshtokens: `CREATE TABLE IF NOT EXISTS refreshtokens (token VARCHAR(255) NOT NULL PRIMARY KEY, UID INT(255) UNSIGNED NOT NULL REFERENCES users(ID), expiryDate DATE NOT NULL)`,
+    refreshtokens: `CREATE TABLE IF NOT EXISTS refreshtokens (token VARCHAR(255) NOT NULL PRIMARY KEY, UID INT(255) UNSIGNED NOT NULL REFERENCES users(ID), expiryDate TIMESTAMP NOT NULL)`,
   },
 }
 
 export const createDefaultTables = async () => {
   for (let q of Object.entries(dbQueries.exportTableQueries)) {
     await new DBService().query(q[1])
-    console.log(q[1])
-    console.log()
   }
   return 'Finished'
 }

@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "echo 'Not working yet!' node index.ts",
-    "dev": "nodemon index.ts",
+    "dev": "nodemon index.ts --ignore ishlearn-client",
     "build": "tsc index.ts ./dist",
     "test": "jest",
     "initt": "nodemon init/initTables.ts",
@@ -35,6 +35,7 @@
     "ffmpeg": "^0.0.4",
     "hashids": "^2.2.10",
     "jsonwebtoken": "^8.5.1",
+    "moment": "^2.29.3",
     "mysql": "^2.18.1",
     "redis": "^4.1.0",
     "redis-om": "^0.3.3",

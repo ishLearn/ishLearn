@@ -1,5 +1,5 @@
-import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
-import HomeView from '../views/HomeView.vue';
+import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
+import HomeView from '../views/HomeView.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -33,15 +33,20 @@ const routes: Array<RouteRecordRaw> = [
   },
   // Alles rund um den Benutzer
   {
-    path: '/user/:id',
-    name: 'UserDetail',
-    component: () => import('../views/UserProfileView.vue'),
+    path: '/user/signup',
+    name: 'UserSignup',
+    component: () => import('../views/UserSignUpView.vue'),
   },
-];
+  {
+    path: '/user/login',
+    name: 'UserLogin',
+    component: () => import('../views/UserLoginView.vue'),
+  },
+]
 
 const router = createRouter({
   history: createWebHashHistory(),
   routes,
-});
+})
 
-export default router;
+export default router

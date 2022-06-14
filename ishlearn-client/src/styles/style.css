@@ -30,14 +30,13 @@ html[data-theme='dark']{
   --nav-fg: var(--almost-white);
 }
 
-[data-theme='dark'] .form-control {
-  background-color: rgba(0, 0, 0, 0.6);
-  border-color: rgba(0, 0, 0, 0.6);
-  color: var(--text-color) !important;
+.wrapper {
+  padding: 4rem 2rem;
+  min-height: 500px;
+  background-color: rgba(0,0,0,0.03);
 }
-
-[data-theme='dark'] .form-control:focus {
-  color: var(--text-color) !important;
+[data-theme='dark'] .wrapper{
+  background-color: rgba(0,0,0,0.1);
 }
 
 [data-theme='light'] .d-block-light,
@@ -61,7 +60,7 @@ html[data-theme='dark']{
 }
 
 #app {
-  font-family: 'Roboto', Helvetica, Arial, sans-serif;
+  /* font-family: 'Roboto', Helvetica, Arial, sans-serif; */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;

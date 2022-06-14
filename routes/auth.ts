@@ -6,6 +6,7 @@ import {
 } from '../controllers/AuthController'
 import RefreshToken from '../models/RefreshToken'
 import { UserRecord } from '../types/users'
+import Logger from '../utils/Logger'
 
 const router = express.Router()
 
@@ -49,18 +50,20 @@ router.post(
         throw newErr
       }
 
-      const otherUserTokens = await RefreshToken.findTokensByID(userInfo.id)
+      const totalUserTokens = await RefreshToken.findTokensByID(userInfo.id)
 
       return res.status(200).json({
         refreshToken,
         accessToken,
         userInfo,
-        otherUserTokens: otherUserTokens.length,
+        totalUserTokens: totalUserTokens.length,
       })
     } catch (err: any) {
-      console.log(err.statusCode)
-      console.log(err.message)
-      console.log(JSON.parse(JSON.stringify(err)))
+      new Logger().error(
+        'Sign In',
+        'General route handler after body validation.',
+        err
+      )
       res.status(err.statusCode || 400).json({ error: err.message })
     }
   }
@@ -77,6 +80,7 @@ router.post(
 
     // Token in locals is from `req.body`
     const token = res.locals.refreshToken
+
     if (typeof token !== 'string')
       return res.status(401).json({
         error:
@@ -84,10 +88,7 @@ router.post(
       })
 
     const newToken = await refreshAccessToken(token)
-    return res.status(200).json({
-      refreshToken: token,
-      accessToken: newToken,
-    })
+    return res.status(200).json(newToken)
   }
 )
 

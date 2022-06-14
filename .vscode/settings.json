@@ -10,6 +10,7 @@
     "hashids",
     "ishlearn",
     "refreshtokens",
+    "Schueler",
     "scripthost",
     "signin",
     "signout",
@@ -17,5 +18,6 @@
     "taggings",
     "unhashed"
   ],
-  "html.format.wrapLineLength": 100
+  "html.format.wrapLineLength": 100,
+  "editor.formatOnSave": true
 }

@@ -62,7 +62,7 @@ export const clearBucket = async (
 
     if (typeof items === 'undefined' || !(items.length > 0)) return null
 
-    console.log('Clearing ' + items.length + ' items')
+    new Logger().event('Clear S3 bucket', 'Clearing ' + items.length + ' items')
     const results = await Promise.all(
       items.map(async (item: { Key: any }) => {
         s3Client.send(

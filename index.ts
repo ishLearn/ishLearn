@@ -12,6 +12,7 @@ import { socketIOConnectionHandler } from './socketio/socketIOConnectionHandler'
 
 // Import api routes
 import users from './routes/users'
+import auth from './routes/auth'
 import products from './routes/products'
 import uploads from './routes/files/uploads'
 import downloads from './routes/files/downloads'
@@ -51,6 +52,7 @@ app.use(logger.request)
 
 // Use routes
 app.use('/api/users', users)
+app.use('/api/auth', auth)
 app.use('/api/products', products)
 app.use('/api/files/upload', uploads)
 app.use('/api/files/download', downloads)

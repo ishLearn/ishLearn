@@ -23,7 +23,7 @@ export async function createThumbnail(
       'Extract Frames (thumbnail)',
       err
     )
-    console.log(err)
+    new Logger().error('Handle Video', 'Create Previews', err)
     throw err
   }
 
@@ -71,7 +71,7 @@ export async function createPreviews(
       'Extract Frames (preview)',
       err
     )
-    console.log(err)
+    new Logger().error('Handle Video', 'Create Previews', err)
     throw err
   }
 
