@@ -50,7 +50,7 @@ const onSignup = async (e: Event) => {
     router.push({ name: 'Home' })
   } catch (err) {
     alert('Login fehlgeschlagen.')
-    console.login('Error while Login:')
+    console.log('Error while Login:')
     console.log(err)
   }
 }
