@@ -5,8 +5,9 @@ import { User } from '@/types/Users'
 import { RefreshToken } from '@/types/Tokens'
 
 // Setup store
+import pinia from '@/store/pinia'
 import useStore from '@/store/auth.module'
-const store = useStore()
+const store = useStore(pinia)
 
 class AuthService {
   static async login({ email, password }: { email: string; password: string }) {
@@ -21,6 +22,7 @@ class AuthService {
         pwd: password,
       })
     ).data
+
     if (typeof response.accessToken !== 'undefined') {
       store.loginSuccessful(response)
     }
