@@ -13,9 +13,7 @@ import useAuthStore from '@/store/auth.module'
 const store = useAuthStore()
 
 // User Login
-if (!store.status.loggedIn)
-  store.initUser().then(() => console.log('Now logged in: ' + store.status.loggedIn))
-console.log(store.status.loggedIn)
+if (!store.status.loggedIn) store.initUser()
 
 // Color Theme
 const storedTheme =

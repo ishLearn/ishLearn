@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import AuthService from '@/services/auth.service'
 import { GenericInputs } from '@/types/GenericInputData'
 import SmallForm from '@/components/SmallForm.vue'
-import router from '@/router';
+import router from '@/router'
 
 const inputs: GenericInputs<string> = {
   email: {
@@ -60,12 +60,7 @@ const onSignup = async (e: Event) => {
 
 <template>
   <div>
-    <SmallForm
-      :title="`Login`"
-      :inputs="inputs"
-      :submitMessage="'Einloggen'"
-      @onSubmit="onSignup"
-    >
+    <SmallForm :title="`Login`" :inputs="inputs" :submitMessage="'Einloggen'" @onSubmit="onSignup">
       <template #subtitle>
         <p>Melde dich hier an!</p>
       </template>

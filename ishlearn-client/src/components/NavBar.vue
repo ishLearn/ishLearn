@@ -3,9 +3,6 @@ import useUser from '@/store/auth.module'
 import AuthService from '@/services/auth.service'
 
 const user = useUser()
-console.log('Navbar User INfo:')
-console.log(user.status.loggedIn)
-console.log(user.$state.user?.firstName)
 
 function toggleTheme() {
   const currentTheme = document.documentElement.getAttribute('data-theme')
