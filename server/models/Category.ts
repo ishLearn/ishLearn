@@ -1,6 +1,12 @@
 import DBService from '../services/DBService'
 import Tag from './Tag'
 
+/**
+ * A Category is the top-level collection of tags.
+ *
+ * @see {@link Tag}
+ * @author @SebastianThomas
+ */
 export default class Category {
   /**
    * Save the tag linked to a category to the database.
