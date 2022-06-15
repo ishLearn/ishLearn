@@ -77,7 +77,7 @@ router.delete(
       })
     } catch (err) {
       return res.status(400).json({
-        err: 'The tag could not be saved. Was the tagname correctly sent and does not it exist already?',
+        err: 'The tag could not be deleted. Was the tagname correctly sent?',
       })
     }
   }
