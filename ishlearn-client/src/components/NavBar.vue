@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import useUser from '@/store/auth.module'
+import AuthService from '@/services/auth.service'
 
 const user = useUser()
 
@@ -38,15 +39,42 @@ function toggleTheme() {
           </li>
         </ul>
       </div>
-      <!-- right part navbar -->
+
+      <!-- Navbar rechts -->
       <div style="margin-right: 1rem">
         <ul class="navbar-nav no-scrollbar">
+          <!-- User -->
           <li class="nav-item">
-            <router-link :to="{ name: 'UserSignup' }" class="nav-link">Registrierung</router-link>
-            <!-- <router-link :to="{ name: 'UserDetail', params: { id: 0 } }" class="nav-link"
-              >Sign Up</router-link
-            > -->
+            <router-link
+              :to="{ name: 'UserDetail', params: { id: user.user?.id } }"
+              class="nav-link"
+              v-if="user.status.loggedIn"
+              >{{ user.user?.firstName }} {{ user.user?.lastName }}</router-link
+            >
+            <router-link :to="{ name: 'UserLogin' }" class="nav-link" v-else>Login</router-link>
           </li>
+          <li class="nav-item" v-if="user.status.loggedIn">
+            <button id="logout" class="nav-colors bigger" @click="AuthService.logout">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                fill="currentColor"
+                class="bi bi-box-arrow-right"
+                viewBox="0 0 16 16"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0v2z"
+                />
+                <path
+                  fill-rule="evenodd"
+                  d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3z"
+                />
+              </svg>
+            </button>
+          </li>
+          <!-- Dark moddle toggle -->
           <li class="nav-item">
             <button id="theme-toggle" class="nav-colors bigger" @click="toggleTheme">
               <span class="d-block-light d-none">
