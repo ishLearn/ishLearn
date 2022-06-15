@@ -352,7 +352,7 @@ export default class User {
     })
 
     if (typeof res === 'undefined' || !('worked' in res) || !res.worked)
-      throw new Error(`Could not upload comment to S3`)
+      throw new Error(`Could not upload profile picture to S3`)
 
     const mId = await Media.saveToMediaOnly(
       User.getProfilePictureFileName(uid),
