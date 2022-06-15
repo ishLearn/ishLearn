@@ -14,7 +14,7 @@ const saltRounds = Number(process.env.SALT_ROUNDS) || 10
 
 /**
  * A User is every Account that can interact with the system.
- * It's Primary Key is a AUTO-INCREMENT INT ID, for the Frontend
+ * Its Primary Key is a AUTO-INCREMENT INT ID, for the Frontend
  * hashed with the {@link https://www.npmjs.com/package/hashids hashids} package.
  *
  * @see {@link User.id}
