@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import AuthService from '@/services/auth.service'
+import { validateEmail, validatePasswort, validateMandatory } from '@/util/inputValidation'
 import { GenericInputs } from '@/types/GenericInputData'
 import SmallForm from '@/components/SmallForm.vue'
 import router from '@/router'
@@ -8,10 +9,10 @@ import router from '@/router'
 const inputs: GenericInputs<string> = {
   email: {
     value: ref(''),
-    type: 'text',
+    type: 'email',
     label: 'Deine Email',
     id: 'email',
-    name: 'Email',
+    name: 'email',
     mandatory: true,
     placeholder: '',
   },
@@ -29,32 +30,29 @@ const inputs: GenericInputs<string> = {
 const onSignup = async (e: Event) => {
   e.preventDefault()
 
-  console.log('Signup Pressed')
-  console.log(inputs.email)
-  console.log(inputs.passwort.value)
-
   if (
-    Object.keys(inputs).reduce((result, k) => {
-      const input = inputs[k]
-      if (input.mandatory && !input.value.value) {
-        result = true
-      }
+    !Object.keys(inputs).reduce((result, k) => {
+      if (inputs[k].mandatory) result = result && validateMandatory(inputs[k].value.value)
+      if (inputs[k].type === 'email') result = result && validateEmail(inputs[k].value.value)
+      if (inputs[k].type === 'password') result = result && validatePasswort(inputs[k].value.value)
       return result
-    }, false)
+    }, true)
   ) {
-    alert('Bitte fülle alle Pflichtfelder aus!')
+    alert('Das Format deiner Eingabedaten ist nicht korrekt!')
     return
   }
 
-  console.log('Send Data to /api/auth/')
-  console.log(`email: ${inputs.email.value.value}`)
-  console.log(`pwd: ${inputs.passwort.value.value}`)
-  console.log('Login tried!')
-  await AuthService.login({
-    email: inputs.email.value.value,
-    password: inputs.passwort.value.value,
-  })
-  router.push({ name: 'Home' })
+  try {
+    await AuthService.login({
+      email: inputs.email.value.value,
+      password: inputs.passwort.value.value,
+    })
+    router.push({ name: 'Home' })
+  } catch (err) {
+    alert('Login fehlgeschlagen.')
+    console.log('Error while Login:')
+    console.log(err)
+  }
 }
 </script>
 

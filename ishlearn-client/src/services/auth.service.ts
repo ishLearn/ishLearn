@@ -22,6 +22,7 @@ class AuthService {
         pwd: password,
       })
     ).data
+
     if (typeof response.accessToken !== 'undefined') {
       store.loginSuccessful(response)
     }

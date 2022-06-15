@@ -3,7 +3,8 @@ import { ref } from 'vue'
 import AuthService from '@/services/auth.service'
 import { GenericInputs } from '@/types/GenericInputData'
 import SmallForm from '@/components/SmallForm.vue'
-import router from '@/router';
+import router from '@/router'
+import { validateEmail, validatePasswort, validateMandatory } from '@/util/inputValidation'
 
 const inputs: GenericInputs<string> = {
   firstName: {
@@ -11,7 +12,7 @@ const inputs: GenericInputs<string> = {
     type: 'text',
     label: 'Dein Vorname',
     id: 'firstName',
-    name: 'FirstName',
+    name: 'firstName',
     mandatory: true,
     placeholder: '',
   },
@@ -20,16 +21,16 @@ const inputs: GenericInputs<string> = {
     type: 'text',
     label: 'Dein Nachname',
     id: 'lastName',
-    name: 'LastName',
+    name: 'lastName',
     mandatory: true,
     placeholder: '',
   },
   email: {
     value: ref(''),
-    type: 'text',
+    type: 'email',
     label: 'Deine Email',
     id: 'email',
-    name: 'Email',
+    name: 'email',
     mandatory: true,
     placeholder: '',
   },
@@ -68,26 +69,19 @@ const onSignup = async (e: Event) => {
   e.preventDefault()
 
   if (
-    Object.keys(inputs).reduce((result, k) => {
-      const input = inputs[k]
-      if (input.mandatory && !input.value.value) {
-        result = true
-      }
+    !Object.keys(inputs).reduce((result, k) => {
+      if (inputs[k].mandatory) result = result && validateMandatory(inputs[k].value.value)
+      if (inputs[k].type === 'email') result = result && validateEmail(inputs[k].value.value)
+      if (inputs[k].type === 'password') result = result && validatePasswort(inputs[k].value.value)
       return result
-    }, false) || Object.keys(isSchuelerInput).reduce((result: boolean, k) => {
-      const input = isSchuelerInput[k]
-      if (input.mandatory && !input.value.value) {
-        result = true
-      }
-      return result
-    }, false)
+    }, true)
   ) {
-    alert('Bitte fülle alle Pflichtfelder aus!')
+    alert('Das Format deiner Eingabedaten ist nicht korrekt!')
     return
   }
 
   if (inputs.passwort.value.value !== inputs.passwort2.value.value) {
-    alert('Deine Passwörter sind verschieden!')
+    alert('Deine Passwörter stimmen nicht überein!')
     return
   }
 
@@ -101,6 +95,7 @@ const onSignup = async (e: Event) => {
     })
     router.push({ name: 'UserLogin' })
   } catch (err) {
+    alert('Etwas ist mit deiner Registrierung schiefgelaufen.')
     console.log('Error while Registering:')
     console.log(err)
   }
