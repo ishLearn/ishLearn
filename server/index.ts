@@ -14,6 +14,7 @@ import { socketIOConnectionHandler } from './socketio/socketIOConnectionHandler'
 import users from './routes/users'
 import auth from './routes/auth'
 import products from './routes/products'
+import tags from './routes/tags'
 import uploads from './routes/files/uploads'
 import downloads from './routes/files/downloads'
 // Import middleware
@@ -54,6 +55,7 @@ app.use(logger.request)
 app.use('/api/users', users)
 app.use('/api/auth', auth)
 app.use('/api/products', products)
+app.use('/api/tags', tags)
 app.use('/api/files/upload', uploads)
 app.use('/api/files/download', downloads)
 
