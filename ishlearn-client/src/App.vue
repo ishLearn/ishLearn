@@ -9,9 +9,16 @@
 
 <script setup lang="ts">
 import NavBar from '@/components/NavBar.vue'
+import useAuthStore from '@/store/auth.module'
+const store = useAuthStore()
 
-// Code
-const storedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+// User Login
+if (!store.status.loggedIn) store.initUser()
+
+// Color Theme
+const storedTheme =
+  localStorage.getItem('theme') ||
+  (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
 if (storedTheme) {
   document.documentElement.setAttribute('data-theme', storedTheme)
 }
