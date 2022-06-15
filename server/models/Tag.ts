@@ -23,7 +23,7 @@ import { addProduct, searchProductById } from '../services/RedisService'
 export default class Tag {
   tag: string
 
-  static QUERY_LIMIT = 50
+  static QUERY_LIMIT = 20
 
   constructor(tag: string) {
     this.tag = tag
@@ -38,7 +38,7 @@ export default class Tag {
    */
   static async getTagByTagname(tagname: string): Promise<Tag> {
     const res = await (
-      await new DBService().query('SELECT * FROM TAGS WHERE tag = ?', [tagname])
+      await new DBService().query('SELECT * FROM tags WHERE tag = ?', [tagname])
     ).results
     return res
   }
@@ -64,8 +64,8 @@ export default class Tag {
   static async search(tagnameBeginning: string): Promise<Tag[]> {
     return (
       await new DBService().query(
-        'SELECT * FROM tags LIMIT ? WHERE tag REGEXP ?',
-        [Tag.QUERY_LIMIT, tagnameBeginning + '*']
+        'SELECT * FROM tags WHERE tag REGEXP ? LIMIT ?',
+        [tagnameBeginning, Tag.QUERY_LIMIT]
       )
     ).results
   }

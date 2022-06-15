@@ -34,6 +34,8 @@ router.get(
 // Return the first {@link Tag.QUERY_LIMIT} results for the tag beginning
 router.get(
   '/search/:tagnameBeginning',
+  body('tagname').trim().isLength({ min: 2 }),
+  validateResult,
   async (req: express.Request, res: express.Response<{}, UserRecord>) => {
     return res.json(await Tag.search(req.params.tagnameBeginning))
   }
