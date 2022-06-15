@@ -469,7 +469,7 @@ export default class Product {
         return await new DBService().query(query, [pid, tag])
       }),
       async () => {
-        return await Product.setLastModified(cid, cid)
+        return await Product.setLastModified(pid, cid)
       },
     ])
   }
@@ -488,7 +488,7 @@ export default class Product {
         return await new DBService().query(query, [pid, tag])
       }),
       async () => {
-        return await Product.setLastModified(cid, cid)
+        return await Product.setLastModified(pid, cid)
       },
     ])
   }
