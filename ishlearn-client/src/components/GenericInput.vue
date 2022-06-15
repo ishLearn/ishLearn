@@ -2,6 +2,7 @@
 <script setup lang="ts">
 // eslint-disable-next-line
 import { defineProps, defineEmits, watch, ref } from 'vue'
+import { validateEmail, validatePasswort, validateMandatory } from '@/util/inputValidation'
 
 const props = defineProps(['modelValue', 'inputProps'])
 defineEmits(['update:modelValue'])
@@ -9,11 +10,19 @@ defineEmits(['update:modelValue'])
 const mandWarn = ref(false)
 if (props.inputProps.mandatory) {
   watch(props.inputProps.value, (oldV, newV) => {
-    if (!props.inputProps.value.value) {
-      mandWarn.value = true
-    } else {
-      mandWarn.value = false
-    }
+    mandWarn.value = !validateMandatory(props.inputProps.value.value)
+  })
+}
+const pwdLengthWarn = ref(false)
+if (props.inputProps.type === 'password') {
+  watch(props.inputProps.value, (oldV, newV) => {
+    pwdLengthWarn.value = !validatePasswort(props.inputProps.value.value)
+  })
+}
+const emailWarn = ref(false)
+if (props.inputProps.type === 'email') {
+  watch(props.inputProps.value, (oldV, newV) => {
+    emailWarn.value = !validateEmail(props.inputProps.value.value)
   })
 }
 </script>
@@ -44,7 +53,11 @@ if (props.inputProps.mandatory) {
           : 'form-control text-input'
       }`"
     />
-    <span v-show="mandWarn" class="text-danger">Dieses Feld ist Pflicht!</span>
+    <span v-show="mandWarn" class="text-danger">Dieses Feld ist Pflicht!<br /></span>
+    <span v-show="pwdLengthWarn" class="text-danger"
+      >Das Passwort muss mindestens 8 Zeichen lang sein.<br
+    /></span>
+    <span v-show="emailWarn" class="text-danger">Bitte gib eine korrekte Email ein.<br /></span>
   </div>
 </template>
 
