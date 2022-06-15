@@ -1,16 +1,4 @@
-import DBService, {
-  getHashFromIntID,
-  getIntIDFromHash,
-  Visibility,
-} from '../services/DBService'
-
-import { NumberLike } from 'hashids/cjs/util'
-import { ID } from '../types/ids'
-
-// User model import
-import User from './User'
-// RedisService import
-import { addProduct, searchProductById } from '../services/RedisService'
+import DBService from '../services/DBService'
 
 /**
  * A Product is a unit of files, comments and other content and information.
