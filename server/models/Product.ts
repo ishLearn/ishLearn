@@ -549,8 +549,47 @@ export default class Product {
   }
 
   /**
+   * Remember a project (Table: `rememberProject`)
+   *
+   * Issue #77
+   * @param productId Project to link
+   * @param userId User to link
+   * @returns Nothing
+   */
+  static async remember(productId: string, userId: string): Promise<any> {
+    const pid = getIntIDFromHash(productId)
+    const uid = getIntIDFromHash(userId)
+
+    return (
+      await new DBService().query(
+        `INSERT INTO rememberProject (PID, SID) VALUES (?, ?)`,
+        [pid, uid]
+      )
+    ).results
+  }
+
+  /**
+   * Remember a project (Table: `rememberProject`)
+   *
+   * Issue #77
+   * @param productId Project to link
+   * @param userId User to link
+   * @returns Nothing
+   */
+  static async doNotRemember(productId: string, userId: string): Promise<any> {
+    const pid = getIntIDFromHash(productId)
+    const uid = getIntIDFromHash(userId)
+
+    return (
+      await new DBService().query(
+        `DELETE FROM rememberProject WHERE PID = ? AND SID = ?`,
+        [pid, uid]
+      )
+    ).results
+  }
+
+  /**
    * Update: Add an existing media to the product
-   * UNUSED; use ADD Media instead
    * @param productId the hashed product id
    * @param collaboratorId the hashed collaborator id
    * @param mediaId the hashed media id to add
@@ -608,6 +647,13 @@ export default class Product {
     return result
   }
 
+  /**
+   * Require the authenticated user to have writing permissions on the project
+   * @param pid Project ID to control
+   * @param uid User ID that is logged in
+   * @returns `true` if the user is allowed
+   * @throws an error if the user is not allowed to write
+   */
   static async requireUserCanWrite(
     pid: NumberLike,
     uid: NumberLike
@@ -626,6 +672,13 @@ export default class Product {
     return valid
   }
 
+  /**
+   * Require the authenticated user to be a teacher having supervisedBy status on the project.
+   * @param pid Project ID to control
+   * @param tid User ID that is logged in
+   * @returns `true` if the user is allowed
+   * @throws an error if the user is not allowed to write
+   */
   static async requireTeacherCanUpdate(
     pid: NumberLike,
     tid: NumberLike
