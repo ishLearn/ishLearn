@@ -1,6 +1,7 @@
 import DBService, {
   getHashFromIntID,
   getIntIDFromHash,
+  SupervisedByStatus,
   Visibility,
 } from '../services/DBService'
 
@@ -174,7 +175,7 @@ export default class Product {
             tagVExist
               ? `LEFT JOIN (SELECT tag, PID FROM pt WHERE tag IN ?) AS pt ON (products.ID = pt.PID)`
               : ''
-          } WHERE title REGEXP ?
+          } WHERE visibility = public AND title REGEXP ?
           GROUP BY products.ID ${
             tagVExist || cIdsExist
               ? `HAVING ${tagVExist ? `COUNT(pt.tag) = ? ` : ''}${
@@ -306,15 +307,20 @@ export default class Product {
    * @param users the user's IDs
    * @returns The new Product's id
    */
-  async save(...users: number[] | string[]): Promise<number> {
+  async save(...users: Array<number | string>): Promise<number> {
     if (typeof this.id !== 'undefined')
       throw new Error('Product has already been saved')
 
-    let usersNrs: number[] | NumberLike[]
+    let usersNrs: Array<number | NumberLike>
     usersNrs = users.map(user => {
       if (typeof user === 'string') return getIntIDFromHash(user)
       return user
     })
+
+    if (usersNrs.length < 1)
+      throw new Error(
+        'There must be at least one user to administrate this product.'
+      )
 
     const res = await new DBService().query(
       `INSERT INTO products (title, visibility, updatedBy, createdBy) VALUES (?)`,
@@ -343,12 +349,34 @@ export default class Product {
     const productId = getIntIDFromHash(pid)
     const userId = getIntIDFromHash(uid)
 
+    await Product.requireUserCanWrite(productId, userId)
+
     const resUploadBy = await new DBService().query(
       `INSERT INTO uploadBy (PID, UID) VALUES (?)`,
       [[productId, userId]]
     )
 
     return resUploadBy.results
+  }
+
+  /**
+   * Add a Supervisor (teacher) from to project. Updates the `supervisedBy`-table.
+   * @param pid Project ID (as string)
+   * @param tid Teacher's ID to add to Project (as string)
+   * @returns The results of the query
+   */
+  static async addTeacher(pid: string, tid: string) {
+    const productId = getIntIDFromHash(pid)
+    const userId = getIntIDFromHash(tid)
+
+    await Product.requireUserCanWrite(productId, userId)
+
+    const resSupervisedBy = await new DBService().query(
+      `INSERT INTO supervisedBy (PID, TID, status) VALUES (?)`,
+      [[productId, userId, SupervisedByStatus.SUBMISSION_OPEN]]
+    )
+
+    return resSupervisedBy.results
   }
 
   /**
@@ -361,6 +389,8 @@ export default class Product {
     const productId = getIntIDFromHash(pid)
     const userId = getIntIDFromHash(uid)
 
+    await Product.requireUserCanWrite(productId, userId)
+
     const resUploadBy = await new DBService().query(
       `DELETE FROM uploadBy WHERE PID = ? AND UID = ?`,
       [productId, userId]
@@ -369,11 +399,45 @@ export default class Product {
     return resUploadBy.results
   }
 
+  /**
+   * Update the last modified time and user for a product.
+   * @param productId Product ID that has been modified
+   * @param userId User ID that modified the product
+   * @returns Nothing
+   */
   static async setLastModified(productId: NumberLike, userId: NumberLike) {
-    return await new DBService().query(
-      `UPDATE products SET updatedBy = ? WHERE ID = ?`,
-      [userId, productId]
-    )
+    await Product.requireUserCanWrite(productId, userId)
+
+    return (
+      await new DBService().query(
+        `UPDATE products SET updatedBy = ? WHERE ID = ?`,
+        [userId, productId]
+      )
+    ).results
+  }
+
+  /**
+   * Teacher updates the supervised by status.
+   * @param productId Product to update
+   * @param teacherId Teacher that updated the status
+   * @param status Status of the product
+   * @param grade Grade to apply, is optional
+   * @returns Nothing
+   */
+  static async updateSupervisedStatus(
+    productId: NumberLike,
+    teacherId: NumberLike,
+    status: SupervisedByStatus,
+    grade?: string
+  ) {
+    await Product.requireTeacherCanUpdate(productId, teacherId)
+
+    return (
+      await new DBService().query(
+        `UPDATE supervisedBy SET status = ?, grade = ? WHERE PID = ? AND TID = ?`,
+        [status, grade, productId, teacherId]
+      )
+    ).results
   }
 
   /**
@@ -399,29 +463,23 @@ export default class Product {
 
     const pid = getIntIDFromHash(productId)
     const cid = getIntIDFromHash(collaboratorId)
-    const validationRequest = await new DBService().query(
-      'SELECT PID, UID FROM uploadBy WHERE PID = ? AND UID = ?',
-      [pid, cid]
-    )
 
-    const valid = validationRequest.results.length > 0
+    // Require user can write to the product
+    await Product.requireUserCanWrite(pid, cid)
 
-    if (valid) {
-      const setTitle = typeof fieldsToUpdate.title !== 'undefined'
-      const setVis = typeof fieldsToUpdate.visibility !== 'undefined'
-      const query = `UPDATE products SET ${setTitle ? `title = ?` : ''}${
-        setTitle && setVis ? ', ' : ''
-      }${setVis ? `visibility = ?` : ''} WHERE ID = ?`
+    const setTitle = typeof fieldsToUpdate.title !== 'undefined'
+    const setVis = typeof fieldsToUpdate.visibility !== 'undefined'
+    const query = `UPDATE products SET ${setTitle ? `title = ?` : ''}${
+      setTitle && setVis ? ', ' : ''
+    }${setVis ? `visibility = ?` : ''} WHERE ID = ?`
 
-      const params = []
+    const params = []
 
-      if (setTitle) params.push(fieldsToUpdate.title)
-      if (setVis) params.push(fieldsToUpdate.visibility)
-      params.push(pid)
+    if (setTitle) params.push(fieldsToUpdate.title)
+    if (setVis) params.push(fieldsToUpdate.visibility)
+    params.push(pid)
 
-      return await new DBService().query(query, params)
-    }
-    throw new Error(`User is not valid; has not been entered`)
+    return await new DBService().query(query, params)
   }
 
   /**
@@ -440,18 +498,11 @@ export default class Product {
   ) {
     const pid = getIntIDFromHash(productId)
     const cid = getIntIDFromHash(collaboratorId)
-    const validationRequest = await new DBService().query(
-      'SELECT PID, UID FROM uploadBy WHERE PID = ? AND UID = ?',
-      [pid, cid]
-    )
+    await Product.requireUserCanWrite(pid, cid)
 
-    const valid = validationRequest.results.length > 0
-
-    if (valid) {
-      return add
-        ? await this.addTags(pid, cid, tags)
-        : await this.removeTags(pid, cid, tags)
-    }
+    return add
+      ? await this.addTags(pid, cid, tags)
+      : await this.removeTags(pid, cid, tags)
     throw new Error(`User is not valid; has not been entered`)
   }
 
@@ -463,6 +514,8 @@ export default class Product {
    * @returns an array of all Promise results
    */
   static async addTags(pid: NumberLike, cid: NumberLike, tags: string[]) {
+    await Product.requireUserCanWrite(pid, cid)
+
     const query = 'INSERT INTO productHasTag (PID, tag) VALUES (?, ?)'
     return await Promise.all([
       ...tags.map(async tag => {
@@ -482,6 +535,8 @@ export default class Product {
    * @returns an array of all Promise results
    */
   static async removeTags(pid: NumberLike, cid: NumberLike, tags: string[]) {
+    await Product.requireUserCanWrite(pid, cid)
+
     const query = 'DELETE FROM productHasTag WHERE PID = ? AND UID = ?'
     return await Promise.all([
       ...tags.map(async tag => {
@@ -495,6 +550,7 @@ export default class Product {
 
   /**
    * Update: Add an existing media to the product
+   * UNUSED; use ADD Media instead
    * @param productId the hashed product id
    * @param collaboratorId the hashed collaborator id
    * @param mediaId the hashed media id to add
@@ -508,6 +564,7 @@ export default class Product {
     const pid = getIntIDFromHash(productId)
     const cid = getIntIDFromHash(collaboratorId)
     const mid = getIntIDFromHash(mediaId)
+    await Product.requireUserCanWrite(pid, cid)
 
     const result = [
       await new DBService().query(
@@ -537,9 +594,11 @@ export default class Product {
     const cid = getIntIDFromHash(collaboratorId)
     const mid = getIntIDFromHash(mediaId)
 
+    await Product.requireUserCanWrite(pid, cid)
+
     const result = [
       await new DBService().query(
-        'INSERT INTO mediaPartOfProduct SET PID = ?, MID = ?',
+        'DELETE FROM mediaPartOfProduct WHERE PID = ? AND MID = ?',
         [pid, mid]
       ),
     ]
@@ -547,5 +606,41 @@ export default class Product {
     result.push(await Product.setLastModified(pid, cid))
 
     return result
+  }
+
+  static async requireUserCanWrite(
+    pid: NumberLike,
+    uid: NumberLike
+  ): Promise<boolean> {
+    const validationRequest = await new DBService().query(
+      'SELECT PID, UID FROM uploadBy WHERE PID = ? AND UID = ?',
+      [pid, uid]
+    )
+
+    const valid: boolean = validationRequest.results.length > 0
+
+    if (!valid)
+      throw new Error(
+        'The user does not have writing permission on this product!'
+      )
+    return valid
+  }
+
+  static async requireTeacherCanUpdate(
+    pid: NumberLike,
+    tid: NumberLike
+  ): Promise<boolean> {
+    const validationRequest = await new DBService().query(
+      'SELECT PID, TID FROM supervisedBy WHERE PID = ? AND TID = ?',
+      [pid, tid]
+    )
+
+    const valid: boolean = validationRequest.results.length > 0
+
+    if (!valid)
+      throw new Error(
+        'The teacher does not have updating permission on this product!'
+      )
+    return valid
   }
 }

@@ -5,6 +5,17 @@ import { validateResult } from './users'
 
 import Product from '../models/Product'
 import { UserRecord } from '../types/users'
+import { NumberLike } from 'hashids/cjs/util'
+import {
+  getIntIDFromHash,
+  getSupervisedByStatus,
+  SupervisedByStatus,
+} from '../services/DBService'
+import {
+  requireAuthenticated,
+  requireAuthenticatedAsStudent,
+  requireAuthenticatedAsTeacher,
+} from '../middleware/authMiddleware'
 
 const router = express.Router()
 
@@ -62,18 +73,30 @@ router.post(
 
 // POST /api/products/
 // Insert a new Product into the database, returns the given product information and the new product's id.
+// body:
+// - title: string,
+// - visibility: Visibility (as string),
+// - collaborators?: UserID[]
 router.post(
   '/',
+  requireAuthenticatedAsStudent,
   body('title').trim().isLength({ min: 3 }),
   body('visibility').trim().isLength({ min: 5 }),
-  body('updatedBy').isDate(),
-  body('createdBy').isDate(),
   validateResult,
   async (req: express.Request, res: express.Response<{}, UserRecord>) => {
-    const { title, visibility, updatedBy, createdBy } = req.body
-    const newP = new Product(title, visibility, updatedBy, createdBy)
+    if (!res.locals.user?.id)
+      return res.status(403).json({ error: 'Not authenticated' })
+    const { title, visibility } = req.body
+    const newP = new Product(
+      title,
+      visibility,
+      res.locals.user.id,
+      res.locals.user.id
+    )
     try {
-      const resultId = await newP.save(createdBy, req.body.users)
+      const users: Array<string | number> = req.body.collaborators || []
+
+      const resultId = await newP.save(res.locals.user.id, ...users)
       return res.json({
         newP,
         id: resultId,
@@ -92,7 +115,9 @@ router.post(
 // Add or remove a new collaborator to or from the database belonging to one project, in the `uploadBy`-table. Does not update the project's `createdBy`-field.
 router.put(
   '/collaborator/:pid',
+  requireAuthenticated,
   body('newCollaboratorId').trim().isLength({ min: 6 }),
+  body('add').isBoolean(),
   validateResult,
   async (req: express.Request, res: express.Response<{}, UserRecord>) => {
     const {
@@ -103,12 +128,62 @@ router.put(
       return res
         .status(400)
         .json({ msg: 'Should the collaborator be added or removed?' })
-    if (add) Product.addCollaborator(req.params.pid, newCollaboratorId)
-    else Product.removeCollaborator(req.params.pid, newCollaboratorId)
+    if (add) await Product.addCollaborator(req.params.pid, newCollaboratorId)
+    else await Product.removeCollaborator(req.params.pid, newCollaboratorId)
 
     return res
       .status(200)
       .json({ msg: 'Successfully added/removed the collaborator' })
+  }
+)
+
+// PUT /api/products/teacher/add/:pid
+// Add a new teacher to the database belonging to one project, in the `supervisedBy`-table.
+router.put(
+  '/teacher/add/:pid',
+  requireAuthenticated,
+  body('teacherID').trim().isLength({ min: 6 }),
+  validateResult,
+  async (req: express.Request, res: express.Response<{}, UserRecord>) => {
+    const { teacherID }: { teacherID: string } = req.body
+
+    await Product.addTeacher(req.params.pid, teacherID)
+
+    return res.status(200).json({ msg: 'Successfully added the teacher' })
+  }
+)
+
+// PUT /api/products/update/status/:pid
+// Add a new teacher to the database belonging to one project, in the `supervisedBy`-table.
+router.put(
+  '/update/status/:pid',
+  requireAuthenticatedAsTeacher,
+  body('status').trim().isLength({ min: 6 }),
+  validateResult,
+  async (req: express.Request, res: express.Response<{}, UserRecord>) => {
+    const { status, grade }: { status: string; grade?: string } = req.body
+
+    const teacherID = res.locals.user?.id
+    if (typeof teacherID === 'undefined')
+      return res.status(403).json({ error: 'Not authenticated as teacher' })
+
+    const pid: NumberLike = getIntIDFromHash(req.params.pid)
+    const tid: NumberLike = getIntIDFromHash(teacherID)
+
+    let s: SupervisedByStatus | null = null
+    if (status == SupervisedByStatus.GRADED) s = SupervisedByStatus.GRADED
+    if (status == SupervisedByStatus.SUBMISSION_OPEN)
+      s = SupervisedByStatus.SUBMISSION_OPEN
+    if (status == SupervisedByStatus.SUBMISSION_CLOSED)
+      s = SupervisedByStatus.SUBMISSION_CLOSED
+
+    if (s === null) {
+      return res.status(400).json({ error: 'Invalid status' })
+    }
+
+    await Product.updateSupervisedStatus(pid, tid, s, grade)
+
+    return res.status(200).json({ msg: 'Successfully updated the status.' })
   }
 )
 
@@ -118,7 +193,7 @@ router.put(
 // Update a product's (id in param) title and/or visibility
 router.put(
   '/:pid',
-  body('collaborator').trim().isLength({ min: 6 }),
+  requireAuthenticatedAsStudent,
   validateResult,
   async (
     req: express.Request<{ pid: string }>,
@@ -127,15 +202,17 @@ router.put(
     const productId = req.params.pid
 
     const {
-      collaborator,
       fieldsToUpdate,
     }: {
-      collaborator: string
       fieldsToUpdate: {
         title?: string
         visibility?: string
       }
     } = req.body
+
+    const collaborator = res.locals.user?.id
+    if (!collaborator)
+      return res.status(403).json({ error: 'Not authenticated' })
 
     try {
       const result: any = (
@@ -164,27 +241,27 @@ router.put(
 // PUT /api/products/:id/tags
 router.put(
   '/:id/tags',
+  requireAuthenticated,
   body('tags').isArray(),
-  body('collaboratorId').trim().isLength({ min: 6 }),
   body('add').isBoolean(),
   validateResult,
   async (
     req: express.Request<{ id: string }>,
     res: express.Response<{}, UserRecord>
   ) => {
-    const {
-      tags,
-      collaboratorId,
-      add,
-    }: { tags: string[]; collaboratorId: string; add: boolean } = req.body
+    const { tags, add }: { tags: string[]; add: boolean } = req.body
     const productId: string = req.params.id
+
+    const collaborator = res.locals.user?.id
+    if (!collaborator)
+      return res.status(403).json({ error: 'Not authenticated' })
 
     if (typeof add !== 'boolean')
       return res
         .status(400)
         .json({ msg: 'Should the collaborator be added or removed?' })
 
-    await Product.updateTags(productId, collaboratorId, tags, add)
+    await Product.updateTags(productId, collaborator, tags, add)
     return res.status(200).json({
       success: true,
       productId,
@@ -199,7 +276,7 @@ router.put(
 // Add a new media to product (id as param)
 router.post(
   '/:id/media',
-  body('collaboratorId').trim().isLength({ min: 6 }),
+  requireAuthenticated,
   body('mediaId').trim().isLength({ min: 6 }),
   body('add').isBoolean(),
   validateResult,
@@ -208,15 +285,15 @@ router.post(
     res: express.Response<{}, UserRecord>
   ) => {
     const productId: string = req.params.id
-    const {
-      collaboratorId,
-      mediaId,
-      add,
-    }: { collaboratorId: string; mediaId: string; add: boolean } = req.body
+    const { mediaId, add }: { mediaId: string; add: boolean } = req.body
     if (add)
       return res.status(400).json({
         msg: 'Cannot blindly add media, will automatically be linked with product when upload is successful.',
       })
+
+    const collaborator = res.locals.user?.id
+    if (!collaborator)
+      return res.status(403).json({ error: 'Not authenticated' })
 
     if (typeof add !== 'boolean')
       return res
@@ -225,8 +302,8 @@ router.post(
 
     const result = (
       add
-        ? await Product.addMedia(productId, collaboratorId, mediaId)
-        : await Product.removeMedia(productId, collaboratorId, mediaId)
+        ? await Product.addMedia(productId, collaborator, mediaId)
+        : await Product.removeMedia(productId, collaborator, mediaId)
     )[0]?.results
     return res.status(200).json({
       success: true,
