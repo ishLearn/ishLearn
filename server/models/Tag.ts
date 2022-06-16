@@ -1,22 +1,9 @@
-import DBService, {
-  getHashFromIntID,
-  getIntIDFromHash,
-  Visibility,
-} from '../services/DBService'
-
-import { NumberLike } from 'hashids/cjs/util'
-import { ID } from '../types/ids'
-
-// User model import
-import User from './User'
-// RedisService import
-import { addProduct, searchProductById } from '../services/RedisService'
+import DBService from '../services/DBService'
 
 /**
- * A Product is a unit of files, comments and other content and information.
- * It's Primary Key is a AUTO-INCREMENT INT ID, for the Frontend
- * hashed with the {@link https://www.npmjs.com/package/hashids hashids} package.
+ * A Tag is an identifier that can be used to search / filter.
  *
+ * @see {@link Category}
  * @see {@link Tag.tagname}
  * @author @SebastianThomas
  */
@@ -44,9 +31,9 @@ export default class Tag {
   }
 
   /**
-   * Find some products from the DB.
+   * Find some tags from the DB.
    * @param page The pages to skip, defaults to 0
-   * @returns the {@link Tag.QUERY_LIMIT} first / from page products from the DB
+   * @returns the {@link Tag.QUERY_LIMIT} first / from page x tags from the DB
    */
   static async getTags(page?: number): Promise<Tag[]> {
     page = page || 0
@@ -61,6 +48,11 @@ export default class Tag {
     return res.results
   }
 
+  /**
+   * Get the tags matching the Regex
+   * @param tagnameBeginning Tag Regex to search for
+   * @returns The tag result from the DB
+   */
   static async search(tagnameBeginning: string): Promise<Tag[]> {
     return (
       await new DBService().query(
@@ -72,6 +64,7 @@ export default class Tag {
 
   /**
    * Save the tag to the database
+   * @param tagname The tag name to save
    * @returns The new Tag's id
    */
   static async save(tagname: string): Promise<any> {
@@ -85,6 +78,7 @@ export default class Tag {
 
   /**
    * Delete the tag to the database
+   * @param tagname The tag to delete
    * @returns The new Tag's id
    */
   static async delete(tagname: string): Promise<any> {
