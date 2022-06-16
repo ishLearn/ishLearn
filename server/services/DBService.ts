@@ -205,7 +205,7 @@ export function getCategories() {
 /**
  * Status of a Project
  */
-enum SupervisedByStatus {
+export enum SupervisedByStatus {
   SUBMISSION_OPEN = 'submissionOpen',
   SUBMISSION_CLOSED = 'submissionClosed',
   GRADED = 'graded',

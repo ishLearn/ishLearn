@@ -61,3 +61,40 @@ const handleAuthAccessHeader = (
     return true
   }
 }
+
+export const requireAuthenticated = (
+  req: Request,
+  res: Response<{}, UserRecord>,
+  next: NextFunction
+) => {
+  if (res.locals.unauthenticated || typeof res.locals.user?.id === 'undefined')
+    return res.status(403).json({ error: 'Not authenticated' })
+  next()
+}
+
+export const requireAuthenticatedAsTeacher = (
+  req: Request,
+  res: Response<{}, UserRecord>,
+  next: NextFunction
+) => {
+  if (
+    !res.locals.user ||
+    typeof res.locals.user.id === 'undefined' ||
+    !(res.locals.user.rank === 'teacher')
+  )
+    return res.status(403).json({ error: 'Not authenticated' })
+  next()
+}
+export const requireAuthenticatedAsStudent = (
+  req: Request,
+  res: Response<{}, UserRecord>,
+  next: NextFunction
+) => {
+  if (
+    !res.locals.user ||
+    typeof res.locals.user.id === 'undefined' ||
+    !(res.locals.user.rank === 'student')
+  )
+    return res.status(403).json({ error: 'Not authenticated' })
+  next()
+}
