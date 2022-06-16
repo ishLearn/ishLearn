@@ -549,7 +549,7 @@ export default class Product {
   }
 
   /**
-   * Remember a project (Table: `rememberProject`)
+   * Remember a project (add to Table: `rememberProject`)
    *
    * Issue #77
    * @param productId Project to link
@@ -569,7 +569,7 @@ export default class Product {
   }
 
   /**
-   * Remember a project (Table: `rememberProject`)
+   * Do not remember a project (remove from Table: `rememberProject`)
    *
    * Issue #77
    * @param productId Project to link
