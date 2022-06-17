@@ -64,6 +64,16 @@ app.use('/api/files/download', downloads)
 // Init socket.io connection
 io.on('connection', socketIOConnectionHandler)
 
+// Handle production builds
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(__dirname + '/frontend-dist/'))
+
+  // Handle Single Page Application
+  app.get(/.*/, (req, res) =>
+    res.sendFile(__dirname + '/frontend-dist/index.html')
+  )
+}
+
 // Bind HTTP server to port (the one created with express and socket.io)
 const PORT = process.env.PORT || 5000
 server.listen(PORT, () => {

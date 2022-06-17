@@ -1,8 +1,8 @@
 # ISH/Learn
 
-## Abstract 
+## Abstract
 
-ISHLearn is the new platform for teachers and students to coordinate projects and related submissions. Apart from the possibility to submit various file formats and choose from different visibilities to allow flexibility and privacy, ISHLearn enables teachers to give individual feedback. Lastly, projects can be  published to other students in order to enable faster and more agile learning with projects from other students, which allows those projects not to be forgotten, but to have a reason. 
+ISHLearn is the new platform for teachers and students to coordinate projects and related submissions. Apart from the possibility to submit various file formats and choose from different visibilities to allow flexibility and privacy, ISHLearn enables teachers to give individual feedback. Lastly, projects can be published to other students in order to enable faster and more agile learning with projects from other students, which allows those projects not to be forgotten, but to have a reason.
 
 ## DB
 
@@ -17,6 +17,14 @@ ISHLearn is the new platform for teachers and students to coordinate projects an
 ## Backend
 
 - Logging with `chalk@4.1.2` and a custom logger class
+
+### Scripts
+
+- start: start script for Docker container
+- startExt: run the result of `tsc`
+- dev: run the development server (with `nodemon`, requires `npm i -D`)
+- build: Build the app with `tsc` according to the configuration in `tsconfig.json`, requires `npm i -D`
+- test: Run tests with `jest`, requires `npm i -D`
 
 ### Requirements
 
