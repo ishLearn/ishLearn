@@ -77,7 +77,7 @@ if (process.env.NODE_ENV === 'production') {
 // Bind HTTP server to port (the one created with express and socket.io)
 const PORT = process.env.PORT || 5000
 server.listen(PORT, () => {
-  logger.listen(PORT)
+  logger.listen(PORT, process.env.NODE_ENV || 'development')
 })
 
 // Test if `ffmpeg` cli is installed on the system

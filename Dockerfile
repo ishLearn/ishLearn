@@ -13,7 +13,6 @@ RUN apt-get -y update
 RUN apt-get install -y ffmpeg
 # Arguments
 ARG NODE_ENV=production
-ARG PORT=80
 
 ENV NODE_ENV $NODE_ENV
 ENV PORT $PORT
@@ -27,4 +26,5 @@ EXPOSE 80
 # Copy files to container
 COPY --from=server-build /backend-src/server/dist . 
 
+USER node
 CMD ["npm", "start"]
