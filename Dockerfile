@@ -22,7 +22,7 @@ COPY --from=vue-build /frontend-src/dist ./frontend-dist
 COPY ["package.json", "package-lock.json*", "./"]
 # Final setup and installation of node
 RUN npm install
-EXPOSE 80
+EXPOSE $PORT
 # Copy files to container
 COPY --from=server-build /backend-src/server/dist . 
 
