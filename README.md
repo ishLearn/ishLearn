@@ -1,5 +1,7 @@
 # studybook
 
+[![Docker Image CI](https://github.com/ishLearn/ishLearn/actions/workflows/docker-image.yml/badge.svg)](https://github.com/ishLearn/ishLearn/actions/workflows/docker-image.yml)
+
 This contains the code to the web-DB project.
 
 ## DB
