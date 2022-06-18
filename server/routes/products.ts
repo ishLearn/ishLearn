@@ -259,7 +259,7 @@ router.put(
     if (typeof add !== 'boolean')
       return res
         .status(400)
-        .json({ msg: 'Should the collaborator be added or removed?' })
+        .json({ msg: 'Should the tags be added or removed?' })
 
     await Product.updateTags(productId, collaborator, tags, add)
     return res.status(200).json({
