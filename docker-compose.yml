@@ -1,3 +1,4 @@
+# File just for convenience, for production, the https://github.com/ishlearn/docker -> docker-compose.yml file will be used instead
 services:
   web-server:
     build: .
