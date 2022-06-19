@@ -1,0 +1,29 @@
+name: Docker Image CI
+
+on:
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repo
+      uses: actions/checkout@v3
+
+    - name: Login to DockerHub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_HUB_USERNAME }}
+        password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v2
+      with:
+        context: .
+        push: true
+        tags: ${{ secrets.DOCKER_HUB_USERNAME }}/ishlearn:latest
+        # cache only working with buildx: 
+        # cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/ishlearn:buildcache
+        # cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/ishlearn:buildcache,mode=max

@@ -1,5 +1,7 @@
 # ISH/Learn
 
+[![Docker Image CI](https://github.com/ishLearn/ishLearn/actions/workflows/docker-image.yml/badge.svg)](https://github.com/ishLearn/ishLearn/actions/workflows/docker-image.yml)
+
 ## Abstract
 
 ISHLearn is the new platform for teachers and students to coordinate projects and related submissions. Apart from the possibility to submit various file formats and choose from different visibilities to allow flexibility and privacy, ISHLearn enables teachers to give individual feedback. Lastly, projects can be published to other students in order to enable faster and more agile learning with projects from other students, which allows those projects not to be forgotten, but to have a reason.
