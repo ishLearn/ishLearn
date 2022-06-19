@@ -111,8 +111,11 @@ export default class Logger {
    * Logs the server's listening status to the console in bright green.
    *
    * @param {number | string} PORT Port the server is listening on
+   * @param {string} NODE_ENV Node environment
    */
-  listen(PORT: number | string) {
-    console.log(chalk.greenBright(`Listening to PORT ${PORT}`))
+  listen(PORT: number | string, NODE_ENV: string) {
+    console.log(
+      chalk.greenBright(`Listening to PORT ${PORT}, in ENV: ${NODE_ENV}`)
+    )
   }
 }

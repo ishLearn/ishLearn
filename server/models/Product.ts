@@ -34,8 +34,8 @@ export default class Product {
 
   static normalQuery = `SELECT ?? FROM products AS products WHERE products.visibility = "public"`
   static adminQuery = `SELECT ?? FROM products AS products`
-  static studentQuery = `SELECT ?? FROM products INNER JOIN uploadBy ON products.ID = uploadBy.PID WHERE (products.visibility = "public" OR uploadBy.UID = ?)`
-  static teachersQuery = `SELECT ?? FROM products INNER JOIN supervisedBy ON products.ID = supervisedBy.PID (WHERE products.visibility = "public" OR supervisedBy.TID = ?)`
+  static studentQuery = `SELECT ?? FROM products LEFT JOIN uploadBy ON products.ID = uploadBy.PID WHERE (products.visibility = "public" AND if(uploadBy.UID IS NULL, TRUE, products.createdBy = uploadBy.UID) OR uploadBy.UID = ?)`
+  static teachersQuery = `SELECT ?? FROM products LEFT JOIN supervisedBy ON products.ID = supervisedBy.PID (WHERE products.visibility = "public" OR supervisedBy.TID = ?)`
 
   /**
    * Create a Product based on
@@ -135,7 +135,7 @@ export default class Product {
         ? Product.studentQuery
         : loggedInUser.rank === 'admin'
         ? Product.adminQuery
-        : Product.teachersQuery) + ` AND ID = ? LIMIT 1`
+        : Product.teachersQuery) + ` AND ID = ? LIMIT 1` // LIMIT 1 so no further filtering required (to cross out double products)
 
     return (await new DBService().query(query, [fields, id])).results.map(
       Product.mapResultsToHash
@@ -279,7 +279,12 @@ export default class Product {
     ])
 
     const { results } = res
-    return results.map(
+    console.log(`GET Products form DB: ${results.length}`)
+    console.log(results)
+    console.log(await new DBService().query('SELECT * FROM products'))
+    console.log(query)
+
+    const resultProducts = results.map(
       (line: {
         ID: number
         title: string
@@ -299,7 +304,16 @@ export default class Product {
           line.ID
         )
       }
-    )
+    ) as Product[]
+
+    // Filter products to be unique, instead of potential doubles through JOIN with teachers table ((multiple teachers -> one product) => (multiple entries in result).filter())
+    const productIds: string[] = []
+    return resultProducts.filter(product => {
+      if (typeof product.id === 'undefined') return false
+      if (productIds.includes(product.id)) return false
+      productIds.push(product.id)
+      return true
+    })
   }
 
   /**
