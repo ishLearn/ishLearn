@@ -24,5 +24,6 @@ jobs:
         context: .
         push: true
         tags: ${{ secrets.DOCKER_HUB_USERNAME }}/ishlearn:latest
-        cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/ishlearn:buildcache
-        cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/ishlearn:buildcache,mode=max
+        # cache only working with buildx: 
+        # cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/ishlearn:buildcache
+        # cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/ishlearn:buildcache,mode=max
