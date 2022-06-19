@@ -115,16 +115,18 @@ export default class Product {
       typeof idInput === 'string' ? idInput : getHashFromIntID(idInput)
     )
 
-    let { ID } = foundProduct
-    if (
-      typeof ID !== 'undefined' &&
-      ID !== null &&
-      foundProduct.visibility === 'public'
-    ) {
-      if (typeof ID === 'number') ID = getHashFromIntID(ID)
+    if (foundProduct?.ID) {
+      let { ID } = foundProduct
+      if (
+        typeof ID !== 'undefined' &&
+        ID !== null &&
+        foundProduct.visibility === 'public'
+      ) {
+        if (typeof ID === 'number') ID = getHashFromIntID(ID)
 
-      // Resolve with redis hit
-      return Product.mapResultsToHash({ id: ID, ...foundProduct })
+        // Resolve with redis hit
+        return Product.mapResultsToHash({ id: ID, ...foundProduct })
+      }
     }
 
     const id = typeof idInput === 'string' ? getIntIDFromHash(idInput) : idInput
@@ -175,7 +177,7 @@ export default class Product {
             tagVExist
               ? `LEFT JOIN (SELECT tag, PID FROM pt WHERE tag IN ?) AS pt ON (products.ID = pt.PID)`
               : ''
-          } WHERE visibility = public AND title REGEXP ?
+          } WHERE visibility = "public" AND title REGEXP ?
           GROUP BY products.ID ${
             tagVExist || cIdsExist
               ? `HAVING ${tagVExist ? `COUNT(pt.tag) = ? ` : ''}${
