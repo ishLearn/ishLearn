@@ -4,5 +4,21 @@
   "javascript.preferences.quoteStyle": "single",
   "prettier.jsxSingleQuote": true,
   "prettier.singleQuote": true,
-  "prettier.semi": false
+  "prettier.semi": false,
+  "cSpell.words": [
+    "catname",
+    "Gaulke",
+    "hashids",
+    "ishlearn",
+    "refreshtokens",
+    "Schueler",
+    "scripthost",
+    "signin",
+    "signout",
+    "socketio",
+    "taggings",
+    "unhashed"
+  ],
+  "html.format.wrapLineLength": 100,
+  "editor.formatOnSave": true
 }
