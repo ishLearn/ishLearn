@@ -9,8 +9,8 @@ COPY . .
 RUN npm install -D && npm run build
 
 FROM node as ishlearn-server
-RUN /bin/bash apt-get -y update
-RUN /bin/bash apt-get install -y ffmpeg
+RUN apt-get -y update
+RUN apt-get install -y ffmpeg
 # Arguments
 ARG NODE_ENV=production
 
