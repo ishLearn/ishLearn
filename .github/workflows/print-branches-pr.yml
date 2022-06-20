@@ -3,19 +3,16 @@ name: Print Branch names
 on:
   pull_request
         
-
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
     - name: Echo Base
-      run: echo github.base_ref: ${{ github.base_ref }}
-    
-    steps:
+      run: echo github.base_ref ${{ github.base_ref }}
+
     - name: Echo Head
-      run: echo github.head_ref: ${{ github.head_ref }}
-    
-    steps:
+      run: echo github.head_ref ${{ github.head_ref }}
+
     - name: Echo Ref
-      run: echo github.ref: ${{ github.ref }}
+      run: echo github.ref ${{ github.ref }}
