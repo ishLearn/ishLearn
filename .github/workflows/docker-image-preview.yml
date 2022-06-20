@@ -1,6 +1,8 @@
 name: Docker Image Preview CI
 
-on: pull_request
+on:
+  pull_request:
+    types: [opened, reopened]
 
 jobs:
   build:
