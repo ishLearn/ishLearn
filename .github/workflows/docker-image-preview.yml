@@ -3,6 +3,9 @@ name: Docker Image Preview CI
 on:
   pull_request:
     types: [opened, reopened]
+    branches: 
+      - '**'        # matches every branch
+      - '!master'   # excludes master
 
 jobs:
   build:
