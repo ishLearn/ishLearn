@@ -1,7 +1,8 @@
 name: Print Branch names 
 
 on:
-  pull_request
+  pull_request:
+    types: opened
         
 jobs:
   build:
