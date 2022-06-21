@@ -31,7 +31,7 @@ ISHLearn is the new platform for teachers and students to coordinate projects an
 - Since the [`node-ffmpeg`-package](https://www.npmjs.com/package/ffmpeg) is used, it is required that `ffmpeg` (cl utility) is installed on the system.
 - A `redis-server` must be running (preferrably on the same machine) for enabling of fast caching
   - Best to use is the preview image from [`RedisLabs`](https://hub.docker.com/r/redislabs/redismod) (`docker run -p 6379:6379 redislabs/redismod:preview`)
-- An S3-server (e.g., the docker image from [scality/s3server](https://hub.docker.com/r/scality/s3server/))
+- An S3-server (e.g., the docker image from [scality/s3server](https://hub.docker.com/r/scality/s3server/) (e.g., on `linux/amd64`-machines) or [minio/minio](https://hub.docker.com/r/minio/minio) (e.g., on `linux/arm64`-machines, that do not run `scality/s3server`))
 
 ### Additional information
 
