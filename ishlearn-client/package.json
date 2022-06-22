@@ -14,6 +14,7 @@
     "bootstrap-icons": "^1.8.2",
     "core-js": "^3.8.3",
     "jquery": "^3.6.0",
+    "mavon-editor": "^3.0.0-beta",
     "pinia": "^2.0.14",
     "popper.js": "^1.16.1",
     "vue": "^3.2.13",
@@ -28,13 +29,13 @@
     "@vue/cli-plugin-typescript": "~5.0.0",
     "@vue/cli-plugin-vuex": "~5.0.0",
     "@vue/cli-service": "~5.0.0",
+    "@vue/compiler-sfc": "^3.2.13",
     "@vue/eslint-config-airbnb": "^6.0.0",
     "@vue/eslint-config-typescript": "^9.1.0",
     "eslint": "^7.32.0",
     "eslint-plugin-import": "^2.25.3",
     "eslint-plugin-vue": "^8.0.3",
     "eslint-plugin-vuejs-accessibility": "^1.1.0",
-    "typescript": "~4.5.5",
-    "@vue/compiler-sfc": "^3.2.13"
+    "typescript": "~4.5.5"
   }
 }

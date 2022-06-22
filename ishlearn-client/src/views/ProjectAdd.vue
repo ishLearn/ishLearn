@@ -1,3 +1,12 @@
+<script setup lang="ts">
+import Vue from 'vue'
+import { ref } from 'vue'
+import mavonEditor from 'mavon-editor'
+import 'mavon-editor/dist/css/index.css'
+
+const mdtext = ref('')
+</script>
+
 <template>
   <div>
     <h1>Hier kannst du dein Projekt hinzufügen.</h1>
@@ -12,5 +21,11 @@
     </p>
 
     <button class="btn btn-primary">Dieser Knopft Submitted nichts</button>
+
+    <p>TEST</p>
+
+    <br /><br /><br />
+
+    <mavon-editor v-model="mdtext" />
   </div>
 </template>
