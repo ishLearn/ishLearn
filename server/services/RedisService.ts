@@ -5,6 +5,8 @@ import { KeyValue } from '../types/redis'
 
 import Product from '../models/Product'
 
+let useRedis: boolean = true
+
 // Redis client Setup
 const REDIS_URL = `redis://${process.env.REDIS_URL || 'localhost:6379'}`
 const REDIS_TTL = Number(process.env.REDIS_TTL) || 2 * 60 * 60 // Default to two hours
@@ -47,11 +49,16 @@ export let productRepo: Repository<ProductEntity>
  * Try to connect Redis client to server
  */
 export const connectRedisClient = async () => {
-  await client.connect()
-  clientOM = await new Client().use(client)
+  try {
+    await client.connect()
+    clientOM = await new Client().use(client)
 
-  productRepo = clientOM.fetchRepository(productSchema)
-  await productRepo.createIndex()
+    productRepo = clientOM.fetchRepository(productSchema)
+    await productRepo.createIndex()
+  } catch (err) {
+    console.log('Not using Redis.')
+    useRedis = false
+  }
 }
 
 // Methods for easy interaction
@@ -61,6 +68,8 @@ export const connectRedisClient = async () => {
  * @returns The Redis ID for the added product
  */
 export const addProduct = async (p: Product) => {
+  if (!useRedis) return
+
   const alreadyAdded: {
     id: string
     product: ProductEntity | null
@@ -70,6 +79,7 @@ export const addProduct = async (p: Product) => {
   }
   if (p.id) {
     const added = await searchProductById(p.id)
+    if (!added) return
     alreadyAdded.product = added
     alreadyAdded.id = added.ID ?? ''
   }
@@ -95,6 +105,7 @@ export const addProduct = async (p: Product) => {
  * @returns The number of deleted entries.
  */
 export const clearProductRepo = async () => {
+  if (!useRedis) return
   const allIds = (await productRepo.search().returnAll()).map(
     (p: ProductEntity) => p.entityId
   )
@@ -109,6 +120,8 @@ export const clearProductRepo = async () => {
  * @see #connectRedisClient
  */
 export const getRedisClient = () => {
+  if (!useRedis) throw new Error('Redis is not available')
+
   if (client == null || !client.isOpen)
     throw new Error(`Redis Client not connected!`)
   return client
@@ -119,6 +132,8 @@ export const getRedisClient = () => {
  * @returns true if the client was connected and successfully closed, false if the client was not connected.
  */
 export const closeRedisConnection = async () => {
+  if (!useRedis) return false
+
   if (client == null || !client.isOpen) return false
 
   await clientOM.close()
@@ -132,6 +147,8 @@ export const closeRedisConnection = async () => {
  * @returns The value associated with the key or null if the value was not found
  */
 export const getValue = async (key: string) => {
+  if (!useRedis) return
+
   return await getRedisClient().get(key)
 }
 /**
@@ -141,6 +158,8 @@ export const getValue = async (key: string) => {
  * @returns The result of SET operation
  */
 export const setValue = async (key: string, value: string) => {
+  if (!useRedis) return
+
   return await getRedisClient().set(key, value)
 }
 /**
@@ -150,6 +169,8 @@ export const setValue = async (key: string, value: string) => {
  * @returns The result of the APPEND operation
  */
 export const appendValue = async (key: string, value: string) => {
+  if (!useRedis) return
+
   return await getRedisClient().append(key, value)
 }
 /**
@@ -159,6 +180,8 @@ export const appendValue = async (key: string, value: string) => {
  * @returns An Array of ProductEntities
  */
 export const searchProducts = async (offset: number = 0, ...k: KeyValue[]) => {
+  if (!useRedis) return []
+
   const search = productRepo.search()
   k.forEach(k => {
     search.where(k.key).match(k.value)
@@ -172,5 +195,7 @@ export const searchProducts = async (offset: number = 0, ...k: KeyValue[]) => {
  * @returns The result found in Redis or a ProductEntity with only `null`-values.
  */
 export const searchProductById = (id: string) => {
+  if (!useRedis) return
+
   return productRepo.fetch(id)
 }
