@@ -18,7 +18,7 @@ import { addProduct, searchProductById } from '../services/RedisService'
  * It's Primary Key is a AUTO-INCREMENT INT ID, for the Frontend
  * hashed with the {@link https://www.npmjs.com/package/hashids hashids} package.
  *
- * @see {@link Product.id}
+ * @see {@link Product["id"]}
  * @author @SebastianThomas
  */
 export default class Product {
@@ -502,7 +502,7 @@ export default class Product {
    * @param collaboratorId the hashed collaborator
    * @param tags the tags to add or remove, should always be an array of strings
    * @param add whether to add or to remove the tags
-   * @returns am array of all Promise results
+   * @returns Nothing
    */
   static async updateTags(
     productId: string,
@@ -517,7 +517,6 @@ export default class Product {
     return add
       ? await this.addTags(pid, cid, tags)
       : await this.removeTags(pid, cid, tags)
-    throw new Error(`User is not valid; has not been entered`)
   }
 
   /**
@@ -551,7 +550,7 @@ export default class Product {
   static async removeTags(pid: NumberLike, cid: NumberLike, tags: string[]) {
     await Product.requireUserCanWrite(pid, cid)
 
-    const query = 'DELETE FROM productHasTag WHERE PID = ? AND UID = ?'
+    const query = 'DELETE FROM productHasTag WHERE PID = ? AND tag = ?'
     return await Promise.all([
       ...tags.map(async tag => {
         return await new DBService().query(query, [pid, tag])
