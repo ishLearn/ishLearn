@@ -3,8 +3,6 @@ name: Docker Image Preview CI
 on:
   pull_request:
     types: [opened, reopened]
-    branches-ignore:
-      - master
 
 jobs:
   build:
