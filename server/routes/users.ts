@@ -3,6 +3,7 @@ import { body, validationResult } from 'express-validator'
 import User from '../models/User'
 import { UserRecord } from '../types/users'
 import DBService from '../services/DBService'
+import { requireAuthenticated } from '../middleware/authMiddleware'
 
 export const validateResult = (
   req: express.Request,
@@ -248,6 +249,45 @@ router.put(
 
     const affectedRows = User.uploadProfilePictureThenSaveToDB(user.id, text)
     return res.status(200).json({ msg: 'Profile text updated', affectedRows })
+  }
+)
+
+// ADD / REMOVE TAGS
+
+// PUT /api/users/tags
+router.put(
+  '/tags',
+  requireAuthenticated,
+  body('tags').isArray(),
+  body('add').isBoolean(),
+  validateResult,
+  async (
+    req: express.Request<
+      { id: string },
+      {},
+      { tags?: string[]; add?: boolean }
+    >,
+    res: express.Response<{}, UserRecord>
+  ) => {
+    const { tags = [], add } = req.body
+    const productId: string = req.params.id
+
+    const user = res.locals.user?.id
+    if (!user) return res.status(403).json({ error: 'Not authenticated' })
+
+    if (tags.length < 1)
+      return res.status(400).json({ error: 'Must send at least one tag!' })
+
+    if (typeof add !== 'boolean')
+      return res
+        .status(400)
+        .json({ msg: 'Should the tags be added or removed?' })
+
+    await User.updateTags(user, tags, add)
+    return res.status(200).json({
+      success: true,
+      productId,
+    })
   }
 )
 
