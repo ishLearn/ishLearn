@@ -5,6 +5,7 @@ import { GenericInputs } from '@/types/GenericInputData'
 import SmallForm from '@/components/SmallForm.vue'
 import router from '@/router'
 import { validateEmail, validatePasswort, validateMandatory } from '@/util/inputValidation'
+import { useRoute } from 'vue-router'
 
 const inputs: GenericInputs<string> = {
   firstName: {
@@ -93,7 +94,7 @@ const onSignup = async (e: Event) => {
       password: inputs.passwort.value.value,
       rank: isSchuelerInput.isSchueler.value.value,
     })
-    router.push({ name: 'UserLogin' })
+    router.push({ name: 'UserLogin', query: useRoute().query })
   } catch (err) {
     alert('Etwas ist mit deiner Registrierung schiefgelaufen.')
     console.log('Error while Registering:')
@@ -116,7 +117,7 @@ const onSignup = async (e: Event) => {
       <template #footer>
         <p>
           Du hast bereits einen Account? Dann logge dich
-          <router-link :to="{ name: 'UserLogin' }">hier</router-link> ein.
+          <router-link :to="{ name: 'UserLogin', query: useRoute().query }">hier</router-link> ein.
         </p>
       </template>
     </SmallForm>
