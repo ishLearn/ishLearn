@@ -37,12 +37,14 @@ class AuthService {
   static async register({
     firstName,
     lastName,
+    birthday,
     email,
     password,
     rank,
   }: {
     firstName: string
     lastName: string
+    birthday: string
     email: string
     password: string
     rank: boolean
@@ -51,6 +53,7 @@ class AuthService {
     return api.post('/users/', {
       firstName,
       lastName,
+      birthday,
       email,
       password,
       rank: r,

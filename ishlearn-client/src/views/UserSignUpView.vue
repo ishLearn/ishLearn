@@ -26,6 +26,15 @@ const inputs: GenericInputs<string> = {
     mandatory: true,
     placeholder: '',
   },
+  birthday: {
+    value: ref(''),
+    type: 'date',
+    label: 'Dein Geburtsdatum',
+    id: 'birthday',
+    name: 'birthday',
+    mandatory: true,
+    placeholder: '',
+  },
   email: {
     value: ref(''),
     type: 'email',
@@ -66,6 +75,7 @@ const isSchuelerInput: GenericInputs<boolean> = {
   },
 }
 
+const query = useRoute().query
 const onSignup = async (e: Event) => {
   e.preventDefault()
 
@@ -90,15 +100,23 @@ const onSignup = async (e: Event) => {
     await AuthService.register({
       firstName: inputs.firstName.value.value,
       lastName: inputs.lastName.value.value,
+      birthday: inputs.birthday.value.value,
       email: inputs.email.value.value,
       password: inputs.passwort.value.value,
       rank: isSchuelerInput.isSchueler.value.value,
     })
-    router.push({ name: 'UserLogin', query: useRoute().query })
   } catch (err) {
     alert('Etwas ist mit deiner Registrierung schiefgelaufen.')
     console.log('Error while Registering:')
     console.log(err)
+    return
+  }
+  try {
+    router.push({ name: 'UserLogin', query: query })
+  } catch (err) {
+    console.log('Fehler beim redirect.')
+    console.log(err)
+    router.push({ name: 'UserLogin' })
   }
 }
 </script>
