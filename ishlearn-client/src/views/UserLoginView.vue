@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRoute } from 'vue-router'
 import AuthService from '@/services/auth.service'
 import { validateEmail, validatePasswort, validateMandatory } from '@/util/inputValidation'
 import { GenericInputs } from '@/types/GenericInputData'
@@ -27,6 +28,7 @@ const inputs: GenericInputs<string> = {
   },
 }
 
+const redirect = useRoute().query.redirect
 const onSignup = async (e: Event) => {
   e.preventDefault()
 
@@ -47,11 +49,18 @@ const onSignup = async (e: Event) => {
       email: inputs.email.value.value,
       password: inputs.passwort.value.value,
     })
-    router.push({ name: 'Home' })
   } catch (err) {
     alert('Login fehlgeschlagen.')
     console.log('Error while Login:')
     console.log(err)
+    return
+  }
+  try {
+    router.push({ path: redirect || '/' })
+  } catch (err) {
+    console.log('Error during routing back.')
+    console.log(err)
+    router.push({ name: 'Home' })
   }
 }
 </script>
@@ -65,7 +74,8 @@ const onSignup = async (e: Event) => {
       <template #footer>
         <p>
           Du hast noch keinen Account? Dann erstelle dir
-          <router-link :to="{ name: 'UserSignup' }">hier</router-link> einen.
+          <router-link :to="{ name: 'UserSignup', query: useRoute().query }">hier</router-link>
+          einen.
         </p>
       </template>
     </SmallForm>
