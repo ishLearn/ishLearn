@@ -400,4 +400,49 @@ export default class User {
     )
     return mediaPartOfProduct.results.insertId as NumberLike
   }
+
+  /**
+   * Update tags for the user.
+   * @param userId the hashed product id
+   * @param tags the tags to add or remove, should always be an array of strings
+   * @param add whether to add or to remove the tags
+   * @returns am array of all Promise results
+   */
+  static async updateTags(userId: string, tags: string[], add: boolean) {
+    const uid = getIntIDFromHash(userId)
+
+    return add
+      ? await this.addTags(uid, tags)
+      : await this.removeTags(uid, tags)
+  }
+
+  /**
+   * Update: Add tags for the User.
+   * @param uid the user id
+   * @param tags the tags to add, should always be an array of strings
+   * @returns an array of all Promise results
+   */
+  static async addTags(uid: NumberLike, tags: string[]) {
+    const query = 'INSERT INTO productHasTag (UID, tag) VALUES (?, ?)'
+    return await Promise.all([
+      ...tags.map(async tag => {
+        return await new DBService().query(query, [uid, tag])
+      }),
+    ])
+  }
+
+  /**
+   * Update: Remove tags for the User.
+   * @param uid the unhashed user id
+   * @param tags the tags to remove, should always be an array of strings
+   * @returns an array of all Promise results
+   */
+  static async removeTags(uid: NumberLike, tags: string[]) {
+    const query = 'DELETE FROM userHasTag WHERE UID = ? AND tag = ?'
+    return await Promise.all([
+      ...tags.map(async tag => {
+        return await new DBService().query(query, [uid, tag])
+      }),
+    ])
+  }
 }

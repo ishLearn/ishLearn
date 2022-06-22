@@ -1,8 +1,10 @@
 # ISH/Learn
 
-## Abstract 
+[![Docker Image CI](https://github.com/ishLearn/ishLearn/actions/workflows/docker-image.yml/badge.svg)](https://github.com/ishLearn/ishLearn/actions/workflows/docker-image.yml)
 
-ISHLearn is the new platform for teachers and students to coordinate projects and related submissions. Apart from the possibility to submit various file formats and choose from different visibilities to allow flexibility and privacy, ISHLearn enables teachers to give individual feedback. Lastly, projects can be  published to other students in order to enable faster and more agile learning with projects from other students, which allows those projects not to be forgotten, but to have a reason. 
+## Abstract
+
+ISHLearn is the new platform for teachers and students to coordinate projects and related submissions. Apart from the possibility to submit various file formats and choose from different visibilities to allow flexibility and privacy, ISHLearn enables teachers to give individual feedback. Lastly, projects can be published to other students in order to enable faster and more agile learning with projects from other students, which allows those projects not to be forgotten, but to have a reason.
 
 ## DB
 
@@ -18,12 +20,21 @@ ISHLearn is the new platform for teachers and students to coordinate projects an
 
 - Logging with `chalk@4.1.2` and a custom logger class
 
+### Scripts
+
+- start: start script for Docker container
+- startExt: run the result of `tsc`
+- dev: run the development server (with `nodemon`, requires `npm i -D`)
+- build: Build the app with `tsc` according to the configuration in `tsconfig.json`, requires `npm i -D`
+- test: Run tests with `jest`, requires `npm i -D`
+
 ### Requirements
 
 - Since the [`node-ffmpeg`-package](https://www.npmjs.com/package/ffmpeg) is used, it is required that `ffmpeg` (cl utility) is installed on the system.
 - A `redis-server` must be running (preferrably on the same machine) for enabling of fast caching
   - Best to use is the preview image from [`RedisLabs`](https://hub.docker.com/r/redislabs/redismod) (`docker run -p 6379:6379 redislabs/redismod:preview`)
-- An S3-server (e.g., the docker image from [scality/s3server](https://hub.docker.com/r/scality/s3server/))
+  - The redis server is _optional_, but decreases latency when products have recently already been pulled from the DB. This is because the `redislabs/redismod:preview`-package does not work with `arm64`-architecture.
+- An S3-server (e.g., the docker image from [scality/s3server](https://hub.docker.com/r/scality/s3server/) (e.g., on `linux/amd64`-machines) or [minio/minio](https://hub.docker.com/r/minio/minio) (e.g., on `linux/arm64`-machines, that do not run `scality/s3server`))
 
 ### Additional information
 

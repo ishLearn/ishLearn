@@ -259,12 +259,42 @@ router.put(
     if (typeof add !== 'boolean')
       return res
         .status(400)
-        .json({ msg: 'Should the collaborator be added or removed?' })
+        .json({ msg: 'Should the tags be added or removed?' })
 
     await Product.updateTags(productId, collaborator, tags, add)
     return res.status(200).json({
       success: true,
       productId,
+    })
+  }
+)
+
+// REMEMBER PRODUCT
+// POST /api/products/remember/:id
+// Remember a product
+router.post(
+  '/remember/:pid',
+  requireAuthenticated,
+  body('add').isBoolean(),
+  async (
+    req: express.Request<{ pid: string }, {}, { add: boolean }>,
+    res: express.Response<{}, UserRecord>
+  ) => {
+    const productId = req.params.pid
+    const userId = res.locals.user?.id
+    if (!userId)
+      return res
+        .status(403)
+        .json({ error: 'Must be logged in to change remembered products.' })
+
+    if (req.body.add) await Product.remember(productId, userId)
+    else await Product.doNotRemember(productId, userId)
+
+    return res.status(200).json({
+      success: true,
+      msg: `Successfully ${
+        req.body.add ? 'added project to' : 'removed project from'
+      } remembered list.`,
     })
   }
 )
@@ -281,11 +311,11 @@ router.post(
   body('add').isBoolean(),
   validateResult,
   async (
-    req: express.Request<{ id: string }>,
+    req: express.Request<{ id: string }, {}, { mediaId: string; add: boolean }>,
     res: express.Response<{}, UserRecord>
   ) => {
     const productId: string = req.params.id
-    const { mediaId, add }: { mediaId: string; add: boolean } = req.body
+    const { mediaId, add } = req.body
     if (add)
       return res.status(400).json({
         msg: 'Cannot blindly add media, will automatically be linked with product when upload is successful.',

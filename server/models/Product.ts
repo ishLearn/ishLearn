@@ -18,7 +18,7 @@ import { addProduct, searchProductById } from '../services/RedisService'
  * It's Primary Key is a AUTO-INCREMENT INT ID, for the Frontend
  * hashed with the {@link https://www.npmjs.com/package/hashids hashids} package.
  *
- * @see {@link Product.id}
+ * @see {@link Product["id"]}
  * @author @SebastianThomas
  */
 export default class Product {
@@ -34,8 +34,8 @@ export default class Product {
 
   static normalQuery = `SELECT ?? FROM products AS products WHERE products.visibility = "public"`
   static adminQuery = `SELECT ?? FROM products AS products`
-  static studentQuery = `SELECT ?? FROM products INNER JOIN uploadBy ON products.ID = uploadBy.PID WHERE (products.visibility = "public" OR uploadBy.UID = ?)`
-  static teachersQuery = `SELECT ?? FROM products INNER JOIN supervisedBy ON products.ID = supervisedBy.PID (WHERE products.visibility = "public" OR supervisedBy.TID = ?)`
+  static studentQuery = `SELECT ?? FROM products LEFT JOIN uploadBy ON products.ID = uploadBy.PID WHERE (products.visibility = "public" AND if(uploadBy.UID IS NULL, TRUE, products.createdBy = uploadBy.UID) OR uploadBy.UID = ?)`
+  static teachersQuery = `SELECT ?? FROM products LEFT JOIN supervisedBy ON products.ID = supervisedBy.PID (WHERE products.visibility = "public" OR supervisedBy.TID = ?)`
 
   /**
    * Create a Product based on
@@ -115,16 +115,18 @@ export default class Product {
       typeof idInput === 'string' ? idInput : getHashFromIntID(idInput)
     )
 
-    let { ID } = foundProduct
-    if (
-      typeof ID !== 'undefined' &&
-      ID !== null &&
-      foundProduct.visibility === 'public'
-    ) {
-      if (typeof ID === 'number') ID = getHashFromIntID(ID)
+    if (foundProduct?.ID) {
+      let { ID } = foundProduct
+      if (
+        typeof ID !== 'undefined' &&
+        ID !== null &&
+        foundProduct.visibility === 'public'
+      ) {
+        if (typeof ID === 'number') ID = getHashFromIntID(ID)
 
-      // Resolve with redis hit
-      return Product.mapResultsToHash({ id: ID, ...foundProduct })
+        // Resolve with redis hit
+        return Product.mapResultsToHash({ id: ID, ...foundProduct })
+      }
     }
 
     const id = typeof idInput === 'string' ? getIntIDFromHash(idInput) : idInput
@@ -135,7 +137,7 @@ export default class Product {
         ? Product.studentQuery
         : loggedInUser.rank === 'admin'
         ? Product.adminQuery
-        : Product.teachersQuery) + ` AND ID = ? LIMIT 1`
+        : Product.teachersQuery) + ` AND ID = ? LIMIT 1` // LIMIT 1 so no further filtering required (to cross out double products)
 
     return (await new DBService().query(query, [fields, id])).results.map(
       Product.mapResultsToHash
@@ -175,7 +177,7 @@ export default class Product {
             tagVExist
               ? `LEFT JOIN (SELECT tag, PID FROM pt WHERE tag IN ?) AS pt ON (products.ID = pt.PID)`
               : ''
-          } WHERE visibility = public AND title REGEXP ?
+          } WHERE visibility = "public" AND title REGEXP ?
           GROUP BY products.ID ${
             tagVExist || cIdsExist
               ? `HAVING ${tagVExist ? `COUNT(pt.tag) = ? ` : ''}${
@@ -279,7 +281,12 @@ export default class Product {
     ])
 
     const { results } = res
-    return results.map(
+    console.log(`GET Products form DB: ${results.length}`)
+    console.log(results)
+    console.log(await new DBService().query('SELECT * FROM products'))
+    console.log(query)
+
+    const resultProducts = results.map(
       (line: {
         ID: number
         title: string
@@ -299,7 +306,16 @@ export default class Product {
           line.ID
         )
       }
-    )
+    ) as Product[]
+
+    // Filter products to be unique, instead of potential doubles through JOIN with teachers table ((multiple teachers -> one product) => (multiple entries in result).filter())
+    const productIds: string[] = []
+    return resultProducts.filter(product => {
+      if (typeof product.id === 'undefined') return false
+      if (productIds.includes(product.id)) return false
+      productIds.push(product.id)
+      return true
+    })
   }
 
   /**
@@ -488,7 +504,7 @@ export default class Product {
    * @param collaboratorId the hashed collaborator
    * @param tags the tags to add or remove, should always be an array of strings
    * @param add whether to add or to remove the tags
-   * @returns am array of all Promise results
+   * @returns Nothing
    */
   static async updateTags(
     productId: string,
@@ -503,7 +519,6 @@ export default class Product {
     return add
       ? await this.addTags(pid, cid, tags)
       : await this.removeTags(pid, cid, tags)
-    throw new Error(`User is not valid; has not been entered`)
   }
 
   /**
@@ -537,7 +552,7 @@ export default class Product {
   static async removeTags(pid: NumberLike, cid: NumberLike, tags: string[]) {
     await Product.requireUserCanWrite(pid, cid)
 
-    const query = 'DELETE FROM productHasTag WHERE PID = ? AND UID = ?'
+    const query = 'DELETE FROM productHasTag WHERE PID = ? AND tag = ?'
     return await Promise.all([
       ...tags.map(async tag => {
         return await new DBService().query(query, [pid, tag])
@@ -549,8 +564,47 @@ export default class Product {
   }
 
   /**
+   * Remember a project (add to Table: `rememberProject`)
+   *
+   * Issue #77
+   * @param productId Project to link
+   * @param userId User to link
+   * @returns Nothing
+   */
+  static async remember(productId: string, userId: string): Promise<any> {
+    const pid = getIntIDFromHash(productId)
+    const uid = getIntIDFromHash(userId)
+
+    return (
+      await new DBService().query(
+        `INSERT INTO rememberProject (PID, SID) VALUES (?, ?)`,
+        [pid, uid]
+      )
+    ).results
+  }
+
+  /**
+   * Do not remember a project (remove from Table: `rememberProject`)
+   *
+   * Issue #77
+   * @param productId Project to link
+   * @param userId User to link
+   * @returns Nothing
+   */
+  static async doNotRemember(productId: string, userId: string): Promise<any> {
+    const pid = getIntIDFromHash(productId)
+    const uid = getIntIDFromHash(userId)
+
+    return (
+      await new DBService().query(
+        `DELETE FROM rememberProject WHERE PID = ? AND SID = ?`,
+        [pid, uid]
+      )
+    ).results
+  }
+
+  /**
    * Update: Add an existing media to the product
-   * UNUSED; use ADD Media instead
    * @param productId the hashed product id
    * @param collaboratorId the hashed collaborator id
    * @param mediaId the hashed media id to add
@@ -608,6 +662,13 @@ export default class Product {
     return result
   }
 
+  /**
+   * Require the authenticated user to have writing permissions on the project
+   * @param pid Project ID to control
+   * @param uid User ID that is logged in
+   * @returns `true` if the user is allowed
+   * @throws an error if the user is not allowed to write
+   */
   static async requireUserCanWrite(
     pid: NumberLike,
     uid: NumberLike
@@ -626,6 +687,13 @@ export default class Product {
     return valid
   }
 
+  /**
+   * Require the authenticated user to be a teacher having supervisedBy status on the project.
+   * @param pid Project ID to control
+   * @param tid User ID that is logged in
+   * @returns `true` if the user is allowed
+   * @throws an error if the user is not allowed to write
+   */
   static async requireTeacherCanUpdate(
     pid: NumberLike,
     tid: NumberLike
