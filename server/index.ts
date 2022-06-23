@@ -32,6 +32,7 @@ import DBService from './services/DBService'
 import { connectRedisClient as startRedis } from './services/RedisService'
 
 import { exec } from 'child_process'
+import EmailService from './services/EmailService'
 
 /**
  * Global Service for DB connections
