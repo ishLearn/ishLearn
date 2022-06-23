@@ -1,5 +1,4 @@
-import AuthService from '@/services/auth.service'
-import { createRouter, createWebHashHistory, RouteRecordRaw, useRoute } from 'vue-router'
+import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 
 const routes: Array<RouteRecordRaw> = [
