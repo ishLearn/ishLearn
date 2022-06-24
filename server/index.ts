@@ -10,17 +10,6 @@ dotenv.config()
 // Import socket.io handler
 import { socketIOConnectionHandler } from './socketio/socketIOConnectionHandler'
 
-// Import api routes
-import users from './routes/users'
-import auth from './routes/auth'
-import products from './routes/products'
-import tags from './routes/tags'
-import categories from './routes/categories'
-import uploads from './routes/files/uploads'
-import downloads from './routes/files/downloads'
-// Import middleware
-import { authMiddleware } from './middleware/authMiddleware'
-
 // Initialize logger
 import Logger from './utils/Logger'
 /**
@@ -33,6 +22,17 @@ import { connectRedisClient as startRedis } from './services/RedisService'
 
 import { exec } from 'child_process'
 import EmailService from './services/EmailService'
+
+// Import api routes
+import users from './routes/users'
+import auth from './routes/auth'
+import products from './routes/products'
+import tags from './routes/tags'
+import categories from './routes/categories'
+import uploads from './routes/files/uploads'
+import downloads from './routes/files/downloads'
+// Import middleware
+import { authMiddleware } from './middleware/authMiddleware'
 
 /**
  * Global Service for DB connections

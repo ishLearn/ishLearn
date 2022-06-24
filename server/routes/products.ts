@@ -6,11 +6,7 @@ import { validateResult } from './users'
 import Product from '../models/Product'
 import { UserRecord } from '../types/users'
 import { NumberLike } from 'hashids/cjs/util'
-import {
-  getIntIDFromHash,
-  getSupervisedByStatus,
-  SupervisedByStatus,
-} from '../services/DBService'
+import { getIntIDFromHash, SupervisedByStatus } from '../services/DBService'
 import {
   requireAuthenticated,
   requireAuthenticatedAsStudent,
@@ -23,7 +19,6 @@ const router = express.Router()
 
 // GET /api/products/page/:page
 // Get a list of the first fifty products that have a visibility of 'public'
-// TODO: Setup pagination
 router.get(
   '/page/:page',
   async (req: express.Request, res: express.Response<{}, UserRecord>) => {
