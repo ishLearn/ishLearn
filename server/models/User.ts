@@ -17,6 +17,9 @@ const saltRounds = Number(process.env.SALT_ROUNDS) || 10
  * Its Primary Key is a AUTO-INCREMENT INT ID, for the Frontend
  * hashed with the {@link https://www.npmjs.com/package/hashids hashids} package.
  *
+ * If {@link User.emailTmp} matches {@link User.email}, then the user are newly
+ * signed up and have not confirmed their E-Mail-Address yet.
+ *
  * @see {@link User.id}
  * @author Sebastian Thomas
  */
@@ -66,7 +69,8 @@ export default class User {
     profilePicture: string | null,
     profileText: string | null,
     birthday?: Date | null,
-    id?: ID | number
+    id?: ID | number,
+    emailTmp?: string | null
   ) {
     this.email = email
     this.password = password
@@ -77,6 +81,7 @@ export default class User {
     this.profileText = profileText
     this.birthday = typeof birthday !== 'undefined' ? birthday : null
     this.id = typeof id === 'number' ? getHashFromIntID(id) : id
+    this.emailTmp = typeof emailTmp !== 'undefined' ? emailTmp : null
   }
 
   /**
@@ -247,7 +252,7 @@ export default class User {
     if (typeof this.id !== 'undefined')
       throw new Error('Product has already been saved')
     const res = await new DBService().query(
-      `INSERT INTO users (email, password, rank, firstName, lastName, profileText, profilePicture, birthday) VALUES (?)`,
+      `INSERT INTO users (email, password, rank, firstName, lastName, profileText, profilePicture, birthday, emailTmp) VALUES (?)`,
       [
         [
           this.email,
@@ -258,6 +263,7 @@ export default class User {
           this.profileText,
           this.profilePicture,
           this.birthday,
+          this.emailTmp,
         ],
       ]
     )
@@ -286,9 +292,11 @@ export default class User {
    * @param uid The (unhashed) ID of the user
    * @returns The number of affected DB rows
    */
-  static async confirmTmpEmail(uid: ID) {
+  static async confirmTmpEmail(uid: ID | number) {
     if (typeof uid === 'undefined') throw new Error('Invalid UID')
-    const { emailTmp } = await User.getFullUserById(uid)
+    const { emailTmp } = await User.getFullUserById(
+      typeof uid === 'number' ? getHashFromIntID(uid) : uid
+    )
     const id = typeof uid === 'string' ? getIntIDFromHash(uid) : uid
 
     if (emailTmp === null) throw new Error('Email is not to be confirmed.')
@@ -299,8 +307,6 @@ export default class User {
     )
     return res.results.affectedRows
   }
-
-  // TODO: Implement routes for email verification
 
   /**
    * Update the password of a user.

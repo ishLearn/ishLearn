@@ -10,6 +10,8 @@ export default class EmailService {
 
   static actions = {
     pwdForgotten: 'passwordReset',
+    confirmNewEmail: 'confirmNewEmail',
+    confirmFirstEmail: 'confirmInitialEmail',
   }
 
   static getConnection() {
@@ -51,9 +53,8 @@ export default class EmailService {
    * @returns Nothing
    */
   static async sendPwdForgottenEmail(user: User) {
-    // Validate user is logged in
-    if (typeof user.id === 'undefined')
-      throw new Error('User is not correctly authenticated')
+    // Validate user is found in the DB
+    if (typeof user.id === 'undefined') throw new Error('User was not found')
 
     // Generate a new Email token and save it to DB
     const newToken = await EmailToken.getNewToken(
@@ -74,6 +75,40 @@ export default class EmailService {
       user.email,
       `${user.firstName} ${user.lastName}`,
       'Passwort zurücksetzen',
+      htmlMessage
+    )
+  }
+
+  /**
+   * Send a mail to reset the password.
+   * @param user The user to target
+   * @returns Nothing
+   */
+  static async sendConfirmAddressEmail(user: User, initial: boolean = true) {
+    // Validate user is found in the DB
+    if (typeof user.id === 'undefined') throw new Error('User was not found')
+
+    // Generate a new Email token and save it to DB
+    const newToken = await EmailToken.getNewToken(
+      user.id,
+      EmailService.actions.confirmNewEmail
+    )
+
+    // get redirect URL
+    // TODO: Implement Frontend route to /callback/:token
+    const redirectURL = `${process.env.BASE_URL}/callback/${newToken.token}`
+
+    // HTML-content of the Email
+    const htmlMessage = `
+      Hier können Sie Ihre${
+        initial && ' neue'
+      } E-Mail bestätigen: <a>${redirectURL}</a>
+    `
+    // Send the email
+    return await EmailService.sendEmail(
+      user.email,
+      `${user.firstName} ${user.lastName}`,
+      'E-Mail-Adresse Bestätigen',
       htmlMessage
     )
   }

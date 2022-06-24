@@ -62,7 +62,9 @@ router.post(
       lastName,
       null,
       null,
-      birthday
+      birthday,
+      undefined,
+      email // Pass email as temporary email, just for documentation that the email is not confirmed yet
     )
 
     try {
@@ -154,29 +156,6 @@ router.put(
     } catch (err) {
       return res.status(403).json({
         error: `User is not logged in`,
-      })
-    }
-  }
-)
-
-/**
- * Update current User's email.
- */
-router.put(
-  '/email/confirm',
-  validateResult,
-  async (req: express.Request, res: express.Response<{}, UserRecord>) => {
-    const user = res.locals.user
-    if (typeof user === 'undefined' || typeof user.id === 'undefined')
-      return res.status(403).json({ error: 'User is not authenticated!' })
-
-    try {
-      const affectedRows = await User.confirmTmpEmail(user.id)
-      return res.status(200).json({ msg: 'Update complete', affectedRows })
-    } catch (err) {
-      return res.status(400).json({
-        error: `If the User ID is correct, there is no verification of a new email address pending.`,
-        currentMail: user.email,
       })
     }
   }
@@ -276,11 +255,9 @@ router.put(
       })
     } catch (err) {
       new Logger().error('Reset password', 'Request Email and send it', err)
-      return res
-        .status(400)
-        .json({
-          error: 'Either invalid email-address or email could not be sent.',
-        })
+      return res.status(400).json({
+        error: 'Either invalid email-address or email could not be sent.',
+      })
     }
   }
 )
