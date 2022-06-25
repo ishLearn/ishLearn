@@ -1,22 +1,40 @@
 import { createTransport, Transporter } from 'nodemailer'
 import SMTPTransport from 'nodemailer/lib/smtp-transport'
 import Logger from '../utils/Logger'
+import User from '../models/User'
+import EmailToken from '../models/EmailToken'
 
 export default class EmailService {
   static EMAIL_ADDRESS = process.env.EMAIL_ADDRESS
   static EMAIL_PASSWORD = process.env.EMAIL_PASSWORD
 
+  /**
+  * The actions that can be performed with EmailTokens.
+  */
+  static actions = {
+    pwdForgotten: 'passwordReset',
+  }
+
+  /**
+  * Get a connection to the Email-Server (SMTP)
+  * @returns the Transporter
+  */
   static getConnection() {
+    // Check ENV
     if (
       typeof EmailService.EMAIL_ADDRESS === 'undefined' ||
-      typeof EmailService.EMAIL_PASSWORD === 'undefined'
+      typeof EmailService.EMAIL_PASSWORD === 'undefined' ||
+      typeof process.env.EMAIL_HOST === 'undefined'
     )
       throw new Error(
         'Email address and password must be defined in environment.'
       )
 
+    /**
+    * options for the Email service
+    */
     const options: SMTPTransport.Options = {
-      host: 'ha01s012.org-dns.com',
+      host: process.env.EMAIL_HOST,
       secure: true,
       port: 465,
       auth: {
@@ -27,6 +45,9 @@ export default class EmailService {
     return createTransport(options)
   }
 
+  /**
+  * Verify the configuration of the Email Service
+  */
   static verify(account: Transporter<SMTPTransport.SentMessageInfo>) {
     return new Promise((resolve, reject) => {
       account.verify((err, success) => {
@@ -39,6 +60,42 @@ export default class EmailService {
     })
   }
 
+  /**
+   * Send a mail to reset the password.
+   * @param user The user to target
+   * @returns Nothing
+   */
+  static async sendPwdForgottenEmail(user: User) {
+    // Validate user is logged in
+    if (typeof user.id === 'undefined')
+      throw new Error('User is not correctly authenticated')
+
+    // Generate a new Email token and save it to DB
+    const newToken = await EmailToken.getNewToken(
+      user.id,
+      EmailService.actions.pwdForgotten
+    )
+
+    // get redirect URL
+    // TODO: Implement Frontend route to /callback/:token
+    const redirectURL = `${process.env.BASE_URL}/callback/${newToken.token}`
+
+    // HTML-content of the Email
+    const htmlMessage = `
+      Hier können Sie Ihr Passwort zurücksetzen: <a>${redirectURL}</a>
+    `
+    // Send the email
+    return await EmailService.sendEmail(
+      user.email,
+      `${user.firstName} ${user.lastName}`,
+      'Passwort zurücksetzen',
+      htmlMessage
+    )
+  }
+
+  /**
+  * Send an Email with parameters.
+  */
   static sendEmail(
     recipient: string,
     recipientName: string,

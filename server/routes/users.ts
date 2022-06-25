@@ -4,6 +4,8 @@ import User from '../models/User'
 import { UserRecord } from '../types/users'
 import DBService from '../services/DBService'
 import { requireAuthenticated } from '../middleware/authMiddleware'
+import EmailService from '../services/EmailService'
+import Logger from '../utils/Logger'
 
 export const validateResult = (
   req: express.Request,
@@ -249,6 +251,37 @@ router.put(
 
     const affectedRows = User.uploadProfilePictureThenSaveToDB(user.id, text)
     return res.status(200).json({ msg: 'Profile text updated', affectedRows })
+  }
+)
+
+router.put(
+  '/reset/pwd',
+  async (
+    req: express.Request<{}, {}, { email: string }>,
+    res: express.Response<{}, UserRecord>
+  ) => {
+    if (!res.locals.unauthenticated)
+      return res.status(400).json({
+        error: 'Cannot reset password when logged in, try to update it instead',
+      })
+    try {
+      const user = await User.findByEmail(req.body.email)
+      if (typeof user === 'undefined' || typeof user.id === 'undefined')
+        throw new Error('Invalid E-Mail')
+
+      await EmailService.sendPwdForgottenEmail(user)
+      return res.status(200).json({
+        success: 'true',
+        message: 'Take a look at your inbox and the Spam / Junk E-Mail folder',
+      })
+    } catch (err) {
+      new Logger().error('Reset password', 'Request Email and send it', err)
+      return res
+        .status(400)
+        .json({
+          error: 'Either invalid email-address or email could not be sent.',
+        })
+    }
   }
 )
 
