@@ -27,6 +27,7 @@ import EmailService from './services/EmailService'
 import users from './routes/users'
 import auth from './routes/auth'
 import products from './routes/products'
+import callback from './routes/callback'
 import tags from './routes/tags'
 import categories from './routes/categories'
 import uploads from './routes/files/uploads'
@@ -56,6 +57,7 @@ app.use(logger.request)
 // Use routes
 app.use('/api/users', users)
 app.use('/api/auth', auth)
+app.use('/api/callback', callback)
 app.use('/api/products', products)
 app.use('/api/tags', tags)
 app.use('/api/categories', categories)
