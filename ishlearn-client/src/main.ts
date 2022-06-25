@@ -7,8 +7,11 @@ import './styles/style.css'
 import 'bootstrap'
 import 'bootstrap/dist/css/bootstrap.min.css'
 
+import mavonEditor from 'mavon-editor'
+import 'mavon-editor/dist/css/index.css'
+
 // eslint-disable-next-line
-createApp(App).use(pinia).use(router).mount('#app')
+createApp(App).use(pinia).use(router).use(mavonEditor).mount('#app')
 
 import setupInterceptors from './services/setupInterceptors'
 setupInterceptors()

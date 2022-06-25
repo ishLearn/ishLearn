@@ -8,23 +8,35 @@ export default class EmailService {
   static EMAIL_ADDRESS = process.env.EMAIL_ADDRESS
   static EMAIL_PASSWORD = process.env.EMAIL_PASSWORD
 
+  /**
+  * The actions that can be performed with EmailTokens.
+  */
   static actions = {
     pwdForgotten: 'passwordReset',
     confirmNewEmail: 'confirmNewEmail',
     confirmFirstEmail: 'confirmInitialEmail',
   }
 
+  /**
+  * Get a connection to the Email-Server (SMTP)
+  * @returns the Transporter
+  */
   static getConnection() {
+    // Check ENV
     if (
       typeof EmailService.EMAIL_ADDRESS === 'undefined' ||
-      typeof EmailService.EMAIL_PASSWORD === 'undefined'
+      typeof EmailService.EMAIL_PASSWORD === 'undefined' ||
+      typeof process.env.EMAIL_HOST === 'undefined'
     )
       throw new Error(
         'Email address and password must be defined in environment.'
       )
 
+    /**
+    * options for the Email service
+    */
     const options: SMTPTransport.Options = {
-      host: 'ha01s012.org-dns.com',
+      host: process.env.EMAIL_HOST,
       secure: true,
       port: 465,
       auth: {
@@ -35,6 +47,9 @@ export default class EmailService {
     return createTransport(options)
   }
 
+  /**
+  * Verify the configuration of the Email Service
+  */
   static verify(account: Transporter<SMTPTransport.SentMessageInfo>) {
     return new Promise((resolve, reject) => {
       account.verify((err, success) => {
@@ -80,8 +95,9 @@ export default class EmailService {
   }
 
   /**
-   * Send a mail to reset the password.
+   * Send a mail to confirm a user's email address.
    * @param user The user to target
+   * @param initial Whether this is the first Email 
    * @returns Nothing
    */
   static async sendConfirmAddressEmail(user: User, initial: boolean = true) {
@@ -113,6 +129,9 @@ export default class EmailService {
     )
   }
 
+  /**
+  * Send an Email with parameters.
+  */
   static sendEmail(
     recipient: string,
     recipientName: string,

@@ -9,19 +9,19 @@ defineEmits(['update:modelValue'])
 
 const mandWarn = ref(false)
 if (props.inputProps.mandatory) {
-  watch(props.inputProps.value, (oldV, newV) => {
+  watch(props.inputProps.value, () => {
     mandWarn.value = !validateMandatory(props.inputProps.value.value)
   })
 }
 const pwdLengthWarn = ref(false)
 if (props.inputProps.type === 'password') {
-  watch(props.inputProps.value, (oldV, newV) => {
+  watch(props.inputProps.value, () => {
     pwdLengthWarn.value = !validatePasswort(props.inputProps.value.value)
   })
 }
 const emailWarn = ref(false)
 if (props.inputProps.type === 'email') {
-  watch(props.inputProps.value, (oldV, newV) => {
+  watch(props.inputProps.value, () => {
     emailWarn.value = !validateEmail(props.inputProps.value.value)
   })
 }
@@ -36,7 +36,9 @@ if (props.inputProps.type === 'email') {
     <label
       :for="inputProps.id"
       :class="`${
-        inputProps.type === 'checkbox' ? 'form-check-label form-label-check' : 'form-label-text'
+        inputProps.type === 'checkbox'
+          ? 'form-check-label form-label-check'
+          : 'form-label-text'
       }`"
       >{{ inputProps.label }}<span v-show="inputProps.mandatory">*</span></label
     >
@@ -46,18 +48,22 @@ if (props.inputProps.type === 'email') {
       :name="inputProps.name"
       :placeholder="inputProps.placeholder"
       :value="modelValue"
-      @input="$emit('update:modelValue', $event.target.value)"
+      @input="$emit('update:modelValue', $event.target?.value)"
       :class="`${
         inputProps.type === 'checkbox'
           ? 'form-check-input input-control-check'
           : 'form-control text-input'
       }`"
     />
-    <span v-show="mandWarn" class="text-danger">Dieses Feld ist Pflicht!<br /></span>
+    <span v-show="mandWarn" class="text-danger"
+      >Dieses Feld ist Pflicht!<br
+    /></span>
     <span v-show="pwdLengthWarn" class="text-danger"
       >Das Passwort muss mindestens 8 Zeichen lang sein.<br
     /></span>
-    <span v-show="emailWarn" class="text-danger">Bitte gib eine korrekte Email ein.<br /></span>
+    <span v-show="emailWarn" class="text-danger"
+      >Bitte gib eine korrekte Email ein.<br
+    /></span>
   </div>
 </template>
 
