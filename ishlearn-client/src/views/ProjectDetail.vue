@@ -4,6 +4,22 @@ import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import axios from 'axios'
 import { formatDate } from '@/util/dateUtils'
+import MDPreview from '@/components/MDPreview.vue'
+
+const mdtext = ref(`# Die Überschrift für mein Projekt
+## Kurze Zusammenfassung
+
+Also in meinem Projekt ist das *Kursive* hier **fett** ++wichtig++!
+
+## Erata
+
+Das ist mir nachträglich aufgefallen, was falsch ist.
+
+## Quellen
+
+- Quelle 1
+- Buch 2
+`)
 
 const pid = useRoute().params.id
 const project = ref({})
@@ -26,5 +42,7 @@ onMounted(() => {
 
     <p></p>
     <p>{{ project }}</p>
+
+    <MDPreview :text-to-display="mdtext"></MDPreview>
   </div>
 </template>
