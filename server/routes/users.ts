@@ -31,6 +31,44 @@ router.get(
   }
 )
 
+router.get(
+  '/:id',
+  async (
+    req: express.Request<{ id: string }>,
+    res: express.Response<{}, UserRecord>
+  ) => {
+    try {
+      const {
+        email,
+        id,
+        rank,
+        profilePicture,
+        profileText,
+        firstName,
+        lastName,
+        emailTmp,
+        birthday,
+      } = await User.findByID(req.params.id)
+
+      const isLoggedIn = req.params.id === res.locals.user?.id
+
+      return res.status(200).json({
+        id,
+        rank,
+        profilePicture,
+        profileText,
+        firstName,
+        lastName: isLoggedIn ? lastName : undefined,
+        emailTmp: isLoggedIn ? emailTmp : undefined,
+        email: isLoggedIn ? email : undefined,
+        birthday: isLoggedIn ? birthday : undefined,
+      })
+    } catch (err) {
+      return res.status(404).json({ error: 'User not found' })
+    }
+  }
+)
+
 /**
  * POST /api/users
  * Create a new user

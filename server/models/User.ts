@@ -157,6 +157,46 @@ export default class User {
   }
 
   /**
+   * Retrieve a user from the DB identified by the ID (hashed), and return it.
+   *
+   * @param id The Email to search for.
+   * @param fields The fields (columns) to retrieve
+   * @returns The found User in the DB or `undefined` if the user is not found.
+   */
+  static async findByID(id: string, fields?: string[]): Promise<User> {
+    if (typeof fields === 'undefined')
+      fields = [
+        'id',
+        'password',
+        'email',
+        'rank',
+        'emailTmp',
+        'profilePicture',
+        'profileText',
+        'firstName',
+        'lastName',
+      ]
+    const result = (
+      await new DBService().query('SELECT ?? FROM users WHERE ID = ?', [
+        fields,
+        getIntIDFromHash(id),
+      ])
+    ).results[0]
+
+    return new User(
+      result.email,
+      result.password,
+      result.rank,
+      result.firstName,
+      result.lastName,
+      result.profilePicture,
+      result.profileText,
+      result.birthday,
+      result.id
+    )
+  }
+
+  /**
    * Retrieve a User from the DB, and return it.
    * Retrieved fields:
    * - email
