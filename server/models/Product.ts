@@ -281,10 +281,6 @@ export default class Product {
     ])
 
     const { results } = res
-    console.log(`GET Products form DB: ${results.length}`)
-    console.log(results)
-    console.log(await new DBService().query('SELECT * FROM products'))
-    console.log(query)
 
     const resultProducts = results.map(
       (line: {
@@ -338,19 +334,36 @@ export default class Product {
         'There must be at least one user to administrate this product.'
       )
 
-    const res = await new DBService().query(
-      `INSERT INTO products (title, visibility, updatedBy, createdBy) VALUES (?)`,
-      [[this.title, this.visibility, this.updatedBy, this.createdBy]]
-    )
+    try {
+      const createdBy: NumberLike =
+        typeof this.createdBy === 'string'
+          ? getIntIDFromHash(this.createdBy)
+          : this.createdBy
+      const updatedBy: NumberLike =
+        typeof this.updatedBy === 'string'
+          ? getIntIDFromHash(this.updatedBy)
+          : this.updatedBy
 
-    const resUploadBy = await new DBService().query(
-      `INSERT INTO uploadBy (PID, UID) VALUES (?)`,
-      usersNrs.map((user: number | NumberLike) => [res.results.insertId, user])
-    )
+      const res = await new DBService().query(
+        `INSERT INTO products (title, visibility, updatedBy, createdBy) VALUES (?)`,
+        [[this.title, this.visibility, updatedBy, createdBy]]
+      )
 
-    this.id = res.results.insertId
+      const resUploadBy = await new DBService().query(
+        `INSERT INTO uploadBy (PID, UID) VALUES (?)`,
+        usersNrs.map((user: number | NumberLike) => [
+          res.results.insertId,
+          user,
+        ])
+      )
 
-    return res.results.insertId
+      this.id = res.results.insertId
+
+      return res.results.insertId
+    } catch (err) {
+      console.log(err)
+      return 0
+    }
   }
 
   // UPDATE PRODUCT
