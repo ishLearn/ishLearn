@@ -4,6 +4,8 @@ import User from '../models/User'
 import { UserRecord } from '../types/users'
 import DBService from '../services/DBService'
 import { requireAuthenticated } from '../middleware/authMiddleware'
+import EmailService from '../services/EmailService'
+import Logger from '../utils/Logger'
 
 export const validateResult = (
   req: express.Request,
@@ -26,6 +28,44 @@ router.get(
       ok: true,
       user: res.locals.user,
     })
+  }
+)
+
+router.get(
+  '/:id',
+  async (
+    req: express.Request<{ id: string }>,
+    res: express.Response<{}, UserRecord>
+  ) => {
+    try {
+      const {
+        email,
+        id,
+        rank,
+        profilePicture,
+        profileText,
+        firstName,
+        lastName,
+        emailTmp,
+        birthday,
+      } = await User.findByID(req.params.id)
+
+      const isLoggedIn = req.params.id === res.locals.user?.id
+
+      return res.status(200).json({
+        id,
+        rank,
+        profilePicture,
+        profileText,
+        firstName,
+        lastName: isLoggedIn ? lastName : undefined,
+        emailTmp: isLoggedIn ? emailTmp : undefined,
+        email: isLoggedIn ? email : undefined,
+        birthday: isLoggedIn ? birthday : undefined,
+      })
+    } catch (err) {
+      return res.status(404).json({ error: 'User not found' })
+    }
   }
 )
 
@@ -60,7 +100,9 @@ router.post(
       lastName,
       null,
       null,
-      birthday
+      birthday,
+      undefined,
+      email // Pass email as temporary email, just for documentation that the email is not confirmed yet
     )
 
     try {
@@ -158,29 +200,6 @@ router.put(
 )
 
 /**
- * Update current User's email.
- */
-router.put(
-  '/email/confirm',
-  validateResult,
-  async (req: express.Request, res: express.Response<{}, UserRecord>) => {
-    const user = res.locals.user
-    if (typeof user === 'undefined' || typeof user.id === 'undefined')
-      return res.status(403).json({ error: 'User is not authenticated!' })
-
-    try {
-      const affectedRows = await User.confirmTmpEmail(user.id)
-      return res.status(200).json({ msg: 'Update complete', affectedRows })
-    } catch (err) {
-      return res.status(400).json({
-        error: `If the User ID is correct, there is no verification of a new email address pending.`,
-        currentMail: user.email,
-      })
-    }
-  }
-)
-
-/**
  * Update password for current user.
  */
 router.put(
@@ -249,6 +268,35 @@ router.put(
 
     const affectedRows = User.uploadProfilePictureThenSaveToDB(user.id, text)
     return res.status(200).json({ msg: 'Profile text updated', affectedRows })
+  }
+)
+
+router.put(
+  '/reset/pwd',
+  async (
+    req: express.Request<{}, {}, { email: string }>,
+    res: express.Response<{}, UserRecord>
+  ) => {
+    if (!res.locals.unauthenticated)
+      return res.status(400).json({
+        error: 'Cannot reset password when logged in, try to update it instead',
+      })
+    try {
+      const user = await User.findByEmail(req.body.email)
+      if (typeof user === 'undefined' || typeof user.id === 'undefined')
+        throw new Error('Invalid E-Mail')
+
+      await EmailService.sendPwdForgottenEmail(user)
+      return res.status(200).json({
+        success: 'true',
+        message: 'Take a look at your inbox and the Spam / Junk E-Mail folder',
+      })
+    } catch (err) {
+      new Logger().error('Reset password', 'Request Email and send it', err)
+      return res.status(400).json({
+        error: 'Either invalid email-address or email could not be sent.',
+      })
+    }
   }
 )
 

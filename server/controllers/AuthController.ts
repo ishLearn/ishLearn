@@ -26,8 +26,10 @@ export const performSignin = async (email: string, password: string) => {
     }
 
     if (!(await User.comparePwd(password, user.password))) {
-      throw new Error('Pwd')
+      throw new Error(`Password or username is wrong!`)
     }
+    if (user.email === user.emailTmp)
+      throw new Error('Email still not confirmed')
 
     const accessToken = genAccessToken(user.id)
     const refreshToken = RefreshToken.createToken({ id: user.id })
