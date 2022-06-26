@@ -12,6 +12,7 @@ import { ID } from '../types/ids'
 import User from './User'
 // RedisService import
 import { addProduct, searchProductById } from '../services/RedisService'
+import Media from './Media'
 
 /**
  * A Product is a unit of files, comments and other content and information.
@@ -312,6 +313,28 @@ export default class Product {
       productIds.push(product.id)
       return true
     })
+  }
+
+  static async saveDescription(
+    pid: NumberLike,
+    description: string,
+    userId: string
+  ) {
+    const result = await Media.uploadMedia(
+      `description.md`,
+      Buffer.from(description),
+      {
+        project: getHashFromIntID(pid),
+        userId,
+      }
+    )
+
+    if (typeof result === 'undefined' || !('worked' in result))
+      throw new Error(
+        'The upload has finished but not succeeded! Internal Server Error'
+      )
+
+    await Media.save(`description.md`, result.filePathName, pid, userId)
   }
 
   /**
@@ -624,13 +647,19 @@ export default class Product {
    * @returns an array of all Promise results
    */
   static async addMedia(
-    productId: string,
-    collaboratorId: string,
-    mediaId: string
+    productId: string | NumberLike,
+    collaboratorId: string | NumberLike,
+    mediaId: string | NumberLike
   ) {
-    const pid = getIntIDFromHash(productId)
-    const cid = getIntIDFromHash(collaboratorId)
-    const mid = getIntIDFromHash(mediaId)
+    const pid =
+      typeof productId === 'string' ? getIntIDFromHash(productId) : productId
+    const cid =
+      typeof collaboratorId === 'string'
+        ? getIntIDFromHash(collaboratorId)
+        : collaboratorId
+    const mid =
+      typeof mediaId === 'string' ? getIntIDFromHash(mediaId) : mediaId
+
     await Product.requireUserCanWrite(pid, cid)
 
     const result = [

@@ -77,7 +77,7 @@ router.post(
   '/',
   // Use express-validator middleware functions
   // to validate the request body
-  body('email').isEmail().normalizeEmail(), //TODO: Sanitize email or just leave it as is?
+  body('email').isEmail().normalizeEmail(),
   body('password').trim().isLength({ min: 8 }),
   body('rank').trim().isLength({ min: 5, max: 7 }),
   body('firstName').trim().isLength({ min: 1 }),

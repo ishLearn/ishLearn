@@ -68,7 +68,7 @@ export default class Comments {
       throw new Error(`Could not upload comment to S3`)
 
     const path = Comments.getCommentFilePath(pid, filename)
-    const m = await Media.save(filename, path, pid)
+    const m = await Media.saveToMediaOnly(filename, path)
 
     return await Comments.save(pid, uid, m, rating)
   }

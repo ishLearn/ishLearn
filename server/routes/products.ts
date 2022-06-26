@@ -6,12 +6,17 @@ import { validateResult } from './users'
 import Product from '../models/Product'
 import { UserRecord } from '../types/users'
 import { NumberLike } from 'hashids/cjs/util'
-import { getIntIDFromHash, SupervisedByStatus } from '../services/DBService'
+import {
+  getHashFromIntID,
+  getIntIDFromHash,
+  SupervisedByStatus,
+} from '../services/DBService'
 import {
   requireAuthenticated,
   requireAuthenticatedAsStudent,
   requireAuthenticatedAsTeacher,
 } from '../middleware/authMiddleware'
+import Logger from '../utils/Logger'
 
 const router = express.Router()
 
@@ -78,7 +83,19 @@ router.post(
   body('title').trim().isLength({ min: 3 }),
   body('visibility').isBoolean(),
   validateResult,
-  async (req: express.Request, res: express.Response<{}, UserRecord>) => {
+  async (
+    req: express.Request<
+      {},
+      {},
+      {
+        title: string
+        visibility: boolean
+        collaborators?: string[]
+        description: string
+      }
+    >,
+    res: express.Response<{}, UserRecord>
+  ) => {
     if (!res.locals.user?.id)
       return res.status(403).json({ error: 'Not authenticated' })
     const { title, visibility } = req.body
@@ -94,11 +111,22 @@ router.post(
       const users: Array<string | number> = req.body.collaborators || []
 
       const resultId = await newP.save(res.locals.user.id, ...users)
+      console.log('Saved Product')
+      await Product.saveDescription(
+        resultId,
+        req.body.description,
+        res.locals.user.id
+      )
+
+      console.log('Saved description')
+
       return res.json({
         newP,
-        id: resultId,
+        id: getHashFromIntID(resultId),
       })
     } catch (err) {
+      new Logger().error('Add new Product', 'Save to DB', err)
+      console.log(err)
       return res.status(400).json({
         err: 'The product could not be saved. Are all fields filled out correctly?',
       })
