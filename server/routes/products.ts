@@ -71,20 +71,22 @@ router.post(
 // body:
 // - title: string,
 // - visibility: Visibility (as string),
-// - collaborators?: UserID[]
+// - collaborators?: UserID[] // Potentially give the possibility to add other future contributors. This logged in user is already included and must not be specified again.
 router.post(
   '/',
   requireAuthenticatedAsStudent,
   body('title').trim().isLength({ min: 3 }),
-  body('visibility').trim().isLength({ min: 5 }),
+  body('visibility').isBoolean(),
   validateResult,
   async (req: express.Request, res: express.Response<{}, UserRecord>) => {
     if (!res.locals.user?.id)
       return res.status(403).json({ error: 'Not authenticated' })
     const { title, visibility } = req.body
+
+    console.log(visibility)
     const newP = new Product(
       title,
-      visibility,
+      visibility ? 'public' : 'private',
       res.locals.user.id,
       res.locals.user.id
     )

@@ -47,7 +47,7 @@ Das ist mir nachträglich aufgefallen, was falsch ist.
 - Buch 2
 `)
 
-const onSubmit = (event: Event) => {
+const onSubmit = (_event: Event) => {
   console.log('Submitted')
 
   if (!user.status.loggedIn) {
@@ -72,7 +72,7 @@ const onSubmit = (event: Event) => {
       .post('/products/', {
         title: inputs.title.value.value,
         visibility: inputs.visibility.value.value,
-        collaborators: { userId },
+        collaborators: [],
         description: mdtext.value,
       })
       .then((res: AxiosResponse) => {
@@ -116,7 +116,11 @@ const onSubmit = (event: Event) => {
           /></span>
         </div>
 
-        <input type="submit" value="Projekt erstellen" class="btn btn-success" />
+        <input
+          type="submit"
+          value="Projekt erstellen"
+          class="btn btn-success"
+        />
       </form>
 
       <p class="tiny-font">(*) sind Pflichtfelder.</p>
