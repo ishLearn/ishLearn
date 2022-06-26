@@ -71,3 +71,18 @@ html[data-theme='dark']{
   margin: 0px;
   background-color: var(--background-color);
 }
+
+.small-width {
+  max-width: 540px;
+  width: 100%;
+}
+[data-theme='light'] .box-background {
+  background-color: white;
+  border: 1px solid lightgrey;
+  border-radius: 5px;
+}
+[data-theme='dark'] .box-background {
+  background-color: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(0, 0, 0, 0.6);
+  border-radius: 5px;
+}

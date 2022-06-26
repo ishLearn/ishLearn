@@ -28,44 +28,48 @@ const user: User = useUser()
 
 const pid = useRoute().params.id
 const project: ref<Product> = ref({})
-// const userCreated: ref<User> = ref({})
 onMounted(() => {
   console.log(pid)
   axios.get(`/api/products/${pid}`).then((res) => {
-    console.log('Aufruf des Projektes: ')
-    console.log(res)
     const [p] = res.data
     project.value = p
+    console.log(project.value)
     if (project.value.description) mdtext.value = project.value.description
   })
 })
 </script>
 
 <template>
-  <div class="row" v-if="project">
-    <div class="col-8">
-      <h1>TODO: Projekt {{ $route.params.id }} mit Titel {{ project.title }}</h1>
+  <div class="row p-1" v-if="project">
+    <div class="col-lg-9">
+      <div class="box-background m-1 p-3">
+        <h1>{{ project.title }}</h1>
 
-      <h2>Datein in dem Projekt</h2>
-      <p>TODO</p>
-      <p>{{ project }}</p>
+        <h2>Dateien in dem Projekt</h2>
+        <p>TODO</p>
+        <p>{{ project }}</p>
 
-      <MDPreview :text-to-display="mdtext"></MDPreview>
+        <MDPreview :text-to-display="mdtext"></MDPreview>
+      </div>
     </div>
-    <div class="col-4">
-      <div class="info-box m-2 p-2 border rounded">
-        <p class="info-box-title info-box-heading">{{ project.title }}</p>
+
+    <div class="col-lg-3">
+      <div class="box-background info-box m-1 p-2">
+        <h4 class="info-box-title info-box-heading">{{ project.title }}</h4>
         <p class="info-box-heading">Erstellt am</p>
         <p class="info-box-content">
           {{ formatDate(project.createDate) }} (
-          <!--<router-link
-            :to="{ name: 'UserDetail', params: { id: project.createdBy } }"
-            >{{ project.createdBy }}</router-link
-          >-->
+          <!--<router-link :to="{ name: 'UserDetail', params: { id: userCreated } }">{{
+            project.createdBy
+          }}</router-link>-->
           {{ project.createdBy }})
         </p>
         <p class="info-box-heading">Letzte Änderung</p>
         <p class="info-box-content">{{ formatDate(project.updatedDate) }}</p>
+      </div>
+      <div class="box-background m-1 p-2">
+        <h4>Projekte, die dich interessieren könnten</h4>
+        <p>Coming soon...</p>
       </div>
     </div>
   </div>
@@ -77,7 +81,7 @@ onMounted(() => {
   text-align: left;
 }
 .info-box-title {
-  font-size: 20px;
+  font-size: 24px;
 }
 .info-box-heading {
   font-weight: bold;
