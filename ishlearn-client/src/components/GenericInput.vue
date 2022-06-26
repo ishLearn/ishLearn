@@ -36,9 +36,7 @@ if (props.inputProps.type === 'email') {
     <label
       :for="inputProps.id"
       :class="`${
-        inputProps.type === 'checkbox'
-          ? 'form-check-label form-label-check'
-          : 'form-label-text'
+        inputProps.type === 'checkbox' ? 'form-check-label form-label-check' : 'form-label-text'
       }`"
       >{{ inputProps.label }}<span v-show="inputProps.mandatory">*</span></label
     >
@@ -55,15 +53,11 @@ if (props.inputProps.type === 'email') {
           : 'form-control text-input'
       }`"
     />
-    <span v-show="mandWarn" class="text-danger"
-      >Dieses Feld ist Pflicht!<br
-    /></span>
+    <span v-show="mandWarn" class="text-danger">Dieses Feld ist Pflicht!<br /></span>
     <span v-show="pwdLengthWarn" class="text-danger"
       >Das Passwort muss mindestens 8 Zeichen lang sein.<br
     /></span>
-    <span v-show="emailWarn" class="text-danger"
-      >Bitte gib eine korrekte Email ein.<br
-    /></span>
+    <span v-show="emailWarn" class="text-danger">Bitte gib eine korrekte Email ein.<br /></span>
   </div>
 </template>
 
