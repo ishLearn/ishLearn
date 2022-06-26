@@ -6,4 +6,4 @@ export { validateEmail }
 
 export const validatePasswort = (pwd: string) => pwd.length >= 8
 
-export const validateMandatory = (input: string) => (input ? true : false)
+export const validateMandatory = (input: string | boolean) => (input ? true : false)
