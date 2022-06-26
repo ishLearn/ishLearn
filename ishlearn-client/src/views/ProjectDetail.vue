@@ -46,7 +46,8 @@ onMounted(() => {
     <div class="col-8">
       <h1>TODO: Projekt {{ $route.params.id }} mit Titel {{ project.title }}</h1>
 
-      <p></p>
+      <h2>Datein in dem Projekt</h2>
+      <p>TODO</p>
       <p>{{ project }}</p>
 
       <MDPreview :text-to-display="mdtext"></MDPreview>
