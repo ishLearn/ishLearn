@@ -30,19 +30,28 @@ class AuthService {
     return response
   }
 
-  static logout() {
+  static async logout() {
+    try {
+      const response = (await api.post('/auth/signout/', { refreshToken: store.refreshKey?.token }))
+        .data
+    } catch (err) {
+      console.log('Error during log out')
+      console.log(err)
+    }
     store.removeUser()
   }
 
   static async register({
     firstName,
     lastName,
+    birthday,
     email,
     password,
     rank,
   }: {
     firstName: string
     lastName: string
+    birthday: string
     email: string
     password: string
     rank: boolean
@@ -51,6 +60,7 @@ class AuthService {
     return api.post('/users/', {
       firstName,
       lastName,
+      birthday,
       email,
       password,
       rank: r,

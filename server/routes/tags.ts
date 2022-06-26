@@ -3,7 +3,6 @@ import { body } from 'express-validator'
 
 import { validateResult } from './users'
 
-import Product from '../models/Product'
 import { UserRecord } from '../types/users'
 import Tag from '../models/Tag'
 
