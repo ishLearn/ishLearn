@@ -18,11 +18,8 @@ onMounted(() => {
   <div class="all-projects">
     <div class="jumbotron">
       <h1>Hier werden alle Projekte angezeigt</h1>
-      <p>{{ allProjects }}</p>
       <p>
-        <router-link :to="{ name: 'AddProject' }"
-          >Füge ein Projekt hinzu.</router-link
-        >
+        <router-link :to="{ name: 'AddProject' }">Füge ein Projekt hinzu.</router-link>
       </p>
     </div>
     <ShowAllProducts :projects="allProjects" />
