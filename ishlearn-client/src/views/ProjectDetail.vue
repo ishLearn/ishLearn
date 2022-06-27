@@ -1,13 +1,13 @@
 <!-- ProductDetail.vue -->
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, Ref, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import axios from 'axios'
 import { formatDate } from '@/util/dateUtils'
 import MDPreview from '@/components/MDPreview.vue'
-import { User } from '@/types/Users'
 import { Product } from '@/types/Products'
 import useUser from '@/store/auth.module'
+import { Store } from 'pinia'
 
 const mdtext = ref(`# Die Überschrift für mein Projekt
 ## Kurze Zusammenfassung
@@ -24,32 +24,46 @@ Das ist mir nachträglich aufgefallen, was falsch ist.
 - Buch 2
 `)
 
-const user: User = useUser()
+const user: Store<'user'> = useUser()
 
 const pid = useRoute().params.id
-const project: ref<Product> = ref({})
-onMounted(() => {
-  console.log(pid)
-  axios.get(`/api/products/${pid}`).then((res) => {
-    const [p] = res.data
-    project.value = p
-    console.log(project.value)
-    if (project.value.description) mdtext.value = project.value.description
-  })
+const project: Ref<Product | null> = ref(null)
+
+const descriptionUpdate = ref(0)
+
+onMounted(async () => {
+  project.value = await Product.getProductById(typeof pid === 'string' ? pid : pid[0], descriptionUpdate)
+  if ('description' in project.value && typeof project.value.description !== 'undefined') { }
 })
+
+watch(project, () => descriptionUpdate.value++)
 </script>
 
 <template>
-  <div class="row p-1" v-if="project">
+  <div
+    class="row p-1"
+    v-if="
+      project &&
+      'title' in project &&
+      'createDate' in project &&
+      typeof project.createDate !== 'undefined' &&
+      'updatedDate' in project &&
+      typeof project.updatedDate !== 'undefined'
+    "
+  >
     <div class="col-lg-9">
       <div class="box-background m-1 p-3">
         <h1>{{ project.title }}</h1>
 
         <h2>Dateien in dem Projekt</h2>
         <p>TODO</p>
-        <p>{{ project }}</p>
 
-        <MDPreview :text-to-display="mdtext"></MDPreview>
+        <span v-show="false">
+          {{ descriptionUpdate }}
+        </span>
+        <span v-if="project.description" :key="descriptionUpdate">
+          <MDPreview :text-to-display="project.description"></MDPreview>
+        </span>
       </div>
     </div>
 

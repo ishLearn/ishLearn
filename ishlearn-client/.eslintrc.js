@@ -17,5 +17,6 @@ module.exports = {
     'vuejs-accessibility/label-has-for': 0,
     'implicit-arrow-linebreak': 0,
     'import/extensions': 0,
+    'no-unused-vars': 0,
   },
 }
