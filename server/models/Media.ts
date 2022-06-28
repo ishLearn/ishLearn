@@ -18,6 +18,7 @@ import { UserRecord } from '../types/users'
 import DBService, { getIntIDFromHash } from '../services/DBService'
 import chalk from 'chalk'
 import { NumberLike } from 'hashids/cjs/util'
+import Product from './Product'
 
 type UploadClient = { u: Upload; c?: socket.Socket }
 
@@ -52,21 +53,31 @@ export default class Media {
    * @param project ProjectID (hashed)
    * @returns The new Media's ID
    */
-  static async save(filename: string, filePath: string, project: string) {
+  static async save(
+    filename: string,
+    filePath: string,
+    project: string | NumberLike,
+    cId: string | NumberLike
+  ) {
+    console.log(filename, filePath)
     const mediaPartOfProduct = await new DBService().query(
-      `INSERT INTO media (filename, URL) VALUES (?)`,
+      `INSERT INTO media (filename, URL) VALUES (?, ?)`,
       [filename, filePath]
     )
-    await new DBService().query(
-      `INSERT INTO mediaPartOfProduct (PID, MID) VALUES (?)`,
-      [getIntIDFromHash(project), mediaPartOfProduct.results.insertId]
+
+    const collaborator = typeof cId === 'string' ? getIntIDFromHash(cId) : cId
+
+    await Product.addMedia(
+      typeof project === 'string' ? getIntIDFromHash(project) : project,
+      collaborator,
+      mediaPartOfProduct.results.insertId
     )
     return mediaPartOfProduct.results.insertId as NumberLike
   }
 
   static async saveToMediaOnly(filename: string, filePath: string) {
     const newMedia = await new DBService().query(
-      `INSERT INTO media (filename, URL), VALUE (?)`,
+      `INSERT INTO media (filename, URL), VALUES (?)`,
       [filename, filePath]
     )
     return newMedia.results.insertId as NumberLike
@@ -93,6 +104,7 @@ export default class Media {
     buf: Buffer,
     config?: {
       project?: string
+      userId?: string | NumberLike
       res?: express.Response<{}, UserRecord>
       useNameAsPath?: boolean
     }
@@ -120,7 +132,7 @@ export default class Media {
     // If called from backend, wait for the result and return
     if (!config?.res) {
       await upload.done()
-      return { worked: true }
+      return { worked: true, filePathName }
     }
 
     const newUploadId = uuid()
@@ -160,10 +172,16 @@ export default class Media {
 
     // Wait for upload to finish and then emit finish event to socket, if present
     upload.done().then(async () => {
+      if (!config.userId)
+        throw new Error(
+          'UserID is not present even though direct upload from Frontend was started. Aborting save. Internal Server Error'
+        )
+
       const newId = await Media.save(
         fileName,
         filePathName,
-        config?.project || ''
+        config?.project || '',
+        config.userId
       )
 
       try {
