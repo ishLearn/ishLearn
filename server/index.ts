@@ -21,7 +21,6 @@ import DBService from './services/DBService'
 import { connectRedisClient as startRedis } from './services/RedisService'
 
 import { exec } from 'child_process'
-import EmailService from './services/EmailService'
 
 // Import api routes
 import users from './routes/users'

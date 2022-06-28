@@ -11,7 +11,12 @@ import { ID } from '../types/ids'
 // User model import
 import User from './User'
 // RedisService import
-import { addProduct, searchProductById } from '../services/RedisService'
+import {
+  addProduct,
+  getValue,
+  setValue,
+  searchProductById,
+} from '../services/RedisService'
 
 /**
  * A Product is a unit of files, comments and other content and information.
@@ -29,6 +34,7 @@ export default class Product {
   createdBy: number | string
   createDate?: Date
   updatedDate?: Date
+  avgRating?: number | string
 
   static QUERY_LIMIT = '50'
 
@@ -53,7 +59,8 @@ export default class Product {
     createdBy: NumberLike | string,
     createDate?: Date,
     updatedDate?: Date,
-    id?: ID | NumberLike
+    id?: ID | NumberLike,
+    avgRating?: number | string
   ) {
     this.title = title
     this.visibility = visibility
@@ -71,6 +78,7 @@ export default class Product {
       typeof id === 'string' || typeof id === 'undefined'
         ? id
         : getHashFromIntID(id)
+    this.avgRating = avgRating
   }
 
   /**
@@ -86,6 +94,7 @@ export default class Product {
     createdBy: NumberLike | string
     createDate?: Date
     updatedDate?: Date
+    avgRating?: number | string
   }) {
     return new Product(
       result.title,
@@ -94,7 +103,8 @@ export default class Product {
       result.createdBy,
       result.createDate,
       result.updatedDate,
-      result.id
+      result.id,
+      result.avgRating
     )
   }
 
@@ -114,6 +124,8 @@ export default class Product {
     const foundProduct = await searchProductById(
       typeof idInput === 'string' ? idInput : getHashFromIntID(idInput)
     )
+
+    console.log(foundProduct)
 
     if (foundProduct?.ID) {
       let { ID } = foundProduct
@@ -139,9 +151,20 @@ export default class Product {
         ? Product.adminQuery
         : Product.teachersQuery) + ` AND ID = ? LIMIT 1` // LIMIT 1 so no further filtering required (to cross out double products)
 
-    return (await new DBService().query(query, [fields, id])).results.map(
-      Product.mapResultsToHash
+    const result = (await new DBService().query(query, [fields, id])).results
+
+    await Promise.all(
+      result.map(async (product: Product): Promise<void> => {
+        if (!product.id) return
+        product.avgRating = await Product.getAvgRating(product.id)
+      })
     )
+
+    const productResult = result.map(Product.mapResultsToHash)
+
+    // productResult is an array, which should only contain one product
+    addProduct(productResult[0])
+    return productResult
   }
 
   /**
@@ -205,10 +228,6 @@ export default class Product {
     const results: Product[] = (
       await new DBService().query(query, params)
     ).results.map(Product.mapResultsToHash)
-
-    results.forEach(p => {
-      addProduct(p)
-    })
 
     return results
   }
@@ -312,6 +331,25 @@ export default class Product {
       productIds.push(product.id)
       return true
     })
+  }
+
+  static async getAvgRating(id: string | number) {
+    const pid = typeof id === 'string' ? getIntIDFromHash(id) : id
+
+    const redisRating = await getValue(`rating-${id}`)
+    console.log(redisRating)
+    // Return either rating from Redis or fetch from DB
+    if (redisRating) return redisRating
+
+    const res = (
+      await new DBService().query(
+        `SELECT avg(rating) FROM comments WHERE PID = ? GROUP BY PID`,
+        [pid]
+      )
+    ).results[0]['avg(rating)'] as number
+
+    setValue(`rating-${id}`, String(res))
+    return res
   }
 
   /**
