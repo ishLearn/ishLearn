@@ -110,7 +110,7 @@ export const addProduct = async (p: Product) => {
  * @returns The number of deleted entries.
  */
 export const clearProductRepo = async () => {
-  if (!useRedis) return
+  if (!useRedis || !useRedisOM) return
   const allIds = (await productRepo.search().returnAll()).map(
     (p: ProductEntity) => p.entityId
   )
@@ -185,7 +185,7 @@ export const appendValue = async (key: string, value: string) => {
  * @returns An Array of ProductEntities
  */
 export const searchProducts = async (offset: number = 0, ...k: KeyValue[]) => {
-  if (!useRedis) return []
+  if (!useRedis || !useRedisOM) return []
 
   const search = productRepo.search()
   k.forEach(k => {
@@ -200,7 +200,7 @@ export const searchProducts = async (offset: number = 0, ...k: KeyValue[]) => {
  * @returns The result found in Redis or a ProductEntity with only `null`-values.
  */
 export const searchProductById = (id: string) => {
-  if (!useRedis) return
+  if (!useRedis || !useRedisOM) return
 
   return productRepo.fetch(id)
 }
