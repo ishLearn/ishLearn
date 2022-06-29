@@ -6,6 +6,8 @@ import { KeyValue } from '../types/redis'
 import Product from '../models/Product'
 
 let useRedis: boolean = true
+// Set to true to activate redis OM, but no significant increase
+const useRedisOM: boolean = false
 
 // Redis client Setup
 const REDIS_URL = `redis://${process.env.REDIS_URL || 'localhost:6379'}`
@@ -26,6 +28,7 @@ interface ProductEntity {
   createdBy: string | number
   createDate: Date | undefined
   updatedDate: Date | undefined
+  avgRating: number | string
 }
 /**
  * @author @SebastianThomas
@@ -53,6 +56,7 @@ export const connectRedisClient = async () => {
     await client.connect()
     clientOM = await new Client().use(client)
 
+    if (!useRedisOM) return
     productRepo = clientOM.fetchRepository(productSchema)
     await productRepo.createIndex()
   } catch (err) {
@@ -68,7 +72,7 @@ export const connectRedisClient = async () => {
  * @returns The Redis ID for the added product
  */
 export const addProduct = async (p: Product) => {
-  if (!useRedis) return
+  if (!useRedis || !useRedisOM) return
 
   const alreadyAdded: {
     id: string
@@ -93,6 +97,7 @@ export const addProduct = async (p: Product) => {
   product.createdBy = p.createdBy
   product.createDate = p.createDate
   product.updatedDate = p.updatedDate
+  product.avgRating = p.avgRating || 0
 
   const id = await productRepo.save(product)
 
@@ -136,7 +141,7 @@ export const closeRedisConnection = async () => {
 
   if (client == null || !client.isOpen) return false
 
-  await clientOM.close()
+  if (useRedisOM) await clientOM.close()
   await client.quit()
   return true
 }
