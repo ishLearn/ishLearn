@@ -342,13 +342,16 @@ export default class Product {
     // Return either rating from Redis or fetch from DB
     if (redisRating) return redisRating
 
+    const result = (
+      await new DBService().query(
+        `SELECT avg(rating) FROM comments WHERE PID = ? GROUP BY PID`,
+        [pid]
+      )
+    ).results[0]
     const res =
-      ((
-        await new DBService().query(
-          `SELECT avg(rating) FROM comments WHERE PID = ? GROUP BY PID`,
-          [pid]
-        )
-      ).results[0]['avg(rating)'] as number) || 0
+      typeof result !== 'undefined' && result !== null
+        ? (result['avg(rating)'] as number)
+        : 0
 
     setValue(`rating-${id}`, String(res))
     return res
