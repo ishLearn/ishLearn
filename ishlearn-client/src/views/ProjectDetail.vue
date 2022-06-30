@@ -8,6 +8,8 @@ import MDPreview from '@/components/MDPreview.vue'
 import { Product } from '@/types/Products'
 import useUser from '@/store/auth.module'
 import { Store } from 'pinia'
+import { User } from '@/types/Users'
+import api from '@/services/api'
 
 const mdtext = ref(`# Die Überschrift für mein Projekt
 ## Kurze Zusammenfassung
@@ -28,12 +30,18 @@ const user: Store<'user'> = useUser()
 
 const pid = useRoute().params.id
 const project: Ref<Product | null> = ref(null)
+const projectCreator: Ref<User | null> = ref(null)
 
 const descriptionUpdate = ref(0)
 
 onMounted(async () => {
-  project.value = await Product.getProductById(typeof pid === 'string' ? pid : pid[0], descriptionUpdate)
-  if ('description' in project.value && typeof project.value.description !== 'undefined') { }
+  project.value = await Product.getProductById(
+    typeof pid === 'string' ? pid : pid[0],
+    descriptionUpdate,
+  )
+  projectCreator.value = (await api.get<User>(`/users/${project.value.createdBy}`)).data
+  if ('description' in project.value && typeof project.value.description !== 'undefined') {
+  }
 })
 
 watch(project, () => descriptionUpdate.value++)
@@ -72,11 +80,10 @@ watch(project, () => descriptionUpdate.value++)
         <h4 class="info-box-title info-box-heading">{{ project.title }}</h4>
         <p class="info-box-heading">Erstellt am</p>
         <p class="info-box-content">
-          {{ formatDate(project.createDate) }} (
-          <!--<router-link :to="{ name: 'UserDetail', params: { id: userCreated } }">{{
-            project.createdBy
-          }}</router-link>-->
-          {{ project.createdBy }})
+          {{ formatDate(project.createDate) }} (<router-link
+            :to="{ name: 'UserDetail', params: { id: project.createdBy } }"
+            >{{ projectCreator?.firstName }}</router-link
+          >)
         </p>
         <p class="info-box-heading">Letzte Änderung</p>
         <p class="info-box-content">{{ formatDate(project.updatedDate) }}</p>

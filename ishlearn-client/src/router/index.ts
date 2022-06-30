@@ -45,6 +45,11 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('../views/UserLogoutDummy.vue'),
   },
   {
+    path: '/user/update',
+    name: 'UserUpdate',
+    component: () => import('../views/UserUpdateView.vue'),
+  },
+  {
     path: '/user/:id',
     name: 'UserDetail',
     component: () => import('../views/UserProfileView.vue'),

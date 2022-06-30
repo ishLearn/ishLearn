@@ -388,7 +388,7 @@ export default class User {
   /**
    *
    * @param uid UserID (hashed)
-   * @param text Text content for user description
+   * @param text content for profile picture
    */
   static async uploadProfilePictureThenSaveToDB(uid: string, text: string) {
     const filepath = User.getProfilePictureFilePath(uid)
@@ -420,11 +420,12 @@ export default class User {
    *
    * @param uid UserID (hashed)
    * @param text Text content for user description
+   * @returns the new Media's ID
    */
   static async uploadProfileTextThenSaveToDB(uid: string, text: string) {
     const filepath = User.getProfileTextFilePath(uid)
 
-    const res = await Media.uploadMedia(filepath, Buffer.from(text), {
+    const res = await Media.uploadMedia(`${filepath}`, Buffer.from(text), {
       useNameAsPath: true,
     })
 
@@ -436,7 +437,7 @@ export default class User {
       filepath
     )
 
-    return await User.saveProfileText(uid, mId)
+    return (await User.saveProfileText(uid, mId)).mid
   }
 
   static async saveProfileText(uid: string, mid: NumberLike) {
@@ -444,7 +445,10 @@ export default class User {
       `UPDATE users SET profileText = ? WHERE id = ?`,
       [mid, getIntIDFromHash(uid)]
     )
-    return mediaPartOfProduct.results.insertId as NumberLike
+    return {
+      insertId: mediaPartOfProduct.results.insertId as NumberLike,
+      mid,
+    }
   }
 
   /**
