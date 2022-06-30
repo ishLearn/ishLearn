@@ -81,6 +81,14 @@ export default class Logger {
   }
 
   /**
+   * Log an information to the console.
+   * @param info The information
+   */
+  info(info: string) {
+    console.log(chalk.cyanBright(info))
+  }
+
+  /**
    * Log an error to the console.
    * TODO: _for later_ Send information to another server / log to a file to preserve stack trace?
    * @param category The part of the code where the error occurred (e.g., "Hashing password", "Handling request")

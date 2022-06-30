@@ -18,7 +18,7 @@ import Logger from './utils/Logger'
 const logger = new Logger()
 // Initialize DBService (start DB connection pool) and Redis Server
 import DBService from './services/DBService'
-import { initBucket } from './libs/aws/s3Client'
+import { initBucket, s3Client } from './libs/aws/s3Client'
 import { connectRedisClient as startRedis } from './services/RedisService'
 
 import { exec } from 'child_process'

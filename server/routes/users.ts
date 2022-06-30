@@ -2,10 +2,14 @@ import express from 'express'
 import { body, validationResult } from 'express-validator'
 import User from '../models/User'
 import { UserRecord } from '../types/users'
-import DBService, { getIntIDFromHash } from '../services/DBService'
+import DBService, {
+  getHashFromIntID,
+  getIntIDFromHash,
+} from '../services/DBService'
 import { requireAuthenticated } from '../middleware/authMiddleware'
 import EmailService from '../services/EmailService'
 import Logger from '../utils/Logger'
+import Media from '../models/Media'
 
 export const validateResult = (
   req: express.Request,
@@ -42,8 +46,8 @@ router.get(
         email,
         id,
         rank,
-        profilePicture,
-        profileText,
+        // profilePicture,
+        // profileText,
         firstName,
         lastName,
         emailTmp,
@@ -55,19 +59,23 @@ router.get(
       return res.status(200).json({
         id,
         rank,
-        profilePicture,
-        profileText,
+        // profilePicture,
+        // profileText,
         firstName,
-        lastName: isLoggedIn ? lastName : undefined,
-        emailTmp: isLoggedIn ? emailTmp : undefined,
-        email: isLoggedIn ? email : undefined,
-        birthday: isLoggedIn ? birthday : undefined,
+        lastName: isLoggedIn ? lastName : null,
+        emailTmp: isLoggedIn ? emailTmp : null,
+        email: isLoggedIn ? email : null,
+        birthday: isLoggedIn ? birthday : null,
       })
     } catch (err) {
       return res.status(404).json({ error: 'User not found' })
     }
   }
 )
+
+router.get('/:id/text', (req, res: express.Response<{}, UserRecord>) => {
+  return Media.downloadMedia(User.getProfileTextFilePath(req.params.id), res)
+})
 
 /**
  * POST /api/users
@@ -107,7 +115,18 @@ router.post(
 
     try {
       const results = await newUser.save()
-      const id = results.id
+      let id = results.id
+
+      if (typeof id === 'number') id = getHashFromIntID(id)
+      if (typeof id === 'undefined')
+        return res.status(500).json({
+          error: 'User could not be saved, ID is undefined.',
+        })
+
+      User.uploadProfileTextThenSaveToDB(
+        id,
+        '__++Ich benutze jetzt auch ISH/Learn++__'
+      )
 
       return res.status(200).json({
         success: true,
@@ -269,7 +288,7 @@ router.put(
       return res.status(403).json({ error: 'User is not authenticated!' })
     const { text } = req.body
 
-    const affectedRows = User.uploadProfilePictureThenSaveToDB(user.id, text)
+    const affectedRows = User.uploadProfileTextThenSaveToDB(user.id, text)
     return res.status(200).json({ msg: 'Profile text updated', affectedRows })
   }
 )
