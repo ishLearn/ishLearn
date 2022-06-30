@@ -1,6 +1,16 @@
 import DBService from '../services/DBService'
 import Tag from './Tag'
 
+export enum Categories {
+  SUBJECT = 'SUBJECT',
+  CLASS = 'CLASS',
+  SCHOOL = 'SCHOOL',
+}
+export const categoriesInclude = (catName: string) => {
+  // TODO
+  return true
+}
+
 /**
  * A Category is the top-level collection of tags.
  *
@@ -17,6 +27,8 @@ export default class Category {
     tagname: string,
     category: string
   ): Promise<any> {
+    if (!categoriesInclude(category))
+      throw new Error(`Category ${category} does not exist`)
     const res = await new DBService().query(
       `INSERT INTO categories (tag, category) VALUES (?)`,
       [tagname, category]
