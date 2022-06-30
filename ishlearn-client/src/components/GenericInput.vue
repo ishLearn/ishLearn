@@ -40,7 +40,21 @@ if (props.inputProps.type === 'email') {
       }`"
       >{{ inputProps.label }}<span v-show="inputProps.mandatory">*</span></label
     >
+    <!-- Special input type: textarea -->
+    <textarea
+      v-if="inputProps.type == 'textarea'"
+      :id="inputProps.id"
+      :name="inputProps.name"
+      :placeholder="inputProps.placeholder"
+      :value="modelValue"
+      rows="4"
+      @input="$emit('update:modelValue', $event.target?.value)"
+      class="form-control text-input"
+    >
+    </textarea>
+    <!-- Normal inputs (text, password, email, date, checkbox ) -->
     <input
+      v-else
       :type="inputProps.type"
       :id="inputProps.id"
       :name="inputProps.name"
@@ -50,7 +64,7 @@ if (props.inputProps.type === 'email') {
       :class="`${
         inputProps.type === 'checkbox'
           ? 'form-check-input input-control-check'
-          : 'form-control text-input'
+          : 'form-control text-input text-oneline-height'
       }`"
     />
     <span v-show="mandWarn" class="text-danger">Dieses Feld ist Pflicht!<br /></span>
@@ -89,10 +103,12 @@ if (props.inputProps.type === 'email') {
 }
 .text-input {
   width: 100%;
-  height: 40px;
   margin: 5px;
   padding: 3px 7px;
   font-size: 17px;
+}
+.text-oneline-height {
+  height: 40px;
 }
 
 .form-control-check {

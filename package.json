@@ -7,6 +7,7 @@
     "start": "node index.js",
     "startExt": "node server/dist/index.js",
     "dev": "nodemon server/index.ts --ignore ishlearn-client",
+    "serve": "cd ishlearn-client && npm run serve",
     "build": "tsc",
     "test": "jest",
     "initt": "nodemon init/initTables.ts",
