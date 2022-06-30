@@ -79,8 +79,7 @@ function onInputChange(e) {
       <div class="box-background m-1 p-3">
         <h1>{{ project.title }}</h1>
 
-        <h2>Dateien in dem Projekt</h2>
-        <p>TODO</p>
+        <h4>Dateien in dem Projekt</h4>
 
         <div class="m-4" v-if="project">
           <DropZone class="drop-area" @files-dropped="addFiles" #default="{ dropZoneActive }">
@@ -90,6 +89,7 @@ function onInputChange(e) {
                   v-for="file of files"
                   :key="file.id"
                   :file="file"
+                  :delete-button="true"
                   tag="li"
                   @remove="removeFile"
                 />
@@ -112,13 +112,6 @@ function onInputChange(e) {
           <button @click.prevent="uploadFiles(files, project.id)" class="upload-button">
             Upload
           </button>
-        </div>
-
-        <p>Space</p>
-        <div class="mb-3">
-          <label for="formFile" class="form-label">Default file input example</label>
-          <input class="form-control" type="file" id="formFile" />
-          <button>Hochladen</button>
         </div>
 
         <span v-show="false">
