@@ -36,6 +36,7 @@ const user: Store<'user'> = useUser()
 
 const pid = useRoute().params.id
 const project: Ref<Product | null> = ref(null)
+const media = ref(null)
 const creator: Ref<User | null> = ref(null)
 const updater: Ref<User | null> = ref(null)
 const descriptionUpdate = ref(0)
@@ -81,10 +82,12 @@ function onInputChange(e) {
 
         <h4>Dateien in dem Projekt</h4>
 
-        <div class="m-4" v-if="project">
+        {{ project.media }}
+
+        <div class="m-4" v-if="project && user.user.id === project.createdBy">
           <DropZone class="drop-area" @files-dropped="addFiles" #default="{ dropZoneActive }">
             <label for="file-input">
-              <ul v-show="files.length">
+              <ul v-show="files.length" class="image-list">
                 <FilePreview
                   v-for="file of files"
                   :key="file.id"
@@ -168,18 +171,6 @@ function onInputChange(e) {
 </style>
 
 <style scoped>
-#app {
-  font-family: Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin: 0 auto;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
 .drop-area {
   width: 100%;
   max-width: 800px;

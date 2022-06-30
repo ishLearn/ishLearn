@@ -1,5 +1,7 @@
 import axios from 'axios'
+import api from '@/services/api'
 import { Ref } from 'vue'
+import { MediaMeta } from './Media'
 
 export enum Visibility {
   PRIVATE = 'private',
@@ -19,6 +21,7 @@ export class Product {
   createDate?: Date
   updatedDate?: Date
   description?: string
+  media?: MediaMeta[]
 
   constructor(
     {
@@ -30,6 +33,7 @@ export class Product {
       createDate,
       updatedDate,
       description,
+      media,
     }: {
       id: ID
       title: string
@@ -39,6 +43,7 @@ export class Product {
       createDate?: Date
       updatedDate?: Date
       description?: string
+      media?: MediaMeta[]
     },
     updateRef?: Ref<number>,
   ) {
@@ -50,9 +55,11 @@ export class Product {
     this.createDate = createDate
     this.updatedDate = updatedDate
     this.description = description
+    this.media = media
 
     if (typeof this.description === 'undefined') {
       this.fetchDescription(updateRef)
+      this.fetchMediaMeta()
     }
   }
 
@@ -76,5 +83,13 @@ export class Product {
     ).data
 
     if (updateRef) updateRef.value++
+  }
+
+  async fetchMediaMeta(updateRef?: Ref<number>): Promise<void> {
+    api.get(`/products/${this.id}/media`).then((res) => {
+      console.log(res.data.media)
+      this.media = res.data.media
+      if (updateRef) updateRef.value++
+    })
   }
 }
