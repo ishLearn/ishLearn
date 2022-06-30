@@ -1,7 +1,15 @@
 <template>
   <component :is="tag" class="file-preview">
-    <button @click="$emit('remove', file)" class="close-icon" aria-label="Entfernen">x</button>
+    <button @click.prevent="$emit('remove', file)" class="close-icon" aria-label="Entfernen">
+      x
+    </button>
     <img :src="file.url" :alt="file.file.name" :title="file.file.name" />
+
+    <span class="status-indicator loading-indicator" v-show="file.status === 'loading'"
+      >In Progress</span
+    >
+    <span class="status-indicator success-indicator" v-show="file.status === true">Uploaded</span>
+    <span class="status-indicator failure-indicator" v-show="file.status === false">Error</span>
   </component>
 </template>
 
