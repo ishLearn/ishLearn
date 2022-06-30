@@ -2,7 +2,7 @@ import express from 'express'
 import { body, validationResult } from 'express-validator'
 import User from '../models/User'
 import { UserRecord } from '../types/users'
-import DBService from '../services/DBService'
+import DBService, { getIntIDFromHash } from '../services/DBService'
 import { requireAuthenticated } from '../middleware/authMiddleware'
 import EmailService from '../services/EmailService'
 import Logger from '../utils/Logger'
@@ -134,7 +134,7 @@ router.put(
   '/',
   async (req: express.Request, res: express.Response<{}, UserRecord>) => {
     const user = res.locals.user
-    if (typeof user === 'undefined')
+    if (typeof user === 'undefined' || typeof user.id === 'undefined')
       return res.status(403).json({ error: 'User is not authenticated!' })
 
     // firstName, lastName, birthday, profileText
@@ -168,7 +168,10 @@ router.put(
       ', '
     )} WHERE id = ?`
 
-    return await new DBService().query(query, params.paramArray)
+    return await new DBService().query(query, [
+      ...params.paramArray,
+      getIntIDFromHash(user.id),
+    ])
   }
 )
 
@@ -221,7 +224,7 @@ router.put(
 )
 
 /**
- * Update current User's email.
+ * Update current User's birthday.
  */
 router.put(
   '/birthday',
@@ -255,7 +258,7 @@ router.put('/profile/picture', (req, res: express.Response<{}, UserRecord>) => {
 
 /**
  * PUT /api/users/profile/text
- * Update the current profile picture
+ * Update the current profile text
  */
 router.put(
   '/profile/text',

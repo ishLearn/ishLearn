@@ -16,5 +16,5 @@ try {
 </script>
 
 <template>
-  <div>Login out...</div>
+  <div>Loging out...</div>
 </template>

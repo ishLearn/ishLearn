@@ -1,19 +1,19 @@
 <script setup lang="ts">
-import { User } from '@/types/Users'
-import { ref } from 'vue'
-import api from '@/services/api'
-import { onMounted } from '@vue/runtime-core'
-import { useRoute } from 'vue-router'
 import axios from 'axios'
+import { ref, Ref } from 'vue'
+import { onMounted, onUpdated } from '@vue/runtime-core'
+import { useRoute } from 'vue-router'
 import useUser from '@/store/auth.module'
+import api from '@/services/api'
+import { User } from '@/types/Users'
 
 const uid = useRoute().params.id
 
 const user = useUser()
-const isHimself = user.status.loggedIn && user.user?.id === uid ? true : false
+const isHimself: Ref<boolean> = ref(false)
 
-const user2display: ref<User> = ref()
-const imageUrl = ref('')
+const user2display: Ref<User | null> = ref(null)
+const imageUrl: Ref<string> = ref('')
 onMounted(() => {
   api.get(`/users/${uid}/`).then((res) => {
     user2display.value = res.data
@@ -21,6 +21,9 @@ onMounted(() => {
   axios.get('https://randomuser.me/api/').then((res) => {
     imageUrl.value = res.data.results[0].picture.large
   })
+})
+onUpdated(() => {
+  isHimself.value = user.status.loggedIn && user.user?.id === uid ? true : false
 })
 </script>
 
@@ -35,7 +38,9 @@ onMounted(() => {
       <p>{{ user2display.profileText || 'Ich benutze jetzt auch ISH/Learn' }}</p>
 
       <button class="btn btn-primary m-2">Alle Projekte von {{ user2display.firstName }}</button>
-      <button v-if="isHimself" class="btn btn-secondary m-2">Edit Profile settings</button>
+      <router-link v-if="isHimself" :to="{ name: 'UserUpdate' }"
+        ><button class="btn btn-secondary m-2">Edit Profile settings</button></router-link
+      >
     </div>
   </div>
 </template>

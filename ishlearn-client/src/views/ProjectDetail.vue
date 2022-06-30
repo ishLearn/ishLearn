@@ -32,8 +32,12 @@ const project: Ref<Product | null> = ref(null)
 const descriptionUpdate = ref(0)
 
 onMounted(async () => {
-  project.value = await Product.getProductById(typeof pid === 'string' ? pid : pid[0], descriptionUpdate)
-  if ('description' in project.value && typeof project.value.description !== 'undefined') { }
+  project.value = await Product.getProductById(
+    typeof pid === 'string' ? pid : pid[0],
+    descriptionUpdate,
+  )
+  if ('description' in project.value && typeof project.value.description !== 'undefined') {
+  }
 })
 
 watch(project, () => descriptionUpdate.value++)
