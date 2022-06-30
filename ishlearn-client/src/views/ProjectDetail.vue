@@ -10,6 +10,10 @@ import { Product } from '@/types/Products'
 import useUser from '@/store/auth.module'
 import { Store } from 'pinia'
 import { User } from '@/types/Users'
+import DropZone from '@/components/DropZone.vue'
+import useFileList from '@/util/file-list'
+
+const { files, addFiles, removeFiles } = useFileList()
 
 const mdtext = ref(`# Die Überschrift für mein Projekt
 ## Kurze Zusammenfassung
@@ -70,9 +74,25 @@ watch(project, () => descriptionUpdate.value++)
 
         <h2>Dateien in dem Projekt</h2>
         <p>TODO</p>
+
+        <!-- -->
+        <div class="m-4">
+          <DropZone class="drop-area" @files-dropped="addFiles" #default="{ dropZoneActive }">
+            <div v-if="dropZoneActive" class="border rounded">
+              <div>Drop Them Here</div>
+            </div>
+            <div v-else class="border rounded">
+              <div>Drag here</div>
+            </div>
+          </DropZone>
+        </div>
+        -->
+
+        <p>Space</p>
         <div class="mb-3">
           <label for="formFile" class="form-label">Default file input example</label>
           <input class="form-control" type="file" id="formFile" />
+          <button>Hochladen</button>
         </div>
 
         <span v-show="false">
