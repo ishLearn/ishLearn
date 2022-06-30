@@ -7,7 +7,6 @@
     @drop.prevent="onDrop"
   >
     <slot :dropZoneActive="active"></slot>
-    Und hier {{ active }}
   </div>
 </template>
 

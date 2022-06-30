@@ -20,16 +20,18 @@ export default function () {
   return { files, addFiles, removeFile }
 }
 
-class UploadableFile {
+type UploadStatus = null | 'loading' | true | false
+
+export class UploadableFile {
   file: File
   id: string
   url: string
-  // status
+  status: UploadStatus
 
   constructor(file: File) {
     this.file = file
     this.id = `${file.name}-${file.size}-${file.lastModified}-${file.type}`
     this.url = URL.createObjectURL(file)
-    // this.status = null
+    this.status = null
   }
 }

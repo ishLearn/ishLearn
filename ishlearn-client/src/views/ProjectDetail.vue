@@ -11,9 +11,11 @@ import useUser from '@/store/auth.module'
 import { Store } from 'pinia'
 import { User } from '@/types/Users'
 import DropZone from '@/components/DropZone.vue'
+import FilePreview from '@/components/FilePreview.vue'
 import useFileList from '@/util/file-list'
+import { uploadFiles } from '@/util/file-uploader'
 
-const { files, addFiles, removeFiles } = useFileList()
+const { files, addFiles, removeFile } = useFileList()
 
 const mdtext = ref(`# Die Überschrift für mein Projekt
 ## Kurze Zusammenfassung
@@ -34,8 +36,8 @@ const user: Store<'user'> = useUser()
 
 const pid = useRoute().params.id
 const project: Ref<Product | null> = ref(null)
-const creator: Ref<User> = ref({})
-const updater: Ref<User> = ref({})
+const creator: Ref<User | null> = ref(null)
+const updater: Ref<User | null> = ref(null)
 const descriptionUpdate = ref(0)
 
 onMounted(async () => {
@@ -54,6 +56,11 @@ onMounted(async () => {
 })
 
 watch(project, () => descriptionUpdate.value++)
+
+function onInputChange(e) {
+  addFiles(e.target.files)
+  e.target.value = null
+}
 </script>
 
 <template>
@@ -75,18 +82,37 @@ watch(project, () => descriptionUpdate.value++)
         <h2>Dateien in dem Projekt</h2>
         <p>TODO</p>
 
-        <!-- -->
-        <div class="m-4">
+        <div class="m-4" v-if="project">
           <DropZone class="drop-area" @files-dropped="addFiles" #default="{ dropZoneActive }">
-            <div v-if="dropZoneActive" class="border rounded">
-              <div>Drop Them Here</div>
-            </div>
-            <div v-else class="border rounded">
-              <div>Drag here</div>
-            </div>
+            <label for="file-input">
+              <ul v-show="files.length">
+                <FilePreview
+                  v-for="file of files"
+                  :key="file.id"
+                  :file="file"
+                  tag="li"
+                  @remove="removeFile"
+                />
+              </ul>
+
+              <span v-if="dropZoneActive">
+                <span>Lasse die Dateien los</span>
+                <span class="smaller">um sie hinzuzufügen</span>
+              </span>
+              <span v-else>
+                <span>Ziehe hier deine Dateien rein</span>
+                <span class="smaller"
+                  >oder <strong>klicke hier</strong> um Dateien auszuwählen</span
+                >
+              </span>
+
+              <input type="file" id="file-input" multiple @change="onInputChange" />
+            </label>
           </DropZone>
+          <button @click.prevent="uploadFiles(files, project.id)" class="upload-button">
+            Upload
+          </button>
         </div>
-        -->
 
         <p>Space</p>
         <div class="mb-3">
@@ -110,7 +136,7 @@ watch(project, () => descriptionUpdate.value++)
         <p class="info-box-heading">Erstellt am</p>
         <p class="info-box-content">
           {{ formatDate(project.createDate) }} (<router-link
-            v-if="creator.firstName"
+            v-if="creator"
             :to="{ name: 'UserDetail', params: { id: creator.id } }"
             >{{ creator.firstName }}</router-link
           >)
@@ -118,7 +144,7 @@ watch(project, () => descriptionUpdate.value++)
         <p class="info-box-heading">Letzte Änderung</p>
         <p class="info-box-content">
           {{ formatDate(project.updatedDate) }} (<router-link
-            v-if="updater.firstName"
+            v-if="updater"
             :to="{ name: 'UserDetail', params: { id: updater.id } }"
             >{{ updater.firstName }}</router-link
           >)
@@ -132,7 +158,7 @@ watch(project, () => descriptionUpdate.value++)
   </div>
 </template>
 
-<style>
+<style scoped>
 .info-box {
   align-content: left;
   text-align: left;
@@ -145,5 +171,79 @@ watch(project, () => descriptionUpdate.value++)
   margin-bottom: 0px;
 }
 .info-box-content {
+}
+</style>
+
+<style scoped>
+#app {
+  font-family: Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #2c3e50;
+  margin: 0 auto;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.drop-area {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 50px;
+  background: #ffffff55;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  transition: 0.2s ease;
+}
+.drop-area[data-active='true'] {
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  background: #ffffffcc;
+}
+
+label {
+  font-size: 36px;
+  cursor: pointer;
+  display: block;
+}
+label span {
+  display: block;
+}
+label input[type='file']:not(:focus-visible) {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+label .smaller {
+  font-size: 16px;
+}
+
+.image-list {
+  display: flex;
+  list-style: none;
+  flex-wrap: wrap;
+  padding: 0;
+}
+.upload-button {
+  display: block;
+  appearance: none;
+  border: 0;
+  border-radius: 50px;
+  padding: 0.75rem 3rem;
+  margin: 1rem auto;
+  font-size: 1.25rem;
+  font-weight: bold;
+  background: #369;
+  color: #fff;
+  text-transform: uppercase;
+}
+button {
+  cursor: pointer;
 }
 </style>
