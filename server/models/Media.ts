@@ -22,6 +22,15 @@ import Product from './Product'
 
 type UploadClient = { u: Upload; c?: socket.Socket }
 
+export type MediaPartOfProduct = {
+  MID: number
+  PID: number
+  filename: string
+  URL: string
+}
+
+export type MediaPartOfProductJoin = MediaPartOfProduct & Product
+
 /**
  * Handle Media up- and downloads.
  *

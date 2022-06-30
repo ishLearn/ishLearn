@@ -17,7 +17,7 @@ import {
   setValue,
   searchProductById,
 } from '../services/RedisService'
-import Media from './Media'
+import Media, { MediaPartOfProduct, MediaPartOfProductJoin } from './Media'
 
 /**
  * A Product is a unit of files, comments and other content and information.
@@ -356,6 +356,29 @@ export default class Product {
     return res
   }
 
+  static async getAllMedia(pid: string) {
+    // With products join
+    // const sql = `SELECT * FROM mediaPartOfProduct INNER JOIN media ON media.ID = mediaPartOfProduct.MID INNER JOIN products ON products.ID = mediaPartOfProduct.PID HAVING mediaPartOfProduct.PID = ?`
+    // Without Products join
+    const sql = `SELECT * FROM mediaPartOfProduct INNER JOIN media ON media.ID = mediaPartOfProduct.MID HAVING mediaPartOfProduct.PID = ?`
+    const result = await new DBService().query(sql, [getIntIDFromHash(pid)])
+    const media = result.results.map((media: MediaPartOfProduct) => ({
+      filename: media.filename,
+      url: media.URL,
+    }))
+    console.log(media)
+
+    return media
+  }
+
+  // UPDATE / ADD Product
+
+  /**
+   * Save a description to a product.
+   * @param pid Product ID
+   * @param description Description text (md)
+   * @param userId User ID (uploader / updater)
+   */
   static async saveDescription(
     pid: NumberLike,
     description: string,
