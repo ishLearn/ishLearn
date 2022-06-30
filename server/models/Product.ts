@@ -126,8 +126,6 @@ export default class Product {
       typeof idInput === 'string' ? idInput : getHashFromIntID(idInput)
     )
 
-    console.log(foundProduct)
-
     if (foundProduct?.ID) {
       let { ID } = foundProduct
       if (
@@ -338,7 +336,7 @@ export default class Product {
     const pid = typeof id === 'string' ? getIntIDFromHash(id) : id
 
     const redisRating = await getValue(`rating-${id}`)
-    console.log(redisRating)
+
     // Return either rating from Redis or fetch from DB
     if (redisRating) return redisRating
 
@@ -353,7 +351,8 @@ export default class Product {
         ? (result['avg(rating)'] as number)
         : 0
 
-    setValue(`rating-${id}`, String(res))
+    await setValue(`rating-${id}`, String(res))
+
     return res
   }
 
@@ -376,6 +375,7 @@ export default class Product {
         'The upload has finished but not succeeded! Internal Server Error'
       )
 
+    console.log('Before media save')
     await Media.save(`description.md`, result.filePathName, pid, userId)
   }
 

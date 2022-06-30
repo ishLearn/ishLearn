@@ -100,6 +100,7 @@ router.post(
       return res.status(403).json({ error: 'Not authenticated' })
     const { title, visibility } = req.body
 
+    console.log('Visibility of new product in next line:')
     console.log(visibility)
     const newP = new Product(
       title,

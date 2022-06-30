@@ -17,6 +17,7 @@ router.post(
   validateResult,
   async (req: express.Request, res: express.Response<{}, UserRecord>) => {
     const { filename } = req.body
+    console.log(filename)
 
     // res status and json done inside of upload
     await Media.downloadMedia(filename, res)

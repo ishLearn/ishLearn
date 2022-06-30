@@ -14,16 +14,22 @@ import { listBucketObjects } from './listBucketObjects'
 import { BucketParams } from '../types'
 
 // Create the Amazon S3 bucket.
-export const createBucket = async (bucketParams: BucketParams) => {
+export const createBucket = async (
+  bucketParams: BucketParams,
+  log: boolean = true
+) => {
   try {
     const data = await s3Client.send(new CreateBucketCommand(bucketParams))
     return data
-  } catch (err) {
-    new Logger().error(
-      'AWS S3 Client',
-      `CREATE Bucket with params: ${JSON.stringify(bucketParams)}`,
-      err
-    )
+  } catch (err: any) {
+    if (log)
+      new Logger().error(
+        'AWS S3 Client',
+        `CREATE Bucket with params: ${JSON.stringify(bucketParams)}`,
+        err
+      )
+    if ((err.message as string).includes('ECONNREFUSED'))
+      throw new Error('S3 Client: Connection Refused')
     throw new Error('Could not create bucket.')
   }
 }

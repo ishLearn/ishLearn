@@ -87,7 +87,7 @@ router.post(
       const newToken = await refreshAccessToken(token)
       return res.status(200).json(newToken)
     } catch (err) {
-      console.log(token)
+      console.log(token + ' is an invalid refresh token.')
       return res.status(403).json({ error: 'Refresh token is invalid' })
     }
   }

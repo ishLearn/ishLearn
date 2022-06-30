@@ -123,7 +123,7 @@ export default class Media {
 
     const params: UploadBucketParams = {
       Bucket: process.env.MAIN_BUCKET,
-      Key: `${filePathName}`,
+      Key: `${process.env.MAIN_BUCKET}/${filePathName}`,
       Body: buf,
     }
 
@@ -215,7 +215,7 @@ export default class Media {
 
     const bucketParams: SearchFileBucketParams = {
       Bucket: process.env.MAIN_BUCKET || 'main',
-      Key: filename,
+      Key: `${process.env.MAIN_BUCKET}/${filename}`,
     }
 
     try {
