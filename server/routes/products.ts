@@ -42,9 +42,15 @@ router.get(
 router.get(
   '/:id',
   async (req: express.Request, res: express.Response<{}, UserRecord>) => {
-    return res.json(
-      await Product.getFullProductById(req.params.id, res.locals.user)
-    )
+    try {
+      return res
+        .status(200)
+        .json(await Product.getFullProductById(req.params.id, res.locals.user))
+    } catch (err) {
+      return res.status(400).json({
+        error: 'Could not retrieve product. Is the ID invalid?',
+      })
+    }
   }
 )
 
