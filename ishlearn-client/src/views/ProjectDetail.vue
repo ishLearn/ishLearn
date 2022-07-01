@@ -14,6 +14,7 @@ import DropZone from '@/components/DropZone.vue'
 import FilePreview from '@/components/FilePreview.vue'
 import useFileList from '@/util/file-list'
 import { uploadFiles } from '@/util/file-uploader'
+import FilePreviewDownload from '@/components/FilePreviewDownload.vue'
 
 const { files, addFiles, removeFile } = useFileList()
 
@@ -82,7 +83,17 @@ function onInputChange(e) {
 
         <h4>Dateien in dem Projekt</h4>
 
-        {{ project.media }}
+        <div>
+          <ul class="image-list">
+            <li v-for="mediaObject of project.media" :key="mediaObject.url">
+              <FilePreviewDownload
+                :filename="mediaObject.filename"
+                :filetype="mediaObject.filename"
+                :fileurl="mediaObject.url"
+              />
+            </li>
+          </ul>
+        </div>
 
         <div class="m-4" v-if="project && user.user.id === project.createdBy">
           <DropZone class="drop-area" @files-dropped="addFiles" #default="{ dropZoneActive }">

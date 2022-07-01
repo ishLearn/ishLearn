@@ -87,8 +87,8 @@ export class Product {
 
   async fetchMediaMeta(updateRef?: Ref<number>): Promise<void> {
     api.get(`/products/${this.id}/media`).then((res) => {
-      console.log(res.data.media)
-      this.media = res.data.media
+      this.media = res.data.media.filter((m: MediaMeta) => m.filename !== 'description.md')
+      console.log(this.media)
       if (updateRef) updateRef.value++
     })
   }

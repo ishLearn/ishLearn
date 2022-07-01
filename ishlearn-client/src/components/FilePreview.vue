@@ -1,37 +1,8 @@
 <template>
   <component :is="tag" class="file-preview">
-    <img
-      v-if="file.file.type.startsWith('image')"
-      :src="file.url"
-      :alt="file.file.name"
-      :title="file.file.name"
-    />
-    <div v-else>
-      <IconFileEarmarkPdf v-if="file.file.name.endsWith('.pdf')" class="icon" />
-      <IconFileEarmarkWord v-if="wordEndings.includes(fileEnding(file.file.name))" class="icon" />
-      <IconFileEarmarkSpreadsheet
-        v-if="excelEndings.includes(fileEnding(file.file.name))"
-        class="icon"
-      />
-      <IconFileEarmarkSlides
-        v-if="powerPointEndings.includes(fileEnding(file.file.name))"
-        class="icon"
-      />
-      <IconFileEarmarkCode v-if="codeEndings.includes(fileEnding(file.file.name))" class="icon" />
-      <IconFileEarmarkMusic v-else-if="file.file.type.startsWith('audio')" class="icon" />
-      <IconFileEarmarkPlay v-else-if="file.file.type.startsWith('video')" class="icon" />
-      <IconFileEarmarkText v-else-if="file.file.name.endsWith('.txt')" class="icon" />
-      <IconEarmarkZip v-else-if="file.file.name.endsWith('.zip')" class="icon" />
-      <IconFileEarmark v-else class="icon" />
-      <p class="filename">{{ file.file.name }}</p>
-    </div>
+    <FileDisplay :filename="file.file.name" :filetype="file.file.type" :fileurl="file.url" />
 
-    <button
-      v-if="deleteButton"
-      @click.prevent="$emit('remove', file)"
-      class="close-icon"
-      aria-label="Entfernen"
-    >
+    <button @click.prevent="$emit('remove', file)" class="close-icon" aria-label="Entfernen">
       X
     </button>
 
@@ -44,36 +15,16 @@
 </template>
 
 <script setup lang="ts">
-import IconFileEarmark from '@/icons/icon-file-earmark.vue'
+import axios from 'axios'
 import { UploadableFile } from '@/util/file-list'
-import IconFileEarmarkMusic from '../icons/icon-file-earmark-music.vue'
-import IconFileEarmarkPlay from '../icons/icon-file-earmark-play.vue'
-import IconEarmarkZip from '../icons/icon-earmark-zip.vue'
-import IconFileEarmarkPdf from '../icons/icon-file-earmark-pdf.vue'
-import IconFileEarmarkWord from '../icons/icon-file-earmark-word.vue'
-import IconFileEarmarkText from '../icons/icon-file-earmark-text.vue'
-import IconFileEarmarkSpreadsheet from '../icons/icon-file-earmark-spreadsheet.vue'
-import IconFileEarmarkSlides from '../icons/icon-file-earmark-slides.vue'
-import IconFileEarmarkCode from '../icons/icon-file-earmark-code.vue'
+import FileDisplay from '@/components/FileDisplayIcon.vue'
 
 defineEmits(['remove'])
 
 const props = defineProps({
   file: { type: UploadableFile, required: true },
   tag: { type: String, default: 'li' },
-  deleteButton: { type: Boolean, default: false },
 })
-
-const wordEndings: string[] = ['doc', 'docx', 'docm', 'dotm', 'odt', 'xps']
-const powerPointEndings: string[] = ['ppt', 'pptx', 'pps']
-const excelEndings: string[] = ['xlsx', 'xlsb', 'xls', 'csv', 'ods']
-const codeEndings: string[] = ['py', 'cpp', 'java', 'ts', 'c', 'html', 'css', 'js', 'php']
-
-const fileEnding = (filename: string) => filename.substring(filename.lastIndexOf('.') + 1)
-
-console.log(props.file.file.type)
-console.log(props.file.file.name)
-console.log(fileEnding(props.file.file.name))
 </script>
 
 <style scoped>
@@ -85,24 +36,7 @@ console.log(fileEnding(props.file.file.name))
   aspect-ratio: 1/1;
   overflow: hidden;
 }
-.file-preview img,
-.file-preview .icon {
-  width: 100%;
-  height: 100%;
-  display: block;
-  object-fit: cover;
-}
-.file-preview .filename {
-  border-radius: 2pt;
-  word-break: break-all;
-  font-size: 8pt;
-  color: black;
-  background: rgba(255, 255, 255, 0.475);
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
+
 .file-preview .close-icon,
 .file-preview .status-indicator {
   --size: 20px;
