@@ -11,10 +11,10 @@ import useUser from '@/store/auth.module'
 import { Store } from 'pinia'
 import { User } from '@/types/Users'
 import DropZone from '@/components/DropZone.vue'
-import FilePreview from '@/components/FilePreview.vue'
 import useFileList from '@/util/file-list'
 import { uploadFiles } from '@/util/file-uploader'
 import FilePreviewDownload from '@/components/FilePreviewDownload.vue'
+import FilePreviewUpload from '@/components/FilePreviewUpload.vue'
 
 const { files, addFiles, removeFile } = useFileList()
 
@@ -37,9 +37,10 @@ const user: Store<'user'> = useUser()
 
 const pid = useRoute().params.id
 const project: Ref<Product | null> = ref(null)
-const media = ref(null)
 const creator: Ref<User | null> = ref(null)
 const updater: Ref<User | null> = ref(null)
+const editPermission: Ref<boolean> = ref(false)
+const showEdit: Ref<boolean> = ref(false)
 const descriptionUpdate = ref(0)
 
 onMounted(async () => {
@@ -49,6 +50,7 @@ onMounted(async () => {
   )
   if ('description' in project.value && typeof project.value.description !== 'undefined') {
   }
+  editPermission.value = user.user.id === project.value.createdBy
   api.get(`/users/${project.value.createdBy}`).then((res) => {
     creator.value = res.data
   })
@@ -81,7 +83,16 @@ function onInputChange(e) {
       <div class="box-background m-1 p-3">
         <h1>{{ project.title }}</h1>
 
-        <h4>Dateien in dem Projekt</h4>
+        <h4>
+          Dateien in dem Projekt
+          <button
+            v-if="editPermission"
+            class="btn btn-sm btn-secondary edit-button"
+            @click.prevent="showEdit = !showEdit"
+          >
+            {{ showEdit ? 'Bearbeitung beenden' : 'Bearbeiten' }}
+          </button>
+        </h4>
 
         <div>
           <ul class="image-list">
@@ -90,16 +101,17 @@ function onInputChange(e) {
                 :filename="mediaObject.filename"
                 :filetype="mediaObject.filename"
                 :fileurl="mediaObject.url"
+                :show-delete="showEdit"
               />
             </li>
           </ul>
         </div>
 
-        <div class="m-4" v-if="project && user.user.id === project.createdBy">
+        <div class="m-4" v-show="project && editPermission && showEdit">
           <DropZone class="drop-area" @files-dropped="addFiles" #default="{ dropZoneActive }">
             <label for="file-input">
               <ul v-show="files.length" class="image-list">
-                <FilePreview
+                <FilePreviewUpload
                   v-for="file of files"
                   :key="file.id"
                   :file="file"
@@ -123,14 +135,11 @@ function onInputChange(e) {
               <input type="file" id="file-input" multiple @change="onInputChange" />
             </label>
           </DropZone>
-          <button @click.prevent="uploadFiles(files, project.id)" class="upload-button">
-            Upload
+          <button class="upload-button" @click.prevent="uploadFiles(files, project.id)">
+            Hochladen
           </button>
         </div>
 
-        <span v-show="false">
-          {{ descriptionUpdate }}
-        </span>
         <span v-if="project.description" :key="descriptionUpdate">
           <MDPreview :text-to-display="project.description"></MDPreview>
         </span>
@@ -157,8 +166,13 @@ function onInputChange(e) {
           >)
         </p>
       </div>
-      <div class="box-background m-1 p-2">
-        <h4>Projekte, die dich interessieren könnten</h4>
+      <div class="box-background info-box m-1 p-2">
+        <h4 class="info-box-title info-box-heading">Tags</h4>
+        Coming soon...
+      </div>
+
+      <div class="box-background info-box m-1 p-2">
+        <h4 class="info-box-title info-box-heading">Projekte, die dich interessieren könnten</h4>
         <p>Coming soon...</p>
       </div>
     </div>
@@ -179,9 +193,15 @@ function onInputChange(e) {
 }
 .info-box-content {
 }
-</style>
 
-<style scoped>
+h4 {
+  position: relative;
+}
+.edit-button {
+  position: absolute;
+  right: 0px;
+}
+
 .drop-area {
   width: 100%;
   max-width: 800px;
