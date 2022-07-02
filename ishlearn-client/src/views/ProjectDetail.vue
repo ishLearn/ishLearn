@@ -17,6 +17,7 @@ import FilePreviewDownload from '@/components/FilePreviewDownload.vue'
 import FilePreviewUpload from '@/components/FilePreviewUpload.vue'
 
 const { files, addFiles, removeFile } = useFileList()
+import api from '@/services/api'
 
 const mdtext = ref(`# Die Überschrift für mein Projekt
 ## Kurze Zusammenfassung
@@ -37,10 +38,14 @@ const user: Store<'user'> = useUser()
 
 const pid = useRoute().params.id
 const project: Ref<Product | null> = ref(null)
+
 const creator: Ref<User | null> = ref(null)
 const updater: Ref<User | null> = ref(null)
 const editPermission: Ref<boolean> = ref(false)
 const showEdit: Ref<boolean> = ref(false)
+
+const projectCreator: Ref<User | null> = ref(null)
+
 const descriptionUpdate = ref(0)
 
 onMounted(async () => {
@@ -48,13 +53,12 @@ onMounted(async () => {
     typeof pid === 'string' ? pid : pid[0],
     descriptionUpdate,
   )
-  if ('description' in project.value && typeof project.value.description !== 'undefined') {
-  }
+
   editPermission.value = user.user.id === project.value.createdBy
-  api.get(`/users/${project.value.createdBy}`).then((res) => {
+  api.get<User>(`/users/${project.value.createdBy}`).then((res) => {
     creator.value = res.data
   })
-  api.get(`/users/${project.value.createdBy}`).then((res) => {
+  api.get(`/users/${project.value.updatedBy}`).then((res) => {
     updater.value = res.data
   })
 })

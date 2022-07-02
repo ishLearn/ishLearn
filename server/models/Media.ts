@@ -86,7 +86,7 @@ export default class Media {
 
   static async saveToMediaOnly(filename: string, filePath: string) {
     const newMedia = await new DBService().query(
-      `INSERT INTO media (filename, URL), VALUES (?)`,
+      `INSERT INTO media (filename, URL) VALUES (?, ?)`,
       [filename, filePath]
     )
     return newMedia.results.insertId as NumberLike
@@ -222,6 +222,7 @@ export default class Media {
     const cacheExpiration = 1000 * 60
     const streamTags = true
 
+    new Logger().info(`Downloading media: ${filename}`)
     const bucketParams: SearchFileBucketParams = {
       Bucket: process.env.MAIN_BUCKET || 'main',
       Key: `${process.env.MAIN_BUCKET}/${filename}`,

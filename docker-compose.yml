@@ -13,6 +13,14 @@ services:
     depends_on:
       - redis
       - s3server
+  db:
+    image: mysql:latest
+    restart: unless-stopped
+    ports:
+      - '3306:3306'
+    volumes:
+      - ./storage/mysql:/var/lib/mysql
+    env_file: .prod.env
   redis:
     image: redislabs/redismod:preview
     restart: unless-stopped

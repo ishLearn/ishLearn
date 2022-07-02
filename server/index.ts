@@ -18,7 +18,7 @@ import Logger from './utils/Logger'
 const logger = new Logger()
 // Initialize DBService (start DB connection pool) and Redis Server
 import DBService from './services/DBService'
-import { initBucket } from './libs/aws/s3Client'
+import { initBucket, s3Client } from './libs/aws/s3Client'
 import { connectRedisClient as startRedis } from './services/RedisService'
 
 import { exec } from 'child_process'
@@ -54,6 +54,14 @@ app.use(express.json())
 app.use(authMiddleware)
 // Middleware: Log all requests
 app.use(logger.request)
+
+// Disable X-Powered-By Header
+app.set('x-powered-by', false)
+
+app.use((_req, res, next) => {
+  res.header('x-powered-by', 'sthomas.ch')
+  next()
+})
 
 // Use routes
 app.use('/api/users', users)
