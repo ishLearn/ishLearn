@@ -2,17 +2,16 @@
 <script setup lang="ts">
 import { onMounted, Ref, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import axios from 'axios'
-import api from '@/services/api'
-import { formatDate } from '@/util/dateUtils'
-import MDPreview from '@/components/MDPreview.vue'
-import { Product } from '@/types/Products'
-import useUser from '@/store/auth.module'
 import { Store } from 'pinia'
+import useUser, { UserStoreState } from '@/store/auth.module'
+import getUser from '@/util/getUser'
 import { User } from '@/types/Users'
-import DropZone from '@/components/DropZone.vue'
+import { Product } from '@/types/Products'
+import { formatDate } from '@/util/dateUtils'
 import useFileList from '@/util/file-list'
 import { uploadFiles } from '@/util/file-uploader'
+import DropZone from '@/components/DropZone.vue'
+import MDPreview from '@/components/MDPreview.vue'
 import FilePreviewDownload from '@/components/FilePreviewDownload.vue'
 import FilePreviewUpload from '@/components/FilePreviewUpload.vue'
 
@@ -33,7 +32,7 @@ Das ist mir nachträglich aufgefallen, was falsch ist.
 - Buch 2
 `)
 
-const user: Store<'user'> = useUser()
+const user: Store<'user', UserStoreState> = useUser()
 
 const pid = useRoute().params.id
 const project: Ref<Product | null> = ref(null)
@@ -43,8 +42,6 @@ const updater: Ref<User | null> = ref(null)
 const editPermission: Ref<boolean> = ref(false)
 const showEdit: Ref<boolean> = ref(false)
 
-const projectCreator: Ref<User | null> = ref(null)
-
 const descriptionUpdate = ref(0)
 
 onMounted(async () => {
@@ -53,13 +50,9 @@ onMounted(async () => {
     descriptionUpdate,
   )
 
-  editPermission.value = user.user.id === project.value.createdBy
-  api.get<User>(`/users/${project.value.createdBy}`).then((res) => {
-    creator.value = res.data
-  })
-  api.get(`/users/${project.value.updatedBy}`).then((res) => {
-    updater.value = res.data
-  })
+  editPermission.value = user.status.loggedIn && user.user?.id === project.value.createdBy
+  getUser(creator, project.value.createdBy)
+  getUser(updater, project.value.updatedBy)
 })
 
 watch(project, () => descriptionUpdate.value++)

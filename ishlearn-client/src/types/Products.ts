@@ -16,8 +16,8 @@ export class Product {
   id?: ID
   title: string
   visibility: Visibility | string
-  updatedBy: number | string
-  createdBy: number | string
+  updatedBy: string
+  createdBy: string
   createDate?: Date
   updatedDate?: Date
   description?: string
@@ -38,8 +38,8 @@ export class Product {
       id: ID
       title: string
       visibility: Visibility
-      updatedBy: number | string
-      createdBy: number | string
+      updatedBy: string
+      createdBy: string
       createDate?: Date
       updatedDate?: Date
       description?: string

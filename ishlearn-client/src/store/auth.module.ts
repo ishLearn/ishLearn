@@ -5,13 +5,15 @@ import { RefreshToken } from '@/types/Tokens'
 import { User } from '@/types/Users'
 // <import AuthService from '@/services/auth.service'
 
+export type UserStoreState = {
+  status: { loggedIn: boolean }
+  user: User | null
+  accessKey: string
+  refreshKey: RefreshToken | null
+}
+
 const useUser = defineStore('user', {
-  state: (): {
-    status: { loggedIn: boolean }
-    user: User | null
-    accessKey: string
-    refreshKey: RefreshToken | null
-  } => ({
+  state: (): UserStoreState => ({
     status: {
       loggedIn: false,
     },
