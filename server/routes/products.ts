@@ -369,4 +369,16 @@ router.post(
   }
 )
 
+router.get('/:id/media', async (req, res) => {
+  try {
+    return res
+      .status(200)
+      .json({ media: await Product.getAllMedia(req.params.id) })
+  } catch (err) {
+    return res
+      .status(400)
+      .json({ error: 'Media for product could not be retrieved' })
+  }
+})
+
 export default router
