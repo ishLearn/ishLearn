@@ -17,7 +17,6 @@ import FilePreviewDownload from '@/components/FilePreviewDownload.vue'
 import FilePreviewUpload from '@/components/FilePreviewUpload.vue'
 
 const { files, addFiles, removeFile } = useFileList()
-import api from '@/services/api'
 
 const mdtext = ref(`# Die Überschrift für mein Projekt
 ## Kurze Zusammenfassung
