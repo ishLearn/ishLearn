@@ -371,6 +371,29 @@ export default class Product {
     return media
   }
 
+  /**
+   * Find out whether a user has update permission on this product.
+   * @param pid Project ID to check for
+   * @param uid User that is logged in
+   * @param projectCreator Creator of the project, if used and uid equals projectCreator, no DB query is needed
+   * @returns `true` if the user has update permission, otherwise `false`
+   */
+  static async hasPermission(
+    pid: string,
+    uid: string,
+    projectCreator?: string
+  ) {
+    return (
+      projectCreator === uid ||
+      (
+        await new DBService().query(
+          `SELECT * FROM uploadBy WHERE PID = ? AND UID = ?`,
+          [getIntIDFromHash(pid), getIntIDFromHash(uid)]
+        )
+      ).results?.length > 0
+    )
+  }
+
   // UPDATE / ADD Product
 
   /**
