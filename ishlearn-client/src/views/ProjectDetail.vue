@@ -3,13 +3,15 @@
 import { onMounted, Ref, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { Store } from 'pinia'
+// utils and functions
 import useUser, { UserStoreState } from '@/store/auth.module'
-import getUser from '@/util/getUser'
+import { getUser, setEditPermission } from '@/util/getUser'
 import { User } from '@/types/Users'
 import { Product } from '@/types/Products'
 import { formatDate } from '@/util/dateUtils'
 import useFileList from '@/util/file-list'
 import { uploadFiles } from '@/util/file-uploader'
+// Vue imports
 import DropZone from '@/components/DropZone.vue'
 import MDPreview from '@/components/MDPreview.vue'
 import FilePreviewDownload from '@/components/FilePreviewDownload.vue'
@@ -50,7 +52,7 @@ onMounted(async () => {
     descriptionUpdate,
   )
 
-  editPermission.value = user.status.loggedIn && user.user?.id === project.value.createdBy
+  setEditPermission(editPermission, user, project)
   getUser(creator, project.value.createdBy)
   getUser(updater, project.value.updatedBy)
 })
@@ -104,7 +106,11 @@ function onInputChange(e) {
         </div>
 
         <div class="m-4" v-show="project && editPermission && showEdit">
-          <DropZone class="drop-area" @files-dropped="addFiles" #default="{ dropZoneActive }">
+          <DropZone
+            class="drop-area"
+            @files-dropped="addFiles"
+            #default="{ dropZoneActive }"
+          >
             <label for="file-input">
               <ul v-show="files.length" class="image-list">
                 <FilePreviewUpload
@@ -124,14 +130,23 @@ function onInputChange(e) {
               <span v-else>
                 <span>Ziehe hier deine Dateien rein</span>
                 <span class="smaller"
-                  >oder <strong>klicke hier</strong> um Dateien auszuwählen</span
+                  >oder <strong>klicke hier</strong> um Dateien
+                  auszuwählen</span
                 >
               </span>
 
-              <input type="file" id="file-input" multiple @change="onInputChange" />
+              <input
+                type="file"
+                id="file-input"
+                multiple
+                @change="onInputChange"
+              />
             </label>
           </DropZone>
-          <button class="upload-button" @click.prevent="uploadFiles(files, project.id)">
+          <button
+            class="upload-button"
+            @click.prevent="uploadFiles(files, project.id)"
+          >
             Hochladen
           </button>
         </div>
@@ -168,7 +183,9 @@ function onInputChange(e) {
       </div>
 
       <div class="box-background info-box m-1 p-2">
-        <h4 class="info-box-title info-box-heading">Projekte, die dich interessieren könnten</h4>
+        <h4 class="info-box-title info-box-heading">
+          Projekte, die dich interessieren könnten
+        </h4>
         <p>Coming soon...</p>
       </div>
     </div>
