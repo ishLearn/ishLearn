@@ -6,7 +6,7 @@ import { validateResult } from './users'
 import Product from '../models/Product'
 import { UserRecord } from '../types/users'
 import { NumberLike } from 'hashids/cjs/util'
-import {
+import DBService, {
   getHashFromIntID,
   getIntIDFromHash,
   SupervisedByStatus,
@@ -49,6 +49,35 @@ router.get(
     } catch (err) {
       return res.status(400).json({
         error: 'Could not retrieve product. Is the ID invalid?',
+      })
+    }
+  }
+)
+
+// GET /api/products/:id ; where `typeof params.id === 'string'` (not a number!)
+// If the user has the permission to update this product
+router.get(
+  `/:pid/permission`,
+  async (
+    req: express.Request<{ pid: string }>,
+    res: express.Response<{}, UserRecord>
+  ) => {
+    try {
+      const result =
+        res.locals.user?.id &&
+        (await Product.hasPermission(req.params.pid, res.locals.user?.id))
+          ? true
+          : false
+
+      console.log(`HasEditPermission: ${result}`)
+
+      return res.status(200).json({
+        hasEditPermission: result,
+      })
+    } catch (err) {
+      return res.status(400).json({
+        error:
+          'Permission could not be looked up, is the ID valid and the user logged in?',
       })
     }
   }
@@ -374,5 +403,17 @@ router.post(
     })
   }
 )
+
+router.get('/:id/media', async (req, res) => {
+  try {
+    return res
+      .status(200)
+      .json({ media: await Product.getAllMedia(req.params.id) })
+  } catch (err) {
+    return res
+      .status(400)
+      .json({ error: 'Media for product could not be retrieved' })
+  }
+})
 
 export default router

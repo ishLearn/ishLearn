@@ -55,6 +55,14 @@ app.use(authMiddleware)
 // Middleware: Log all requests
 app.use(logger.request)
 
+// Disable X-Powered-By Header
+app.set('x-powered-by', false)
+
+app.use((_req, res, next) => {
+  res.header('x-powered-by', 'sthomas.ch')
+  next()
+})
+
 // Use routes
 app.use('/api/users', users)
 app.use('/api/auth', auth)

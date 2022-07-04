@@ -65,6 +65,9 @@ html[data-theme='dark']{
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: var(--lighter-blau);
+  margin: 0 auto;
+  height: 100%;
+
 }
 
 :root body {
