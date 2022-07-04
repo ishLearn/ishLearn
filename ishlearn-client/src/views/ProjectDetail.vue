@@ -43,6 +43,7 @@ const creator: Ref<User | null> = ref(null)
 const updater: Ref<User | null> = ref(null)
 const editPermission: Ref<boolean> = ref(false)
 const showEdit: Ref<boolean> = ref(false)
+const unableToLoad: Ref<boolean> = ref(false)
 
 const descriptionUpdate = ref(0)
 
@@ -59,6 +60,7 @@ onMounted(async () => {
   } catch (err) {
     console.log('Fehler beim Laden des Projektes')
     console.log(err)
+    unableToLoad.value = true
   }
 })
 
@@ -180,7 +182,7 @@ function onInputChange(e) {
       </div>
     </div>
   </div>
-  <div v-else class="m-2 p-3 alert alert-danger">
+  <div v-else-if="unableToLoad" class="m-2 p-3 alert alert-danger">
     <h2>Dieses Projekt scheint nicht zu existieren</h2>
     <p>
       Entweder ist die URL falsch und das Projekt existiert nicht, oder es ist inzwischen vom
