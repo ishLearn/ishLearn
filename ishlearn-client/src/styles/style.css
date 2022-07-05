@@ -89,3 +89,9 @@ html[data-theme='dark']{
   border: 1px solid rgba(0, 0, 0, 0.6);
   border-radius: 5px;
 }
+[data-theme='dark'] .alert-danger {
+  color: rgb(226, 93, 93);
+  background-color: rgba(92, 25, 25, 0.567);
+  border: 1px solid rgba(110, 5, 5, 0.623);
+  border-radius: 5px;
+}

@@ -42,14 +42,28 @@ class DBService {
 
     this.getConnection().then(async connection => {
       try {
-        if (await this.ping(connection))
+        if (await this.ping(connection)) {
           new Logger().event(
             'DB Connection',
             'Pinged MySQL-DB',
             `${process.env.DB_USER}@${process.env.DB_CONNECTION_HOST}`
           )
+        }
+        try {
+          await createDefaultTables()
+        } catch (err) {
+          new Logger().error(
+            `Initialize DBService`,
+            `Create default tables`,
+            err
+          )
+        }
       } catch (err) {
-        console.error(`MySQL ping on Pool connection failed!`)
+        new Logger().error(
+          `Initialize DBService`,
+          `MySQL ping on Pool connection failed!`,
+          err
+        )
         console.error(err)
       }
     })

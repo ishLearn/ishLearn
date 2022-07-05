@@ -69,6 +69,7 @@ export class Product {
         .get(`/api/products/${pid}`)
         .then((res) => {
           const [p] = res.data
+          if (!res.data) throw res
           return resolve(new Product(p, updateRef))
         })
         .catch((err) => reject(err))
