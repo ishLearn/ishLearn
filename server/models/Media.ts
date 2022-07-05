@@ -65,13 +65,14 @@ export default class Media {
   static async save(
     filename: string,
     filePath: string,
+    fileType: string,
     project: string | NumberLike,
     cId: string | NumberLike
   ) {
     console.log(filename, filePath)
     const mediaPartOfProduct = await new DBService().query(
-      `INSERT INTO media (filename, URL) VALUES (?, ?)`,
-      [filename, filePath]
+      `INSERT INTO media (filename, URL, filetype) VALUES (?, ?, ?)`,
+      [filename, filePath, fileType]
     )
 
     const collaborator = typeof cId === 'string' ? getIntIDFromHash(cId) : cId
@@ -84,10 +85,14 @@ export default class Media {
     return mediaPartOfProduct.results.insertId as NumberLike
   }
 
-  static async saveToMediaOnly(filename: string, filePath: string) {
+  static async saveToMediaOnly(
+    filename: string,
+    filePath: string,
+    fileType?: string
+  ) {
     const newMedia = await new DBService().query(
-      `INSERT INTO media (filename, URL) VALUES (?, ?)`,
-      [filename, filePath]
+      `INSERT INTO media (filename, URL, filetype) VALUES (?, ?, ?)`,
+      [filename, filePath, fileType]
     )
     return newMedia.results.insertId as NumberLike
   }
@@ -116,6 +121,7 @@ export default class Media {
       userId?: string | NumberLike
       res?: express.Response<{}, UserRecord>
       useNameAsPath?: boolean
+      fileType: string
     }
   ) {
     if (fileName === '')
@@ -189,6 +195,7 @@ export default class Media {
       const newId = await Media.save(
         fileName,
         filePathName,
+        config.fileType,
         config?.project || '',
         config.userId
       )

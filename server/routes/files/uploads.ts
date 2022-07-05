@@ -39,6 +39,7 @@ router.post(
 
     // res status and json done inside of upload
     Media.uploadMedia(filename, fileContent, {
+      fileType: file.mimetype,
       res,
       project: projectId,
       userId: res.locals.user?.id,
