@@ -36,6 +36,8 @@ Das ist mir nachträglich aufgefallen, was falsch ist.
 
 const user: Store<'user', UserStoreState> = useUser()
 
+const origin = window.origin
+
 const pid = useRoute().params.id
 const project: Ref<Product | null> = ref(null)
 
@@ -104,8 +106,8 @@ function onInputChange(e) {
             <li v-for="mediaObject of project.media" :key="mediaObject.url">
               <FilePreviewDownload
                 :filename="mediaObject.filename"
-                :filetype="mediaObject.filename"
-                :fileurl="mediaObject.url"
+                :filetype="mediaObject.fileType || 'notworking/nothing'"
+                :fileurl="`${origin}/api/files/download/${mediaObject.url}`"
                 :show-delete="showEdit"
               />
             </li>
@@ -113,7 +115,11 @@ function onInputChange(e) {
         </div>
 
         <div class="m-4" v-show="project && editPermission && showEdit">
-          <DropZone class="drop-area" @files-dropped="addFiles" #default="{ dropZoneActive }">
+          <DropZone
+            class="drop-area"
+            @files-dropped="addFiles"
+            #default="{ dropZoneActive }"
+          >
             <label for="file-input">
               <ul v-show="files.length" class="image-list">
                 <FilePreviewUpload
@@ -133,14 +139,23 @@ function onInputChange(e) {
               <span v-else>
                 <span>Ziehe hier deine Dateien rein</span>
                 <span class="smaller"
-                  >oder <strong>klicke hier</strong> um Dateien auszuwählen</span
+                  >oder <strong>klicke hier</strong> um Dateien
+                  auszuwählen</span
                 >
               </span>
 
-              <input type="file" id="file-input" multiple @change="onInputChange" />
+              <input
+                type="file"
+                id="file-input"
+                multiple
+                @change="onInputChange"
+              />
             </label>
           </DropZone>
-          <button class="upload-button" @click.prevent="uploadFiles(files, project.id)">
+          <button
+            class="upload-button"
+            @click.prevent="uploadFiles(files, project.id)"
+          >
             Hochladen
           </button>
         </div>
@@ -177,7 +192,9 @@ function onInputChange(e) {
       </div>
 
       <div class="box-background info-box m-1 p-2">
-        <h4 class="info-box-title info-box-heading">Projekte, die dich interessieren könnten</h4>
+        <h4 class="info-box-title info-box-heading">
+          Projekte, die dich interessieren könnten
+        </h4>
         <p>Coming soon...</p>
       </div>
     </div>
@@ -185,8 +202,8 @@ function onInputChange(e) {
   <div v-else-if="unableToLoad" class="m-2 p-3 alert alert-danger">
     <h2>Dieses Projekt scheint nicht zu existieren</h2>
     <p>
-      Entweder ist die URL falsch und das Projekt existiert nicht, oder es ist inzwischen vom
-      Besitzer auf privat gestellt worden.
+      Entweder ist die URL falsch und das Projekt existiert nicht, oder es ist
+      inzwischen vom Besitzer auf privat gestellt worden.
     </p>
   </div>
 </template>

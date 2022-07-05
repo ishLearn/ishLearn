@@ -224,11 +224,24 @@ export default class Media {
    */
   static async downloadMedia(
     filename: string,
-    res: express.Response<{}, UserRecord>
+    res: express.Response<{}, UserRecord>,
+    showInBrowser: boolean = false
   ) {
     // TODO: Testing needed One minute for testing, what time to use?
     const cacheExpiration = 1000 * 60
     const streamTags = true
+
+    const media: {
+      ID: number
+      filename: string
+      URL: string
+      uploadedDate: Date
+      filetype: string | null
+    } = await (
+      await new DBService().query(`SELECT * FROM media WHERE URL=? LIMIT 1`, [
+        filename,
+      ])
+    ).results
 
     new Logger().info(`Downloading media: ${filename}`)
     const bucketParams: SearchFileBucketParams = {
@@ -270,6 +283,19 @@ export default class Media {
         res.setHeader('Cache-Control', 'no-cache')
         res.setHeader('Expires', 0)
       }
+
+      res.setHeader(
+        'Content-disposition',
+        'inline; filename="' + filename + '"'
+      )
+      const type =
+        media.filetype || filename.endsWith('.md')
+          ? 'application/markdown'
+          : filename.endsWith('.pdf')
+          ? 'application/pdf'
+          : 'text/plain'
+
+      res.setHeader('Content-type', type)
 
       // Now get the object data and stream it
       const response = await s3Client.send(new GetObjectCommand(bucketParams))

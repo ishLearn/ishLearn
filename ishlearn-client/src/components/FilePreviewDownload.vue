@@ -1,6 +1,10 @@
 <template>
   <component :is="tag" class="file-preview" @click.prevent="downloadFile">
-    <FileDisplay :filename="filename" :filetype="filetype" :fileurl="fileurl" />
+    <FileDisplayIcon
+      :filename="filename"
+      :filetype="filetype"
+      :fileurl="fileurl"
+    />
     <button
       v-show="showDelete"
       @click.prevent="removeFileFromServer"
@@ -15,12 +19,12 @@
 <script setup lang="ts">
 import axios from 'axios'
 import { UploadableFile } from '@/util/file-list'
-import FileDisplay from '@/components/FileDisplayIcon.vue'
+import FileDisplayIcon from '@/components/FileDisplayIcon.vue'
 
 const props = defineProps({
   filename: { type: String, required: true },
   fileurl: { type: String, required: true },
-  filetype: { type: String, required: false, default: 'nothing' },
+  filetype: { type: String, required: false, default: 'notworking/nothing' },
   showDelete: { type: Boolean, default: false },
   tag: { type: String, default: 'li' },
 })

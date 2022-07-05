@@ -1,14 +1,37 @@
 <template>
   <div class="">
-    <img v-if="filetype.startsWith('image')" :src="fileurl" :alt="filename" :title="filename" />
+    <img
+      v-if="filetype.startsWith('image')"
+      :src="fileurl"
+      :alt="filename"
+      :title="filename"
+    />
     <div v-else>
       <IconFileEarmarkPdf v-if="filename.endsWith('.pdf')" class="icon" />
-      <IconFileEarmarkWord v-if="wordEndings.includes(fileEnding(filename))" class="icon" />
-      <IconFileEarmarkSpreadsheet v-if="excelEndings.includes(fileEnding(filename))" class="icon" />
-      <IconFileEarmarkSlides v-if="powerPointEndings.includes(fileEnding(filename))" class="icon" />
-      <IconFileEarmarkCode v-if="codeEndings.includes(fileEnding(filename))" class="icon" />
-      <IconFileEarmarkMusic v-else-if="filetype.startsWith('audio')" class="icon" />
-      <IconFileEarmarkPlay v-else-if="filetype.startsWith('video')" class="icon" />
+      <IconFileEarmarkWord
+        v-if="wordEndings.includes(fileEnding(filename))"
+        class="icon"
+      />
+      <IconFileEarmarkSpreadsheet
+        v-if="excelEndings.includes(fileEnding(filename))"
+        class="icon"
+      />
+      <IconFileEarmarkSlides
+        v-if="powerPointEndings.includes(fileEnding(filename))"
+        class="icon"
+      />
+      <IconFileEarmarkCode
+        v-if="codeEndings.includes(fileEnding(filename))"
+        class="icon"
+      />
+      <IconFileEarmarkMusic
+        v-else-if="filetype.startsWith('audio')"
+        class="icon"
+      />
+      <IconFileEarmarkPlay
+        v-else-if="filetype.startsWith('video')"
+        class="icon"
+      />
       <IconFileEarmarkText v-else-if="filename.endsWith('.txt')" class="icon" />
       <IconEarmarkZip v-else-if="filename.endsWith('.zip')" class="icon" />
       <IconFileEarmark v-else class="icon" />
@@ -29,7 +52,10 @@ import IconFileEarmarkSpreadsheet from '../icons/icon-file-earmark-spreadsheet.v
 import IconFileEarmarkSlides from '../icons/icon-file-earmark-slides.vue'
 import IconFileEarmarkCode from '../icons/icon-file-earmark-code.vue'
 
-defineProps(['filename', 'filetype', 'fileurl'])
+const props = defineProps(['filename', 'filetype', 'fileurl'])
+
+console.log(props)
+console.log(props.filetype)
 
 const wordEndings: string[] = ['doc', 'docx', 'docm', 'dotm', 'odt', 'xps']
 const powerPointEndings: string[] = ['ppt', 'pptx', 'pps']
