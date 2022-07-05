@@ -62,6 +62,7 @@ export default class Comments {
 
     const res = await Media.uploadMedia(filename, Buffer.from(text), {
       project: pid,
+      fileType: 'text/markdown'
     })
 
     if (typeof res === 'undefined' || !('worked' in res) || !res.worked)
