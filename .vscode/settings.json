@@ -20,5 +20,6 @@
     "unhashed"
   ],
   "html.format.wrapLineLength": 100,
-  "editor.formatOnSave": true
+  "editor.formatOnSave": true,
+  "githubPullRequests.ignoredPullRequestBranches": ["main"]
 }

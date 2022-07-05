@@ -362,11 +362,13 @@ export default class Product {
     // Without Products join
     const sql = `SELECT * FROM mediaPartOfProduct INNER JOIN media ON media.ID = mediaPartOfProduct.MID HAVING mediaPartOfProduct.PID = ?`
     const result = await new DBService().query(sql, [getIntIDFromHash(pid)])
-    const media = result.results.map((media: MediaPartOfProduct) => ({
-      filename: media.filename,
-      url: media.URL,
-    }))
-    console.log(media)
+    const media = (result.results as MediaPartOfProduct[]).map(
+      (media: MediaPartOfProduct) => ({
+        filename: media.filename,
+        url: media.URL,
+        fileType: media.filetype,
+      })
+    )
 
     return media
   }
@@ -413,6 +415,7 @@ export default class Product {
       {
         project: getHashFromIntID(pid),
         userId,
+        fileType: 'text/markdown',
       }
     )
 
@@ -421,8 +424,13 @@ export default class Product {
         'The upload has finished but not succeeded! Internal Server Error'
       )
 
-    console.log('Before media save')
-    await Media.save(`description.md`, result.filePathName, pid, userId)
+    await Media.save(
+      `description.md`,
+      result.filePathName,
+      'text/markdown',
+      pid,
+      userId
+    )
   }
 
   /**

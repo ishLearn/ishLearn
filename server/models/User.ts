@@ -390,11 +390,12 @@ export default class User {
    * @param uid UserID (hashed)
    * @param text content for profile picture
    */
-  static async uploadProfilePictureThenSaveToDB(uid: string, text: string) {
+  static async uploadProfilePictureThenSaveToDB(uid: string, img: string) {
     const filepath = User.getProfilePictureFilePath(uid)
 
-    const res = await Media.uploadMedia(filepath, Buffer.from(text), {
+    const res = await Media.uploadMedia(filepath, Buffer.from(img), {
       useNameAsPath: true,
+      fileType: 'notworking/img',
     })
 
     if (typeof res === 'undefined' || !('worked' in res) || !res.worked)
@@ -427,6 +428,7 @@ export default class User {
 
     const res = await Media.uploadMedia(`${filepath}`, Buffer.from(text), {
       useNameAsPath: true,
+      fileType: 'text/markdown',
     })
 
     if (typeof res === 'undefined' || !('worked' in res) || !res.worked)
