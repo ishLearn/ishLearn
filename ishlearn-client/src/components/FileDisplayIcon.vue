@@ -52,10 +52,7 @@ import IconFileEarmarkSpreadsheet from '../icons/icon-file-earmark-spreadsheet.v
 import IconFileEarmarkSlides from '../icons/icon-file-earmark-slides.vue'
 import IconFileEarmarkCode from '../icons/icon-file-earmark-code.vue'
 
-const props = defineProps(['filename', 'filetype', 'fileurl'])
-
-console.log(props)
-console.log(props.filetype)
+defineProps(['filename', 'filetype', 'fileurl'])
 
 const wordEndings: string[] = ['doc', 'docx', 'docm', 'dotm', 'odt', 'xps']
 const powerPointEndings: string[] = ['ppt', 'pptx', 'pps']
