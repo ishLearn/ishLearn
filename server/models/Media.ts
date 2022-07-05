@@ -27,6 +27,7 @@ export type MediaPartOfProduct = {
   PID: number
   filename: string
   URL: string
+  filetype: string
 }
 
 export type MediaPartOfProductJoin = MediaPartOfProduct & Product
