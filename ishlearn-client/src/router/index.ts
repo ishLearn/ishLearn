@@ -28,6 +28,11 @@ const routes: Array<RouteRecordRaw> = [
     name: 'ViewProject',
     component: () => import('../views/ProjectDetail.vue'),
   },
+  {
+    path: '/projects/update/:id',
+    name: 'UpdateProject',
+    component: () => import('../views/ProjectUpdateView.vue'),
+  },
   // Alles rund um den Benutzer
   {
     path: '/user/signup',

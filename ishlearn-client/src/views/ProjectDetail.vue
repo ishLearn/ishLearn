@@ -36,7 +36,6 @@ Das ist mir nachträglich aufgefallen, was falsch ist.
 
 const user: Store<'user', UserStoreState> = useUser()
 
-const pid = useRoute().params.id
 const project: Ref<Product | null> = ref(null)
 
 const creator: Ref<User | null> = ref(null)
@@ -49,6 +48,7 @@ const descriptionUpdate = ref(0)
 
 onMounted(async () => {
   try {
+    const pid = useRoute().params.id
     project.value = await Product.getProductById(
       typeof pid === 'string' ? pid : pid[0],
       descriptionUpdate,
@@ -97,6 +97,9 @@ function onInputChange(e) {
           >
             {{ showEdit ? 'Bearbeitung beenden' : 'Bearbeiten' }}
           </button>
+          <router-link :to="{ name: 'UpdateProject', params: { id: project.id } }">
+            <button class="btn btn-sm btn-secondary button">Bearbeiten für Profis</button>
+          </router-link>
         </h4>
 
         <div>

@@ -5,7 +5,7 @@ import { defineProps, defineEmits, watch, ref } from 'vue'
 import { validateEmail, validatePasswort, validateMandatory } from '@/util/inputValidation'
 
 const props = defineProps(['modelValue', 'inputProps'])
-defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue'])
 
 const mandWarn = ref(false)
 if (props.inputProps.mandatory) {
@@ -24,6 +24,13 @@ if (props.inputProps.type === 'email') {
   watch(props.inputProps.value, () => {
     emailWarn.value = !validateEmail(props.inputProps.value.value)
   })
+}
+const customEmit = (event) => {
+  if (props.inputProps.type === 'checkbox') {
+    emit('update:modelValue', !props.inputProps.value.value)
+  } else {
+    emit('update:modelValue', event.target?.value)
+  }
 }
 </script>
 
@@ -60,7 +67,7 @@ if (props.inputProps.type === 'email') {
       :name="inputProps.name"
       :placeholder="inputProps.placeholder"
       :value="modelValue"
-      @input="$emit('update:modelValue', $event.target?.value)"
+      @input="customEmit($event)"
       :class="`${
         inputProps.type === 'checkbox'
           ? 'form-check-input input-control-check'
