@@ -17,48 +17,33 @@ import MDPreview from '@/components/MDPreview.vue'
 import FilePreviewDownload from '@/components/FilePreviewDownload.vue'
 import FilePreviewUpload from '@/components/FilePreviewUpload.vue'
 
-const { files, addFiles, removeFile } = useFileList()
-
-const mdtext = ref(`# Die Überschrift für mein Projekt
-## Kurze Zusammenfassung
-
-Also in meinem Projekt ist das *Kursive* hier **fett** ++wichtig++!
-
-## Erata
-
-Das ist mir nachträglich aufgefallen, was falsch ist.
-
-## Quellen
-
-- Quelle 1
-- Buch 2
-`)
-
 const user: Store<'user', UserStoreState> = useUser()
 
 const origin = window.origin
 
-const pid = useRoute().params.id
 const project: Ref<Product | null> = ref(null)
 
 const creator: Ref<User | null> = ref(null)
 const updater: Ref<User | null> = ref(null)
 const editPermission: Ref<boolean> = ref(false)
-const showEdit: Ref<boolean> = ref(false)
 const unableToLoad: Ref<boolean> = ref(false)
 
 const descriptionUpdate = ref(0)
 
 onMounted(async () => {
   try {
+    const pid = useRoute().params.id
     project.value = await Product.getProductById(
       typeof pid === 'string' ? pid : pid[0],
       descriptionUpdate,
     )
+    await user.loading
 
     setEditPermission(editPermission, user, project)
     getUser(creator, project.value.createdBy)
     getUser(updater, project.value.updatedBy)
+    project.value.fetchDescription(descriptionUpdate)
+    project.value.fetchMediaMeta()
   } catch (err) {
     console.log('Fehler beim Laden des Projektes')
     console.log(err)
@@ -67,11 +52,6 @@ onMounted(async () => {
 })
 
 watch(project, () => descriptionUpdate.value++)
-
-function onInputChange(e) {
-  addFiles(e.target.files)
-  e.target.value = null
-}
 </script>
 
 <template>
@@ -92,13 +72,12 @@ function onInputChange(e) {
 
         <h4>
           Dateien in dem Projekt
-          <button
+          <router-link
             v-if="editPermission"
-            class="btn btn-sm btn-secondary edit-button"
-            @click.prevent="showEdit = !showEdit"
+            :to="{ name: 'UpdateProject', params: { id: project.id } }"
           >
-            {{ showEdit ? 'Bearbeitung beenden' : 'Bearbeiten' }}
-          </button>
+            <button class="btn btn-sm btn-secondary button edit-button">Bearbeiten</button>
+          </router-link>
         </h4>
 
         <div>
@@ -110,56 +89,10 @@ function onInputChange(e) {
                 :fileurl="`${
                   mediaObject.fileType ? `${origin}/api/files/download/` : ''
                 }${mediaObject.url}`"
-                :show-delete="showEdit"
+                :show-delete="false"
               />
             </li>
           </ul>
-        </div>
-
-        <div class="m-4" v-show="project && editPermission && showEdit">
-          <DropZone
-            class="drop-area"
-            @files-dropped="addFiles"
-            #default="{ dropZoneActive }"
-          >
-            <label for="file-input">
-              <ul v-show="files.length" class="image-list">
-                <FilePreviewUpload
-                  v-for="file of files"
-                  :key="file.id"
-                  :file="file"
-                  :delete-button="true"
-                  tag="li"
-                  @remove="removeFile"
-                />
-              </ul>
-
-              <span v-if="dropZoneActive">
-                <span>Lasse die Dateien los</span>
-                <span class="smaller">um sie hinzuzufügen</span>
-              </span>
-              <span v-else>
-                <span>Ziehe hier deine Dateien rein</span>
-                <span class="smaller"
-                  >oder <strong>klicke hier</strong> um Dateien
-                  auszuwählen</span
-                >
-              </span>
-
-              <input
-                type="file"
-                id="file-input"
-                multiple
-                @change="onInputChange"
-              />
-            </label>
-          </DropZone>
-          <button
-            class="upload-button"
-            @click.prevent="uploadFiles(files, project.id)"
-          >
-            Hochladen
-          </button>
         </div>
 
         <span v-if="project.description" :key="descriptionUpdate">
@@ -233,63 +166,10 @@ h4 {
   right: 0px;
 }
 
-.drop-area {
-  width: 100%;
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 50px;
-  background: #ffffff55;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-  transition: 0.2s ease;
-}
-.drop-area[data-active='true'] {
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-  background: #ffffffcc;
-}
-
-label {
-  font-size: 36px;
-  cursor: pointer;
-  display: block;
-}
-label span {
-  display: block;
-}
-label input[type='file']:not(:focus-visible) {
-  position: absolute !important;
-  width: 1px !important;
-  height: 1px !important;
-  padding: 0 !important;
-  margin: -1px !important;
-  overflow: hidden !important;
-  clip: rect(0, 0, 0, 0) !important;
-  white-space: nowrap !important;
-  border: 0 !important;
-}
-label .smaller {
-  font-size: 16px;
-}
-
 .image-list {
   display: flex;
   list-style: none;
   flex-wrap: wrap;
   padding: 0;
-}
-.upload-button {
-  display: block;
-  appearance: none;
-  border: 0;
-  border-radius: 50px;
-  padding: 0.75rem 3rem;
-  margin: 1rem auto;
-  font-size: 1.25rem;
-  font-weight: bold;
-  background: #369;
-  color: #fff;
-  text-transform: uppercase;
-}
-button {
-  cursor: pointer;
 }
 </style>

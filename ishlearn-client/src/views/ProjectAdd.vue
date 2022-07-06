@@ -3,13 +3,14 @@ import { ref } from 'vue'
 import api from '@/services/api'
 import { validateMandatory } from '@/util/inputValidation'
 import { GenericInputs } from '@/types/GenericInputData'
-import useUser from '@/store/auth.module'
+import useUser, { UserStoreState } from '@/store/auth.module'
 import router from '@/router'
 import MDEditor from '@/components/MDEditor.vue'
 import GenericInput from '@/components/GenericInput.vue'
 import { AxiosResponse } from 'axios'
+import { Store } from 'pinia'
 
-const user = useUser()
+const user: Store<'user', UserStoreState> = useUser()
 
 const inputs: GenericInputs<string | boolean> = {
   title: {
@@ -22,13 +23,13 @@ const inputs: GenericInputs<string | boolean> = {
     placeholder: '',
   },
   visibility: {
-    value: ref(false),
+    value: ref(true),
     type: 'checkbox',
     label: 'Soll das Projekt öffentlich sein?',
     id: 'visibility',
     name: 'visibility',
-    mandatory: true,
-    placeholder: '',
+    mandatory: false,
+    placeholder: 'true',
   },
 }
 
@@ -90,7 +91,7 @@ const onSubmit = (_event: Event) => {
 <template>
   <div>
     <div class="container p-3">
-      <h1>Hier kannst du dein Projekt hinzufügen.</h1>
+      <h2>Hier kannst du dein Projekt hinzufügen.</h2>
 
       <p v-show="!user.status.loggedIn" class="text-danger">
         Du musst dich erst einloggen, um ein Projekt zu erstellen!
@@ -116,11 +117,11 @@ const onSubmit = (_event: Event) => {
           /></span>
         </div>
 
-        <input
-          type="submit"
-          value="Projekt erstellen"
-          class="btn btn-success"
-        />
+        <div class="m-2 p-2">
+          Dateien kannst du später zu deinem Projekt hinzufügen, wenn du es erstellt hast.
+        </div>
+
+        <input type="submit" value="Projekt erstellen" class="btn btn-success" />
       </form>
 
       <p class="tiny-font">(*) sind Pflichtfelder.</p>

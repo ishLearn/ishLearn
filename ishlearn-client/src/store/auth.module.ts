@@ -10,6 +10,7 @@ export type UserStoreState = {
   user: User | null
   accessKey: string
   refreshKey: RefreshToken | null
+  loading: Promise<boolean> | null
 }
 
 const useUser = defineStore('user', {
@@ -20,6 +21,7 @@ const useUser = defineStore('user', {
     user: null,
     accessKey: '',
     refreshKey: null,
+    loading: null,
   }),
   getters: {
     localRefreshToken: () =>
@@ -28,17 +30,20 @@ const useUser = defineStore('user', {
   },
   actions: {
     async initUser() {
-      const item = localStorage.getItem('refreshToken')
-      if (item == null) {
-        this.status.loggedIn = false
-        return
-      }
-      const refreshToken: RefreshToken = JSON.parse(item)
+      this.loading = new Promise(async (res) => {
+        const item = localStorage.getItem('refreshToken')
+        if (item == null) {
+          this.status.loggedIn = false
+          return
+        }
+        const refreshToken: RefreshToken = JSON.parse(item)
 
-      if (refreshToken.token == null) this.status.loggedIn = false
-      else {
-        await this.refreshAccessToken(refreshToken)
-      }
+        if (refreshToken.token == null) this.status.loggedIn = false
+        else {
+          await this.refreshAccessToken(refreshToken)
+        }
+        res(true)
+      })
     },
     async refreshAccessToken(refreshToken?: RefreshToken) {
       try {

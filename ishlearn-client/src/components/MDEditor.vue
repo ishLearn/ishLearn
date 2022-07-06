@@ -1,6 +1,6 @@
 <!-- GenericInput.vue -->
 <script setup lang="ts">
-import { defineProps, defineEmits, ref, watch } from 'vue'
+import { defineProps, defineEmits, ref, Ref, onMounted, onUpdated, watch } from 'vue'
 
 const markdownOption = {
   bold: true,
@@ -40,8 +40,11 @@ const markdownOption = {
 
 const props = defineProps(['modelValue'])
 defineEmits(['update:modelValue'])
+const mdtext: Ref<string> = ref('')
 
-const mdtext = ref(props.modelValue)
+onMounted(() => {
+  mdtext.value = props.modelValue
+})
 </script>
 
 <template>
