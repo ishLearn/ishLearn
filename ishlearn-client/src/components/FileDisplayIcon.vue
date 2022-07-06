@@ -18,16 +18,16 @@
 </template>
 
 <script setup lang="ts">
-import IconFileEarmark from '@/icons/icon-file-earmark.vue'
-import IconFileEarmarkMusic from '../icons/icon-file-earmark-music.vue'
-import IconFileEarmarkPlay from '../icons/icon-file-earmark-play.vue'
-import IconEarmarkZip from '../icons/icon-earmark-zip.vue'
-import IconFileEarmarkPdf from '../icons/icon-file-earmark-pdf.vue'
-import IconFileEarmarkWord from '../icons/icon-file-earmark-word.vue'
-import IconFileEarmarkText from '../icons/icon-file-earmark-text.vue'
-import IconFileEarmarkSpreadsheet from '../icons/icon-file-earmark-spreadsheet.vue'
-import IconFileEarmarkSlides from '../icons/icon-file-earmark-slides.vue'
-import IconFileEarmarkCode from '../icons/icon-file-earmark-code.vue'
+import IconEarmarkZip from '@/icons/IconEarmarkZip'
+import IconFileEarmark from '@/icons/IconFileEarmark'
+import IconFileEarmarkCode from '@/icons/IconFileEarmarkCode'
+import IconFileEarmarkPdf from '@/icons/IconFileEarmarkPdf'
+import IconFileEarmarkMusic from '@/icons/IconFileEarmarkMusic'
+import IconFileEarmarkPlay from '@/icons/IconFileEarmarkPlay'
+import IconFileEarmarkSlides from '@/icons/IconFileEarmarkSlides'
+import IconFileEarmarkSpreadsheet from '@/icons/IconFileEarmarkSpreadsheet'
+import IconFileEarmarkText from '@/icons/IconFileEarmarkText'
+import IconFileEarmarkWord from '@/icons/IconFileEarmarkWord'
 
 defineProps(['filename', 'filetype', 'fileurl'])
 

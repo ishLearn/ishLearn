@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import useUser from '@/store/auth.module'
 import router from '@/router'
-import IconMoon from '@/icons/icon-moon.vue'
-import IconMoonFill from '../icons/icon-moon-fill.vue'
-import IconBoxArrowRight from '../icons/icon-box-arrow-right.vue'
+import IconMoon from '@/icons/IconMoon'
+import IconMoonFill from '@/icons/IconMoonFill'
+import IconBoxArrowRight from '@/icons/IconBoxArrowRight'
 
 const user = useUser()
 
