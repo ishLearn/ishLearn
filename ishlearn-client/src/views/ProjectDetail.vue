@@ -19,6 +19,8 @@ import FilePreviewUpload from '@/components/FilePreviewUpload.vue'
 
 const user: Store<'user', UserStoreState> = useUser()
 
+const origin = window.origin
+
 const project: Ref<Product | null> = ref(null)
 
 const creator: Ref<User | null> = ref(null)
@@ -83,8 +85,10 @@ watch(project, () => descriptionUpdate.value++)
             <li v-for="mediaObject of project.media" :key="mediaObject.url">
               <FilePreviewDownload
                 :filename="mediaObject.filename"
-                :filetype="mediaObject.filename"
-                :fileurl="mediaObject.url"
+                :filetype="mediaObject.fileType || 'notworking/nothing'"
+                :fileurl="`${
+                  mediaObject.fileType ? `${origin}/api/files/download/` : ''
+                }${mediaObject.url}`"
                 :show-delete="false"
               />
             </li>
@@ -123,7 +127,9 @@ watch(project, () => descriptionUpdate.value++)
       </div>
 
       <div class="box-background info-box m-1 p-2">
-        <h4 class="info-box-title info-box-heading">Projekte, die dich interessieren könnten</h4>
+        <h4 class="info-box-title info-box-heading">
+          Projekte, die dich interessieren könnten
+        </h4>
         <p>Coming soon...</p>
       </div>
     </div>
@@ -131,8 +137,8 @@ watch(project, () => descriptionUpdate.value++)
   <div v-else-if="unableToLoad" class="m-2 p-3 alert alert-danger">
     <h2>Dieses Projekt scheint nicht zu existieren</h2>
     <p>
-      Entweder ist die URL falsch und das Projekt existiert nicht, oder es ist inzwischen vom
-      Besitzer auf privat gestellt worden.
+      Entweder ist die URL falsch und das Projekt existiert nicht, oder es ist
+      inzwischen vom Besitzer auf privat gestellt worden.
     </p>
   </div>
 </template>

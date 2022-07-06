@@ -27,9 +27,12 @@ router.post(
 // GET /api/files/download
 // Get a file from S3
 router.get(
-  '/:filename',
+  '/*',
   async (req: express.Request, res: express.Response<{}, UserRecord>) => {
-    await Media.downloadMedia(req.params.filename, res)
+    const url = req.url.substring(1).replace(new RegExp('%20', 'g'), ' ')
+
+    console.log(true)
+    await Media.downloadMedia(url, res, true)
   }
 )
 
