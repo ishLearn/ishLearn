@@ -32,9 +32,6 @@ class DBService {
   constructor() {
     if (DBService.instance !== null) return DBService.instance
 
-    console.log(process.env.MYSQL_USER)
-    console.log(process.env.MYSQL_PASSWORD)
-
     this.pool = mysql.createPool({
       connectionLimit: 10,
       host: process.env.DB_CONNECTION_HOST,
@@ -49,7 +46,7 @@ class DBService {
           new Logger().event(
             'DB Connection',
             'Pinged MySQL-DB',
-            `${process.env.DB_USER}@${process.env.DB_CONNECTION_HOST}`
+            `${process.env.MYSQL_USER}@${process.env.DB_CONNECTION_HOST}`
           )
         }
         try {
