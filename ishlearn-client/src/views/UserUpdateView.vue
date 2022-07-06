@@ -53,16 +53,16 @@ const inputs: GenericInputs<string> = {
 }
 
 const fillUser = async () => {
-  if (user.user == null || !user.status.loggedIn || !user.user.email) {
-    // der Benutzer war davor nicht eingeloggt, und das Laden von pinia dauert
-    // da Pinia sich beim page reload zurücksetzt, wird hier init User nochmal ausgeführt
-    await useUser().initUser()
-    if (!user.status.loggedIn) {
-      console.log('Not Loged in')
-      router.push({ name: 'UserLogin', query: { redirect: router.currentRoute.value.path } })
-      return
-    }
+  // Wait for user to load
+  await user.loading
+  if (!user.status.loggedIn) {
+    console.log('Not Logged in')
+    router.push({ name: 'UserLogin', query: { redirect: router.currentRoute.value.path } })
+    return false
   }
+
+  if (!user.user) return false
+
   inputs.firstName.value.value = user.user.firstName
   inputs.lastName.value.value = user.user.lastName
   const date = new Date(user.user.birthday)
@@ -79,6 +79,8 @@ onUpdated(() => {
 const query = useRoute().query
 const onSignup = async (e: Event) => {
   e.preventDefault()
+
+  if (!user.user) router.push({ name: 'UserLogin', query: { redirect: router.currentRoute.value.path } })
 
   console.log('Textarea')
   console.log(inputs.profileText.value.value)
@@ -111,7 +113,7 @@ const onSignup = async (e: Event) => {
           }
         })
     }
-    if (inputs.birthday.value.value !== toYYYYMMDD(new Date(user.user?.birthday))) {
+    if (inputs.birthday.value.value !== toYYYYMMDD(new Date(user.user.birthday))) {
       console.log('Date has changed')
       api
         .put('/users/birthday', {

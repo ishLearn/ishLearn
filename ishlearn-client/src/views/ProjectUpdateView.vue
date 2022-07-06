@@ -59,7 +59,7 @@ const loadProduct = async () => {
   })
 }
 const loadUser = async () => {
-  while (user.loading == null) {}
+  while (user.loading == null) { }
   await user.loading
   if (!user.status.loggedIn) {
     router.push({ name: 'UserLogin', query: { redirect: router.currentRoute.value.path } })
@@ -81,9 +81,6 @@ onMounted(async () => {
 })
 
 const onSubmit = (_event: Event) => {
-  console.log('Submit Edit')
-  console.log(_event)
-
   if (
     inputs.title.value.value !== project.value?.title ||
     inputs.visibility.value.value !== project.value.visibility
@@ -92,7 +89,6 @@ const onSubmit = (_event: Event) => {
       alert('Das Format deiner Eingabe passt nicht.')
       return
     }
-    console.log('Title changed')
     api.put(`/products/${pid}/`, {
       title: inputs.title.value.value,
       visibility: inputs.visibility.value.value || true,
@@ -104,9 +100,13 @@ const onSubmit = (_event: Event) => {
       alert('Das Format deiner Eingabe passt nicht.')
       return
     }
+
+    api.put(`/products/${pid}/description`, {
+      description: mdtext.value
+    })
   }
 
-  router.push({ name: 'ViewProject', params: { id: project.value.id } })
+  router.push({ name: 'ViewProject', params: { id: project.value?.id } })
 }
 
 function onInputChange(e) {
@@ -146,16 +146,20 @@ function onInputChange(e) {
             <FilePreviewDownload
               :filename="mediaObject.filename"
               :filetype="mediaObject.fileType || 'notworking/nothing'"
-              :fileurl="`${mediaObject.fileType ? `${origin}/api/files/download/` : ''}${
-                mediaObject.url
-              }`"
+              :fileurl="`${
+                mediaObject.fileType ? `${origin}/api/files/download/` : ''
+              }${mediaObject.url}`"
               :show-delete="true"
             />
           </li>
         </ul>
 
         <div class="m-4" v-show="project">
-          <DropZone class="drop-area" @files-dropped="addFiles" #default="{ dropZoneActive }">
+          <DropZone
+            class="drop-area"
+            @files-dropped="addFiles"
+            #default="{ dropZoneActive }"
+          >
             <label for="file-input">
               <ul v-show="files.length" class="image-list">
                 <FilePreviewUpload
@@ -175,20 +179,33 @@ function onInputChange(e) {
               <span v-else>
                 <span>Ziehe hier deine Dateien rein</span>
                 <span class="smaller"
-                  >oder <strong>klicke hier</strong> um Dateien auszuwählen</span
+                  >oder <strong>klicke hier</strong> um Dateien
+                  auszuwählen</span
                 >
               </span>
 
-              <input type="file" id="file-input" multiple @change="onInputChange" />
+              <input
+                type="file"
+                id="file-input"
+                multiple
+                @change="onInputChange"
+              />
             </label>
           </DropZone>
-          <button class="upload-button" @click.prevent="uploadFiles(files, project.id)">
+          <button
+            class="upload-button"
+            @click.prevent="uploadFiles(files, project.id)"
+          >
             Hochladen
           </button>
         </div>
       </div>
 
-      <input type="submit" value="Bearbeitung abschließen" class="btn btn-success btn-lg" />
+      <input
+        type="submit"
+        value="Bearbeitung abschließen"
+        class="btn btn-success btn-lg"
+      />
     </form>
 
     <p class="tiny-font">(*) sind Pflichtfelder.</p>
