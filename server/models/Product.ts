@@ -226,13 +226,10 @@ export default class Product {
     if (cIdsExist) params.push(collaboratorNumberIds.length)
 
     const dbresult = await new DBService().query(query, params)
-    console.log(dbresult)
     // Send Query and return result
     const results: Product[] = (
       await new DBService().query(query, params)
     ).results.map(Product.mapResultsToHash)
-
-    console.log(results)
 
     return results
   }
