@@ -70,7 +70,6 @@ export default class Media {
     project: string | NumberLike,
     cId: string | NumberLike
   ) {
-    console.log(filename, filePath)
     const mediaPartOfProduct = await new DBService().query(
       `INSERT INTO media (filename, URL, filetype) VALUES (?, ?, ?)`,
       [filename, filePath, fileType]

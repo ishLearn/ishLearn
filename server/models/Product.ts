@@ -150,8 +150,6 @@ export default class Product {
         ? Product.adminQuery
         : Product.teachersQuery) + ` AND ID = ? LIMIT 1` // LIMIT 1 so no further filtering required (to cross out double products)
 
-    console.log(loggedInUser)
-    console.log(loggedInUser?.id)
     const result = (
       await new DBService().query(query, [
         fields,

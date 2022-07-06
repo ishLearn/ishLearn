@@ -42,7 +42,6 @@ router.get(
 router.get(
   '/:id',
   async (req: express.Request, res: express.Response<{}, UserRecord>) => {
-    console.log(res.locals.user)
     try {
       return res
         .status(200)
@@ -69,8 +68,6 @@ router.get(
         (await Product.hasPermission(req.params.pid, res.locals.user?.id))
           ? true
           : false
-
-      console.log(`HasEditPermission: ${result}`)
 
       return res.status(200).json({
         hasEditPermission: result,
@@ -136,8 +133,6 @@ router.post(
       return res.status(403).json({ error: 'Not authenticated' })
     const { title, visibility } = req.body
 
-    console.log('Visibility of new product in next line:')
-    console.log(visibility)
     const newP = new Product(
       title,
       visibility ? 'public' : 'private',
@@ -148,14 +143,11 @@ router.post(
       const users: Array<string | number> = req.body.collaborators || []
 
       const resultId = await newP.save(res.locals.user.id, ...users)
-      console.log('Saved Product')
       await Product.saveDescription(
         resultId,
         req.body.description,
         res.locals.user.id
       )
-
-      console.log('Saved description')
 
       return res.json({
         newP,
@@ -163,7 +155,6 @@ router.post(
       })
     } catch (err) {
       new Logger().error('Add new Product', 'Save to DB', err)
-      console.log(err)
       return res.status(400).json({
         err: 'The product could not be saved. Are all fields filled out correctly?',
       })
