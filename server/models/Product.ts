@@ -783,17 +783,18 @@ export default class Product {
    * Update: Add an existing media to the product
    * @param productId the hashed product id
    * @param collaboratorId the hashed collaborator id
-   * @param mediaId the hashed media id to add
+   * @param mediaId the hashed media id to delete
    * @returns an array of all Promise results
    */
   static async removeMedia(
     productId: string,
     collaboratorId: string,
-    mediaId: string
+    mediaId: string | NumberLike
   ) {
     const pid = getIntIDFromHash(productId)
     const cid = getIntIDFromHash(collaboratorId)
-    const mid = getIntIDFromHash(mediaId)
+    const mid =
+      typeof mediaId === 'string' ? getIntIDFromHash(mediaId) : mediaId
 
     await Product.requireUserCanWrite(pid, cid)
 
@@ -807,6 +808,28 @@ export default class Product {
     result.push(await Product.setLastModified(pid, cid))
 
     return result
+  }
+
+  /**
+   * Update: Add an existing media to the product
+   * @param productId the hashed product id
+   * @param filename the filename to delete
+   * @param collaboratorId the hashed collaborator id
+   * @returns an array of all Promise results
+   */
+  static async removeMediaByFilename(
+    productId: string,
+    filename: string,
+    collaboratorId: string
+  ) {
+    const mid = (
+      await new DBService().query(
+        'SELECT * FROM mediaPartOfProduct INNER JOIN media ON media.ID = mediaPartOfProduct.MID WHERE PID = ? AND media.filename = ?',
+        [getIntIDFromHash(productId), filename]
+      )
+    ).results[0].MID
+
+    return Product.removeMedia(productId, collaboratorId, mid)
   }
 
   /**

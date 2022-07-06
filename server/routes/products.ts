@@ -449,4 +449,24 @@ router.get('/:id/media', async (req, res) => {
   }
 })
 
+router.post(
+  '/:pid/media/delete',
+  requireAuthenticatedAsStudent,
+  async (
+    req: express.Request<{ pid: string }, {}, { filename?: string }>,
+    res: express.Response<{}, UserRecord>
+  ) => {
+    if (!req.body.filename)
+      return res.status(400).json({ error: 'Filename was not defined' })
+    if (!res.locals.user?.id)
+      return res.status(403).json({ error: 'User not authenticated' })
+
+    Product.removeMediaByFilename(
+      req.params.pid,
+      req.body.filename,
+      res.locals.user.id
+    )
+  }
+)
+
 export default router

@@ -7,7 +7,7 @@
     />
     <button
       v-show="showDelete"
-      @click.prevent="removeFileFromServer"
+      @click.stop="$emit('delete', { filename })"
       class="close-icon"
       aria-label="Entfernen"
     >
@@ -18,8 +18,10 @@
 
 <script setup lang="ts">
 import axios from 'axios'
+
 import { UploadableFile } from '@/util/file-list'
 import FileDisplayIcon from '@/components/FileDisplayIcon.vue'
+import api from '@/services/api';
 
 const props = defineProps({
   filename: { type: String, required: true },
@@ -28,6 +30,7 @@ const props = defineProps({
   showDelete: { type: Boolean, default: false },
   tag: { type: String, default: 'li' },
 })
+defineEmits(['delete'])
 
 function downloadFile() {
   const isHttp = props.fileurl.substring(0, 7) === 'http://' || props.fileurl.substring(0, 8) === 'https://'
@@ -35,7 +38,7 @@ function downloadFile() {
 
   if (isHttp) return window.open(url, '_blank')?.focus();
 
-  axios({
+  api({
     url,
     method: isHttp ? 'GET' : 'POST',
     responseType: 'blob',
@@ -51,10 +54,6 @@ function downloadFile() {
 
     fileLink.click()
   })
-}
-
-function removeFileFromServer() {
-  alert('Das muss noch implementiert werden.')
 }
 </script>
 
@@ -88,5 +87,6 @@ function removeFileFromServer() {
   color: #fff;
   top: 0.25rem;
   cursor: pointer;
+  z-index: 5;
 }
 </style>
