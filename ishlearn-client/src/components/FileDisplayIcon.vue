@@ -1,35 +1,22 @@
 <template>
   <div class="">
-    <img
-      v-if="filetype.startsWith('image')"
-      :src="fileurl"
-      :alt="filename"
-      :title="filename"
-    />
+    <img v-if="urlExists" :src="fileurl" :alt="filename" :title="filename" />
     <div v-else>
       <IconFileEarmarkPdf v-if="filename.endsWith('.pdf')" class="icon" />
-      <IconFileEarmarkWord
-        v-if="wordEndings.includes(fileEnding(filename))"
-        class="icon"
-      />
-      <IconFileEarmarkSpreadsheet
-        v-if="excelEndings.includes(fileEnding(filename))"
-        class="icon"
-      />
-      <IconFileEarmarkSlides
-        v-if="powerPointEndings.includes(fileEnding(filename))"
-        class="icon"
-      />
-      <IconFileEarmarkCode
-        v-if="codeEndings.includes(fileEnding(filename))"
-        class="icon"
-      />
+      <IconFileEarmarkWord v-if="wordEndings.includes(fileEnding(filename))" class="icon" />
+      <IconFileEarmarkSpreadsheet v-if="excelEndings.includes(fileEnding(filename))" class="icon" />
+      <IconFileEarmarkSlides v-if="powerPointEndings.includes(fileEnding(filename))" class="icon" />
+      <IconFileEarmarkCode v-if="codeEndings.includes(fileEnding(filename))" class="icon" />
       <IconFileEarmarkMusic
-        v-else-if="filetype.startsWith('audio')"
+        v-else-if="filetype.startsWith('audio') || audioEndings.includes(fileEnding(filename))"
         class="icon"
       />
       <IconFileEarmarkPlay
-        v-else-if="filetype.startsWith('video')"
+        v-else-if="filetype.startsWith('video') || videoEndings.includes(fileEnding(filename))"
+        class="icon"
+      />
+      <IconFileEarmarkImage
+        v-else-if="filetype.startsWith('image') || imageEndings.includes(fileEnding(filename))"
         class="icon"
       />
       <IconFileEarmarkText v-else-if="filename.endsWith('.txt')" class="icon" />
@@ -41,9 +28,12 @@
 </template>
 
 <script setup lang="ts">
+import axios from 'axios'
+import { ref, Ref } from 'vue'
 import IconEarmarkZip from '@/icons/IconEarmarkZip'
 import IconFileEarmark from '@/icons/IconFileEarmark'
 import IconFileEarmarkCode from '@/icons/IconFileEarmarkCode'
+import IconFileEarmarkImage from '@/icons/IconFileEarmarkImage.vue'
 import IconFileEarmarkPdf from '@/icons/IconFileEarmarkPdf'
 import IconFileEarmarkMusic from '@/icons/IconFileEarmarkMusic'
 import IconFileEarmarkPlay from '@/icons/IconFileEarmarkPlay'
@@ -52,14 +42,27 @@ import IconFileEarmarkSpreadsheet from '@/icons/IconFileEarmarkSpreadsheet'
 import IconFileEarmarkText from '@/icons/IconFileEarmarkText'
 import IconFileEarmarkWord from '@/icons/IconFileEarmarkWord'
 
-defineProps(['filename', 'filetype', 'fileurl'])
+const props = defineProps(['filename', 'filetype', 'fileurl'])
 
 const wordEndings: string[] = ['doc', 'docx', 'docm', 'dotm', 'odt', 'xps']
 const powerPointEndings: string[] = ['ppt', 'pptx', 'pps']
+const audioEndings: string[] = ['mp3', 'wav', 'aac', 'flac', 'm4a']
+const videoEndings: string[] = ['mp4', 'mov', 'avi', 'flv', 'webm']
+const imageEndings: string[] = ['jpg', 'png', 'gif', 'jpeg', 'svg']
 const excelEndings: string[] = ['xlsx', 'xlsb', 'xls', 'csv', 'ods']
 const codeEndings: string[] = ['py', 'cpp', 'java', 'ts', 'c', 'html', 'css', 'js', 'php', 'tex']
 
 const fileEnding = (filename: string) => filename.substring(filename.lastIndexOf('.') + 1)
+
+const urlExists: Ref<boolean> = ref(false)
+if (props.filetype.startsWith('image')) {
+  try {
+    axios.get(props.fileurl).then((res) => {
+      // solange bzw. falls das Bild nicht existiert, wird ein Icon angezeigt.
+      urlExists.value = true
+    })
+  } catch (err) {}
+}
 </script>
 
 <style scoped>

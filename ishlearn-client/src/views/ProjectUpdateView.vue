@@ -21,6 +21,8 @@ const { files, addFiles, removeFile } = useFileList()
 
 const user: Store<'user', UserStoreState> = useUser()
 
+const origin = window.origin
+
 const inputs: GenericInputs<string | boolean> = {
   title: {
     value: ref(''),
@@ -138,13 +140,15 @@ function onInputChange(e) {
       </div>
 
       <div class="files p-2">
-        <h4>Dateien</h4>
+        <h3>Dateien</h3>
         <ul class="image-list p-2">
           <li v-for="mediaObject of project.media" :key="mediaObject.url">
             <FilePreviewDownload
               :filename="mediaObject.filename"
-              :filetype="mediaObject.filename"
-              :fileurl="mediaObject.url"
+              :filetype="mediaObject.fileType || 'notworking/nothing'"
+              :fileurl="`${mediaObject.fileType ? `${origin}/api/files/download/` : ''}${
+                mediaObject.url
+              }`"
               :show-delete="true"
             />
           </li>
@@ -184,7 +188,7 @@ function onInputChange(e) {
         </div>
       </div>
 
-      <input type="submit" value="Bearbeitung abschließen" class="btn btn-success" />
+      <input type="submit" value="Bearbeitung abschließen" class="btn btn-success btn-lg" />
     </form>
 
     <p class="tiny-font">(*) sind Pflichtfelder.</p>
@@ -249,7 +253,7 @@ function onInputChange(e) {
   border-radius: 50px;
   padding: 0.75rem 3rem;
   margin: 1rem auto;
-  font-size: 1.25rem;
+  font-size: 1rem;
   font-weight: bold;
   background: #369;
   color: #fff;
