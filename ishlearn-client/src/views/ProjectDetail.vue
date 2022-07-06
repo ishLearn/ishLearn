@@ -16,6 +16,7 @@ import DropZone from '@/components/DropZone.vue'
 import MDPreview from '@/components/MDPreview.vue'
 import FilePreviewDownload from '@/components/FilePreviewDownload.vue'
 import FilePreviewUpload from '@/components/FilePreviewUpload.vue'
+import api from '@/services/api'
 
 const user: Store<'user', UserStoreState> = useUser()
 
@@ -76,23 +77,29 @@ watch(project, () => descriptionUpdate.value++)
             v-if="editPermission"
             :to="{ name: 'UpdateProject', params: { id: project.id } }"
           >
-            <button class="btn btn-sm btn-secondary button edit-button">Bearbeiten</button>
+            <button class="btn btn-sm btn-secondary button edit-button">
+              Bearbeiten
+            </button>
           </router-link>
         </h4>
 
         <div>
-          <ul class="image-list">
+          <ul
+            class="image-list"
+            v-if="project.media && project.media.length > 0"
+          >
             <li v-for="mediaObject of project.media" :key="mediaObject.url">
               <FilePreviewDownload
                 :filename="mediaObject.filename"
                 :filetype="mediaObject.fileType || 'notworking/nothing'"
-                :fileurl="`${mediaObject.fileType ? `${origin}/api/files/download/` : ''}${
-                  mediaObject.url
-                }`"
+                :fileurl="`${
+                  mediaObject.fileType ? `${origin}/api/files/download/` : ''
+                }${mediaObject.url}`"
                 :show-delete="false"
               />
             </li>
           </ul>
+          <h6 v-else>Es gibt in diesem Projekt keine Dateien.</h6>
         </div>
 
         <span v-if="project.description" :key="descriptionUpdate">
@@ -127,7 +134,9 @@ watch(project, () => descriptionUpdate.value++)
       </div>
 
       <div class="box-background info-box m-1 p-2">
-        <h4 class="info-box-title info-box-heading">Projekte, die dich interessieren könnten</h4>
+        <h4 class="info-box-title info-box-heading">
+          Projekte, die dich interessieren könnten
+        </h4>
         <p>Coming soon...</p>
       </div>
     </div>
@@ -135,8 +144,8 @@ watch(project, () => descriptionUpdate.value++)
   <div v-else-if="unableToLoad" class="m-2 p-3 alert alert-danger">
     <h2>Dieses Projekt scheint nicht zu existieren</h2>
     <p>
-      Entweder ist die URL falsch und das Projekt existiert nicht, oder es ist inzwischen vom
-      Besitzer auf privat gestellt worden.
+      Entweder ist die URL falsch und das Projekt existiert nicht, oder es ist
+      inzwischen vom Besitzer auf privat gestellt worden.
     </p>
   </div>
 </template>

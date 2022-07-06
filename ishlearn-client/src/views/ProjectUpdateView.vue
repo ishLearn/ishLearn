@@ -66,6 +66,14 @@ const loadUser = async () => {
   }
 }
 
+const deleteFile = ({ filename }: { filename: string }) => {
+  console.log('Delete')
+  if (!filename || !project.value) return false
+  api.post(`/products/${project.value.id}/media/delete`, {
+    filename
+  })
+}
+
 onMounted(async () => {
   try {
     await Promise.all([loadProduct(), loadUser()])
@@ -150,6 +158,7 @@ function onInputChange(e) {
                 mediaObject.fileType ? `${origin}/api/files/download/` : ''
               }${mediaObject.url}`"
               :show-delete="true"
+              @delete="deleteFile"
             />
           </li>
         </ul>
