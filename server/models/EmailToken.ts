@@ -60,7 +60,6 @@ export default class EmailToken {
         token,
       ])
     ).results
-    console.log(res)
 
     if (
       deleteAfterFound

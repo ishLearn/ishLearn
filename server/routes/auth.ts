@@ -87,7 +87,8 @@ router.post(
       const newToken = await refreshAccessToken(token)
       return res.status(200).json(newToken)
     } catch (err) {
-      console.log(token + ' is an invalid refresh token.')
+      // in production, there will be many false refreshs, and this error is absolutely expected
+      // new Logger().error('Refresh token', token + ' is an invalid refresh token.', err)
       return res.status(403).json({ error: 'Refresh token is invalid' })
     }
   }

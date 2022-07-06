@@ -150,7 +150,13 @@ export default class Product {
         ? Product.adminQuery
         : Product.teachersQuery) + ` AND ID = ? LIMIT 1` // LIMIT 1 so no further filtering required (to cross out double products)
 
-    const result = (await new DBService().query(query, [fields, id])).results
+    const result = (
+      await new DBService().query(query, [
+        fields,
+        loggedInUser?.id && getIntIDFromHash(loggedInUser.id),
+        id,
+      ])
+    ).results
 
     await Promise.all(
       result.map(async (product: Product): Promise<void> => {
@@ -295,7 +301,7 @@ export default class Product {
         'products.updatedBy',
         'products.createdBy',
       ],
-      config.loggedInUser?.id,
+      config.loggedInUser?.id && getIntIDFromHash(config.loggedInUser.id),
     ])
 
     const { results } = res

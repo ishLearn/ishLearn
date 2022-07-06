@@ -65,8 +65,8 @@ export class Product {
 
   static async getProductById(pid: string, updateRef?: Ref<number>): Promise<Product> {
     return new Promise<Product>((resolve, reject) => {
-      axios
-        .get(`/api/products/${pid}`)
+      api
+        .get(`/products/${pid}`)
         .then((res) => {
           const [p] = res.data
           if (!res.data) throw res
