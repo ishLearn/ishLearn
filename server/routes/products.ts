@@ -42,6 +42,7 @@ router.get(
 router.get(
   '/:id',
   async (req: express.Request, res: express.Response<{}, UserRecord>) => {
+    console.log(res.locals.user)
     try {
       return res
         .status(200)
