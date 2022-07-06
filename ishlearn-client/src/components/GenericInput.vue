@@ -1,7 +1,7 @@
 <!-- GenericInput.vue -->
 <script setup lang="ts">
 // eslint-disable-next-line
-import { defineProps, defineEmits, watch, ref } from 'vue'
+import { defineProps, defineEmits, watch, ref, onMounted } from 'vue'
 import { validateEmail, validatePasswort, validateMandatory } from '@/util/inputValidation'
 
 const props = defineProps(['modelValue', 'inputProps'])
@@ -25,9 +25,15 @@ if (props.inputProps.type === 'email') {
     emailWarn.value = !validateEmail(props.inputProps.value.value)
   })
 }
+onMounted(() => {
+  if (props.inputProps.type === 'checkbox') {
+    document.getElementById(props.inputProps.id).defaultChecked = props.modelValue
+  }
+})
 const customEmit = (event) => {
   if (props.inputProps.type === 'checkbox') {
     emit('update:modelValue', !props.inputProps.value.value)
+    console.log(event.target?.value)
   } else {
     emit('update:modelValue', event.target?.value)
   }
