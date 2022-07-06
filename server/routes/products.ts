@@ -248,6 +248,43 @@ router.put(
   }
 )
 
+// Update DESCRIPTION
+
+// PUT /api/products/:pid/description
+// Update a product's description
+router.put(
+  '/:pid/description',
+  requireAuthenticatedAsStudent,
+  validateResult,
+  async (
+    req: express.Request<{ pid: string }, {}, { description: string }>,
+    res: express.Response<{}, UserRecord>
+  ) => {
+    const productId = req.params.pid
+
+    const collaborator = res.locals.user?.id
+    if (!collaborator)
+      return res.status(403).json({ error: 'Not authenticated' })
+
+    try {
+      await Product.saveDescription(
+        getIntIDFromHash(productId),
+        req.body.description,
+        collaborator
+      )
+
+      return res.status(200).json({
+        success: true,
+        productId,
+      })
+    } catch (err: any) {
+      return res.status(403).json({
+        error: 'Benutzer hat keinen schreibenden Zugriff auf dieses Produkt.',
+      })
+    }
+  }
+)
+
 // UPDATE TITLE / VISIBILITY
 
 // PUT /api/products/:pid/
@@ -262,13 +299,9 @@ router.put(
   ) => {
     const productId = req.params.pid
 
-    const {
-      fieldsToUpdate,
-    }: {
-      fieldsToUpdate: {
-        title?: string
-        visibility?: string
-      }
+    const fieldsToUpdate: {
+      title?: string
+      visibility?: string
     } = req.body
 
     const collaborator = res.locals.user?.id
@@ -286,12 +319,20 @@ router.put(
         affectedRows: result.affectedRows, // result.affectedRows
       })
     } catch (err: any) {
-      if ('Visibility is not valid' === err.message)
+      if ('Visibility is not valid' === err.message) {
+        new Logger().error(
+          'Update Product',
+          'Update title / visibility:    Invalid visibility   ',
+          err
+        )
+
         return res.status(400).json({
-          msg: 'Benutzer hat keine valide Sichtbarkeit ausgewählt.',
+          error: 'Benutzer hat keine valide Sichtbarkeit ausgewählt.',
         })
+      }
+
       return res.status(403).json({
-        msg: 'Benutzer hat keinen schreibenden Zugriff auf dieses Produkt.',
+        error: 'Benutzer hat keinen schreibenden Zugriff auf dieses Produkt.',
       })
     }
   }

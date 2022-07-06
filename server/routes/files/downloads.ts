@@ -17,7 +17,6 @@ router.post(
   validateResult,
   async (req: express.Request, res: express.Response<{}, UserRecord>) => {
     const { filename } = req.body
-    console.log(filename)
 
     // res status and json done inside of upload
     await Media.downloadMedia(filename, res)
@@ -31,7 +30,6 @@ router.get(
   async (req: express.Request, res: express.Response<{}, UserRecord>) => {
     const url = req.url.substring(1).replace(new RegExp('%20', 'g'), ' ')
 
-    console.log(true)
     await Media.downloadMedia(url, res, true)
   }
 )

@@ -232,7 +232,7 @@ export default class Media {
     const streamTags = true
 
     const media: {
-      ID: number
+      ID?: number
       filename: string
       URL: string
       uploadedDate: Date
@@ -243,7 +243,7 @@ export default class Media {
       ])
     ).results
 
-    new Logger().info(`Downloading media: ${filename}`)
+    new Logger().info(`Downloading media: ${filename}, ID: ${media.ID}`)
     const bucketParams: SearchFileBucketParams = {
       Bucket: process.env.MAIN_BUCKET || 'main',
       Key: `${process.env.MAIN_BUCKET}/${filename}`,
