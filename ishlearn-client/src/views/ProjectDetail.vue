@@ -76,7 +76,7 @@ watch(project, () => descriptionUpdate.value++)
             v-if="editPermission"
             :to="{ name: 'UpdateProject', params: { id: project.id } }"
           >
-            <button class="btn btn-sm btn-secondary button edit-button">Bearbeiten</button>
+            <button class="btn btn-sm btn-secondary edit-button">Bearbeiten</button>
           </router-link>
         </h4>
 
