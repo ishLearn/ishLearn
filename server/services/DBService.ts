@@ -32,11 +32,14 @@ class DBService {
   constructor() {
     if (DBService.instance !== null) return DBService.instance
 
+    console.log(process.env.MYSQL_USER)
+    console.log(process.env.MYSQL_PASSWORD)
+
     this.pool = mysql.createPool({
       connectionLimit: 10,
       host: process.env.DB_CONNECTION_HOST,
       user: process.env.MYSQL_USER || process.env.DB_USER,
-      password: process.env.MYSQL_ROOT_PASSWORD || process.env.DB_PASSWORD,
+      password: process.env.MYSQL_PASSWORD || process.env.DB_PASSWORD,
       database: process.env.MYSQL_DATABASE || process.env.DB_NAME,
     })
 
