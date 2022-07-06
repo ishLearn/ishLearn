@@ -107,7 +107,9 @@ function onInputChange(e) {
               <FilePreviewDownload
                 :filename="mediaObject.filename"
                 :filetype="mediaObject.fileType || 'notworking/nothing'"
-                :fileurl="`${origin}/api/files/download/${mediaObject.url}`"
+                :fileurl="`${
+                  mediaObject.fileType ? `${origin}/api/files/download/` : ''
+                }${mediaObject.url}`"
                 :show-delete="showEdit"
               />
             </li>

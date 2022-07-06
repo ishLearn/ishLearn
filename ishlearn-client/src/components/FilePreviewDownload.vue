@@ -30,11 +30,16 @@ const props = defineProps({
 })
 
 function downloadFile() {
+  const isHttp = props.fileurl.substring(0, 7) === 'http://' || props.fileurl.substring(0, 8) === 'https://'
+  const url = isHttp ? props.fileurl : '/api/files/download/'
+
+  if (isHttp) return window.open(url, '_blank')?.focus();
+
   axios({
-    url: '/api/files/download/',
-    method: 'POST',
+    url,
+    method: isHttp ? 'GET' : 'POST',
     responseType: 'blob',
-    data: { filename: props.fileurl },
+    data: !isHttp ? { filename: props.fileurl } : {},
   }).then((res) => {
     console.log(res.data)
     const fileURL = window.URL.createObjectURL(new Blob([res.data]))

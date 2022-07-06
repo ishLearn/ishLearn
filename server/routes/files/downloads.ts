@@ -30,7 +30,8 @@ router.get(
   '/*',
   async (req: express.Request, res: express.Response<{}, UserRecord>) => {
     const url = req.url.substring(1).replace(new RegExp('%20', 'g'), ' ')
-    console.log(url)
+
+    console.log(true)
     await Media.downloadMedia(url, res, true)
   }
 )
