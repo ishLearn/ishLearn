@@ -1,17 +1,23 @@
 <script setup lang="ts">
 import { onMounted, Ref, ref } from 'vue'
 import useUser, { UserStoreState } from '@/store/auth.module'
-import { GenericInputs } from '@/types/GenericInputData'
-import { validateMandatory } from '@/util/inputValidation'
-import GenericInput from '@/components/GenericInput.vue'
+import api from '@/services/api'
 import { Store } from 'pinia'
 import { useRoute } from 'vue-router'
+import router from '@/router'
+import useFileList from '@/util/file-list'
+import { uploadFiles } from '@/util/file-uploader'
 import { setEditPermission } from '@/util/getUser'
 import { Product } from '@/types/Products'
-import router from '@/router'
-import { productRepo } from '../../../server/services/RedisService'
-import MDEditor from '../components/MDEditor.vue'
-import api from '@/services/api'
+import { GenericInputs } from '@/types/GenericInputData'
+import GenericInput from '@/components/GenericInput.vue'
+import { validateMandatory } from '@/util/inputValidation'
+import MDEditor from '@/components/MDEditor.vue'
+import FilePreviewDownload from '@/components/FilePreviewDownload.vue'
+import FilePreviewUpload from '@/components/FilePreviewUpload.vue'
+import DropZone from '@/components/DropZone.vue'
+
+const { files, addFiles, removeFile } = useFileList()
 
 const user: Store<'user', UserStoreState> = useUser()
 
@@ -100,6 +106,11 @@ const onSubmit = (_event: Event) => {
 
   router.push({ name: 'ViewProject', params: { id: project.value.id } })
 }
+
+function onInputChange(e) {
+  addFiles(e.target.files)
+  e.target.value = null
+}
 </script>
 
 <template>
@@ -126,8 +137,51 @@ const onSubmit = (_event: Event) => {
         /></span>
       </div>
 
-      <div class="m-2 p-2">
+      <div class="files p-2">
         <h4>Dateien</h4>
+        <ul class="image-list p-2">
+          <li v-for="mediaObject of project.media" :key="mediaObject.url">
+            <FilePreviewDownload
+              :filename="mediaObject.filename"
+              :filetype="mediaObject.filename"
+              :fileurl="mediaObject.url"
+              :show-delete="true"
+            />
+          </li>
+        </ul>
+
+        <div class="m-4" v-show="project">
+          <DropZone class="drop-area" @files-dropped="addFiles" #default="{ dropZoneActive }">
+            <label for="file-input">
+              <ul v-show="files.length" class="image-list">
+                <FilePreviewUpload
+                  v-for="file of files"
+                  :key="file.id"
+                  :file="file"
+                  :delete-button="true"
+                  tag="li"
+                  @remove="removeFile"
+                />
+              </ul>
+
+              <span v-if="dropZoneActive">
+                <span>Lasse die Dateien los</span>
+                <span class="smaller">um sie hinzuzufügen</span>
+              </span>
+              <span v-else>
+                <span>Ziehe hier deine Dateien rein</span>
+                <span class="smaller"
+                  >oder <strong>klicke hier</strong> um Dateien auszuwählen</span
+                >
+              </span>
+
+              <input type="file" id="file-input" multiple @change="onInputChange" />
+            </label>
+          </DropZone>
+          <button class="upload-button" @click.prevent="uploadFiles(files, project.id)">
+            Hochladen
+          </button>
+        </div>
       </div>
 
       <input type="submit" value="Bearbeitung abschließen" class="btn btn-success" />
@@ -136,3 +190,72 @@ const onSubmit = (_event: Event) => {
     <p class="tiny-font">(*) sind Pflichtfelder.</p>
   </div>
 </template>
+
+<style scope>
+.files {
+  width: 100%;
+  max-width: 800px;
+  margin: 50px auto;
+}
+.image-list {
+  display: flex;
+  list-style: none;
+  flex-wrap: wrap;
+  padding: 0;
+  max-width: 80%;
+}
+
+.drop-area {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 50px;
+  background: #ffffff55;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  transition: 0.2s ease;
+}
+.drop-area[data-active='true'] {
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  background: #ffffffcc;
+}
+
+.drop-area label {
+  font-size: 36px;
+  cursor: pointer;
+  display: block;
+}
+.drop-area label span {
+  display: block;
+}
+.drop-area label input[type='file']:not(:focus-visible) {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+.drop-area label .smaller {
+  font-size: 16px;
+}
+
+.upload-button {
+  display: block;
+  appearance: none;
+  border: 0;
+  border-radius: 50px;
+  padding: 0.75rem 3rem;
+  margin: 1rem auto;
+  font-size: 1.25rem;
+  font-weight: bold;
+  background: #369;
+  color: #fff;
+  text-transform: uppercase;
+}
+button {
+  cursor: pointer;
+}
+</style>
