@@ -27,6 +27,12 @@ class AuthService {
       store.loginSuccessful(response)
     }
 
+    if (store.user) {
+      // Get user profile text
+      const { data } = await api.get(`/users/${response.userInfo.id}/text`)
+      store.user.profileText = data
+    }
+
     return response
   }
 

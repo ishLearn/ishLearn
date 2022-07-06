@@ -30,7 +30,7 @@ const useUser = defineStore('user', {
   },
   actions: {
     async initUser() {
-      this.loading = new Promise(async (res) => {
+      this.loading = new Promise(async (resolve) => {
         const item = localStorage.getItem('refreshToken')
         if (item == null) {
           this.status.loggedIn = false
@@ -42,7 +42,8 @@ const useUser = defineStore('user', {
         else {
           await this.refreshAccessToken(refreshToken)
         }
-        res(true)
+
+        resolve(true)
       })
     },
     async refreshAccessToken(refreshToken?: RefreshToken) {
@@ -68,20 +69,25 @@ const useUser = defineStore('user', {
         const data = (await api.get('/users')).data
         this.user = data.user
 
+        if (!this.user) return 'User not logged in'
+
         // Set logged in status
         this.status.loggedIn = true
+
+        // Get user profile text
+        this.user.profileText = await (await api.get(`/users/${this.user.id}/text`)).data
       } catch (e) {
         console.log('Could not refresh')
         console.log(e)
       }
     },
-    loginSuccessful(data: { accessToken: string; refreshToken: RefreshToken; userInfo: User }) {
+    loginSuccessful(input: { accessToken: string; refreshToken: RefreshToken; userInfo: User }) {
       this.status.loggedIn = true
-      this.accessKey = data.accessToken
-      this.refreshKey = data.refreshToken
-      this.user = data.userInfo
+      this.accessKey = input.accessToken
+      this.refreshKey = input.refreshToken
+      this.user = input.userInfo
 
-      localStorage.setItem('refreshToken', JSON.stringify(data.refreshToken))
+      localStorage.setItem('refreshToken', JSON.stringify(input.refreshToken))
     },
     removeUser() {
       localStorage.removeItem('refreshToken')
