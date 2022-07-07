@@ -76,7 +76,7 @@ export class Product {
     })
   }
 
-  async fetchDescription(updateRef?: Ref<number>): Promise<void> {
+  async fetchDescription(updateRef?: Ref<number>): Promise<boolean> {
     this.description = (
       await axios.post('/api/files/download', {
         filename: `${this.id}/description.md`,
@@ -84,13 +84,16 @@ export class Product {
     ).data
 
     if (updateRef) updateRef.value++
+
+    return true
   }
 
-  async fetchMediaMeta(updateRef?: Ref<number>): Promise<void> {
+  async fetchMediaMeta(updateRef?: Ref<number>): Promise<boolean> {
     api.get(`/products/${this.id}/media`).then((res) => {
       this.media = res.data.media.filter((m: MediaMeta) => m.filename !== 'description.md')
-      console.log(this.media)
       if (updateRef) updateRef.value++
     })
+
+    return true
   }
 }

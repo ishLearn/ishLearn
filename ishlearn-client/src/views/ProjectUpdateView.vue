@@ -1,17 +1,20 @@
 <script setup lang="ts">
+// NPM imports
 import { onMounted, Ref, ref } from 'vue'
+import { useRoute } from 'vue-router'
+
 import useUser, { UserStoreState } from '@/store/auth.module'
 import api from '@/services/api'
 import { Store } from 'pinia'
-import { useRoute } from 'vue-router'
 import router from '@/router'
 import useFileList from '@/util/file-list'
 import { uploadFiles } from '@/util/file-uploader'
 import { setEditPermission } from '@/util/getUser'
 import { Product } from '@/types/Products'
 import { GenericInputs } from '@/types/GenericInputData'
-import GenericInput from '@/components/GenericInput.vue'
 import { validateMandatory } from '@/util/inputValidation'
+// Vue components
+import GenericInput from '@/components/GenericInput.vue'
 import MDEditor from '@/components/MDEditor.vue'
 import FilePreviewDownload from '@/components/FilePreviewDownload.vue'
 import FilePreviewUpload from '@/components/FilePreviewUpload.vue'
