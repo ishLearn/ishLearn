@@ -1,11 +1,14 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import AuthService from '@/services/auth.service'
+import useUser from '@/store/auth.module'
+import router from '@/router'
 import { validateEmail, validatePasswort, validateMandatory } from '@/util/inputValidation'
 import { GenericInputs } from '@/types/GenericInputData'
 import SmallForm from '@/components/SmallForm.vue'
-import router from '@/router'
+
+const user: Store<'user', UserStoreState> = useUser()
 
 const inputs: GenericInputs<string> = {
   email: {
@@ -28,7 +31,21 @@ const inputs: GenericInputs<string> = {
   },
 }
 
-const redirect = useRoute().query.redirect
+const redirectPath: string = useRoute().query.redirect as string
+const redirect = (standard: { name: string; params: { [key: string]: string } | null }) => {
+  try {
+    router.push({ path: redirectPath || '/' })
+  } catch (err) {
+    console.log('Error during routing back.')
+    console.log(err)
+    router.push(standard)
+  }
+}
+onMounted(() => {
+  if (user.status.loggedIn) {
+    redirect({ name: 'UserDetail', params: { id: user.user.id } })
+  }
+})
 const onSignup = async (e: Event) => {
   e.preventDefault()
 
@@ -55,13 +72,7 @@ const onSignup = async (e: Event) => {
     console.log(err)
     return
   }
-  try {
-    router.push({ path: redirect || '/' })
-  } catch (err) {
-    console.log('Error during routing back.')
-    console.log(err)
-    router.push({ name: 'Home' })
-  }
+  redirect({ name: 'Home' })
 }
 </script>
 
