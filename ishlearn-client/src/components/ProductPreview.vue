@@ -14,7 +14,7 @@ getUser(creator, props.project.createdBy)
 <template>
   <div class="media box-background rounded shadow m-2">
     <div class="heading">
-      <h3>{{ project.title }}</h3>
+      <h4>{{ project.title }}</h4>
     </div>
     <div class="trenner">ein Projekt von</div>
     <div class="content">
