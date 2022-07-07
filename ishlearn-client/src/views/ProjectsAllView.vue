@@ -1,17 +1,21 @@
 <script setup lang="ts">
 import { onMounted, ref, Ref } from 'vue'
+import { Store } from 'pinia'
 import api from '@/services/api'
+import useUser, { UserStoreState } from '@/store/auth.module'
 import ShowAllProducts from '@/components/ShowAllProducts.vue'
 import SearchField from '@/components/SearchField.vue'
 import IconSearch from '@/icons/IconSearch.vue'
 import IconPlus from '@/icons/IconPlus.vue'
 
+const user: Store<'user', UserStoreState> = useUser()
+
 const allProjects = ref([])
 const checkedTags: Ref<string[]> = ref([])
 const checkedSubjects: Ref<string[]> = ref([])
 
-onMounted(() => {
-  console.log('Getting projects using the api service')
+onMounted(async () => {
+  await user.loading
   api.get('/products/page/0').then((res: { data: [] }) => {
     allProjects.value = res.data
   })
