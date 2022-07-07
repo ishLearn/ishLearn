@@ -53,7 +53,7 @@ export default class Media {
    * @returns The complete file path including the project ID and the name
    */
   static getFilename(file: string, project: string) {
-    return `${project}/${file}`
+    return `${project}/${file}`.replace(/[^a-z0-9\.\/-]/gi, '_')
   }
 
   /**
@@ -129,8 +129,9 @@ export default class Media {
         ?.status(400)
         .json({ error: 'Please specify filename.' })
 
+    // Escape special characters with underscores
     const filePathName = config?.useNameAsPath
-      ? fileName
+      ? fileName.replace(/[^a-z0-9\.\/-]/gi, '_')
       : Media.getFilename(fileName, config?.project || '')
 
     if (typeof process.env.MAIN_BUCKET === 'undefined')
@@ -238,14 +239,21 @@ export default class Media {
       filetype: string | null
     } = await (
       await new DBService().query(`SELECT * FROM media WHERE URL=? LIMIT 1`, [
-        filename,
+        filename.replace(/[^a-z0-9\.\/-]/gi, '_'),
       ])
     ).results
 
-    new Logger().info(`Downloading media: ${filename}, ID: ${media.ID}`)
+    new Logger().info(
+      `Downloading media: ${filename.replace(/[^a-z0-9\.\/-]/gi, '_')}, ID: ${
+        media.ID
+      }`
+    )
     const bucketParams: SearchFileBucketParams = {
       Bucket: process.env.MAIN_BUCKET || 'main',
-      Key: `${process.env.MAIN_BUCKET}/${filename}`,
+      Key: `${process.env.MAIN_BUCKET}/${filename.replace(
+        /[^a-z0-9\.\/-]/gi,
+        '_'
+      )}`,
     }
 
     try {
@@ -285,7 +293,7 @@ export default class Media {
 
       res.setHeader(
         'Content-disposition',
-        'inline; filename="' + filename + '"'
+        'inline; filename="' + media.filename + '"'
       )
       const type =
         media.filetype || filename.endsWith('.md')
