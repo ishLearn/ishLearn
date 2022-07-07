@@ -18,7 +18,9 @@ onMounted(() => {
 })
 
 const search = async (queryString: string) => {
-  console.log(queryString)
+  // Minimum query string length is 3 chars
+  if (queryString.length < 3) return
+
   if (queryString.length == 0) return
   api.post('/products/filter/', { queryString: queryString }).then((res) => {
     allProjects.value = res.data.products
@@ -68,7 +70,9 @@ const subjects: string[] = [
           <p>Diese Knöpfe bewirken inhaltlich noch nichts...</p>
 
           <div class="tag-space">
-            <span class="tag tag-blue" v-for="tag in checkedTags" :key="tag">{{ tag }}</span>
+            <span class="tag tag-blue" v-for="tag in checkedTags" :key="tag">{{
+              tag
+            }}</span>
           </div>
 
           <div v-for="kl in classes" :key="kl" class="form-check">
@@ -84,7 +88,12 @@ const subjects: string[] = [
           <hr />
 
           <div class="tag-space">
-            <span class="tag tag-red" v-for="tag in checkedSubjects" :key="tag">{{ tag }}</span>
+            <span
+              class="tag tag-red"
+              v-for="tag in checkedSubjects"
+              :key="tag"
+              >{{ tag }}</span
+            >
           </div>
 
           <div v-for="kl in subjects" :key="kl" class="form-check">
