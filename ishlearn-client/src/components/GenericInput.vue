@@ -27,8 +27,6 @@ if (props.inputProps.type === 'email') {
 }
 onMounted(() => {
   if (props.inputProps.type === 'checkbox') {
-    console.log('Started Checkbox input')
-    console.log(props.inputProps.value.value)
     document.getElementById(props.inputProps.id).defaultChecked = props.modelValue
   }
 })
