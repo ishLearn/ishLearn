@@ -67,7 +67,7 @@ html[data-theme='dark']{
   color: var(--lighter-blau);
   margin: 0 auto;
   height: 100%;
-
+  padding-top: 50px;
 }
 
 :root body {

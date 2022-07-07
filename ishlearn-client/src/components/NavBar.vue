@@ -23,8 +23,8 @@ function toggleTheme() {
 <template>
   <div>
     <nav
-      class="navbar navbar-expand-sm p-2 navbar-dark nav-colors"
-      style="display: flex; justify-content: space-between"
+      class="navbar navbar-expand-sm fixed-top p-3 navbar-dark nav-colors"
+      style="display: flex; justify-content: space-between; z-index: 2500"
     >
       <div class="" id="" style="display: flex">
         <!-- Brand -->
