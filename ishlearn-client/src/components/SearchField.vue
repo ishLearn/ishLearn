@@ -1,9 +1,20 @@
 <script setup lang="ts">
+import { ref, Ref, watch } from 'vue'
 import IconSearch from '@/icons/IconSearch.vue'
-import { ref, Ref } from 'vue'
+import { debounce } from '@/util/debounceThrottle';
 
-defineEmits(['submitSearch'])
+const emit = defineEmits(['submitSearch'])
 const searchText: Ref<string> = ref('')
+
+const submitSearchDebounce = debounce(() => {
+  console.log('Debouncing')
+
+  emit('submitSearch', searchText.value)
+}, 250)
+
+watch(searchText, (newV, oldV) => {
+  submitSearchDebounce()
+})
 </script>
 
 <template>
