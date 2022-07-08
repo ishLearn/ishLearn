@@ -79,6 +79,7 @@ const useUser = defineStore('user', {
       } catch (e) {
         console.log('Could not refresh')
         console.log(e)
+        this.removeUser()
       }
     },
     loginSuccessful(input: { accessToken: string; refreshToken: RefreshToken; userInfo: User }) {
