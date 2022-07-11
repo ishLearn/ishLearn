@@ -142,6 +142,7 @@ export default class Product {
       }
     }
 
+    // Query
     const id = typeof idInput === 'string' ? getIntIDFromHash(idInput) : idInput
     const query =
       (typeof loggedInUser === 'undefined'
@@ -152,14 +153,18 @@ export default class Product {
         ? Product.adminQuery
         : Product.teachersQuery) + ` AND ID = ? LIMIT 1` // LIMIT 1 so no further filtering required (to cross out double products)
 
-    const result = (
-      await new DBService().query(query, [
-        fields,
-        loggedInUser?.id && getIntIDFromHash(loggedInUser.id),
-        id,
-      ])
-    ).results
+    // Parameters
+    const params: any[] = [fields]
+    if (loggedInUser?.id) params.push(getIntIDFromHash(loggedInUser.id))
+    params.push(id)
 
+    // console.log(query)
+    // console.log(params)
+
+    // Send query and await response
+    const result = (await new DBService().query(query, params)).results
+
+    // Return
     await Promise.all(
       result.map(async (product: Product): Promise<void> => {
         if (!product.id) return
@@ -189,7 +194,7 @@ export default class Product {
   ): Promise<Product[]> {
     const conditionQuery: string = queryString || ''
     const collaboratorNumberIds: NumberLike[] =
-      collaborators?.map((v) => getIntIDFromHash(v)) || []
+      collaborators?.map(v => getIntIDFromHash(v)) || []
     const tagValues: string[] = tags || []
 
     const cIdsExist = collaboratorNumberIds.length > 0
@@ -333,7 +338,7 @@ export default class Product {
 
     // Filter products to be unique, instead of potential doubles through JOIN with teachers table ((multiple teachers -> one product) => (multiple entries in result).filter())
     const productIds: string[] = []
-    return resultProducts.filter((product) => {
+    return resultProducts.filter(product => {
       if (typeof product.id === 'undefined') return false
       if (productIds.includes(product.id)) return false
       productIds.push(product.id)
@@ -452,7 +457,7 @@ export default class Product {
       throw new Error('Product has already been saved')
 
     let usersNrs: Array<number | NumberLike>
-    usersNrs = users.map((user) => {
+    usersNrs = users.map(user => {
       if (typeof user === 'string') return getIntIDFromHash(user)
       return user
     })
@@ -613,7 +618,7 @@ export default class Product {
   ) {
     if (
       typeof fieldsToUpdate.visibility !== 'undefined' &&
-      Object.values(Visibility).filter((v) => v === fieldsToUpdate.visibility)
+      Object.values(Visibility).filter(v => v === fieldsToUpdate.visibility)
         .length < 1
     )
       throw new Error('Visibility is not valid')
@@ -674,7 +679,7 @@ export default class Product {
 
     const query = 'INSERT INTO productHasTag (PID, tag) VALUES (?, ?)'
     return await Promise.all([
-      ...tags.map(async (tag) => {
+      ...tags.map(async tag => {
         return await new DBService().query(query, [pid, tag])
       }),
       async () => {
@@ -695,7 +700,7 @@ export default class Product {
 
     const query = 'DELETE FROM productHasTag WHERE PID = ? AND tag = ?'
     return await Promise.all([
-      ...tags.map(async (tag) => {
+      ...tags.map(async tag => {
         return await new DBService().query(query, [pid, tag])
       }),
       async () => {

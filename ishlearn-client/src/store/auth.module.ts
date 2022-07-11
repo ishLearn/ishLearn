@@ -34,7 +34,7 @@ const useUser = defineStore('user', {
         const item = localStorage.getItem('refreshToken')
         if (item == null) {
           this.status.loggedIn = false
-          return
+          return resolve(false)
         }
         const refreshToken: RefreshToken = JSON.parse(item)
 

@@ -33,6 +33,9 @@ const unableToLoad: Ref<boolean> = ref(false)
 
 const descriptionUpdate = ref(0)
 
+const descriptionFetchingFinished: Ref<boolean> = ref(false)
+const mediaMetaFetchingFinished: Ref<boolean> = ref(false)
+
 onMounted(async () => {
   try {
     const pid = useRoute().params.id
@@ -41,13 +44,16 @@ onMounted(async () => {
       typeof pid === 'string' ? pid : pid[0],
       descriptionUpdate,
     )
-    await user.loading
+
+    if (user.loading !== null) await user.loading
 
     setEditPermission(editPermission, user, project)
     getUser(creator, project.value.createdBy)
     getUser(updater, project.value.updatedBy)
-    project.value.fetchDescription(descriptionUpdate)
-    project.value.fetchMediaMeta()
+
+    project.value.fetchDescription(descriptionUpdate).then((worked: boolean) => descriptionFetchingFinished.value = worked)
+    project.value.fetchMediaMeta().then((worked: boolean) => mediaMetaFetchingFinished.value = worked)
+
   } catch (err) {
     console.log('Fehler beim Laden des Projektes')
     console.log(err)
@@ -87,12 +93,22 @@ watch(project, () => descriptionUpdate.value++)
             v-if="editPermission"
             :to="{ name: 'UpdateProject', params: { id: project.id } }"
           >
+            <button class="btn btn-sm btn-secondary edit-button">
+              Bearbeiten
+            </button>
             <button class="btn btn-sm btn-secondary put-right">Bearbeiten</button>
           </router-link>
         </h4>
 
         <div>
-          <ul class="image-list" v-if="project.media && project.media.length > 0">
+          <ul
+            class="image-list"
+            v-if="
+              mediaMetaFetchingFinished &&
+              project.media &&
+              project.media.length > 0
+            "
+          >
             <li v-for="mediaObject of project.media" :key="mediaObject.url">
               <FilePreviewDownload
                 :filename="mediaObject.filename"
@@ -107,7 +123,10 @@ watch(project, () => descriptionUpdate.value++)
           <h6 v-else>Es gibt in diesem Projekt keine Dateien.</h6>
         </div>
 
-        <span v-if="project.description" :key="descriptionUpdate">
+        <span
+          v-if="descriptionFetchingFinished && project.description"
+          :key="descriptionUpdate"
+        >
           <MDPreview :text-to-display="project.description"></MDPreview>
         </span>
       </div>
