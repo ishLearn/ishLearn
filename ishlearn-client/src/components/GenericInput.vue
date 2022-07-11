@@ -33,7 +33,6 @@ onMounted(() => {
 const customEmit = (event) => {
   if (props.inputProps.type === 'checkbox') {
     emit('update:modelValue', !props.inputProps.value.value)
-    console.log(event.target?.value)
   } else {
     emit('update:modelValue', event.target?.value)
   }
@@ -51,8 +50,8 @@ const customEmit = (event) => {
       :class="`${
         inputProps.type === 'checkbox' ? 'form-check-label form-label-check' : 'form-label-text'
       }`"
-      >{{ inputProps.label }}<span v-show="inputProps.mandatory">*</span></label
-    >
+      >{{ inputProps.label }}<span v-show="inputProps.mandatory">*</span>
+    </label>
     <!-- Special input type: textarea -->
     <textarea
       v-if="inputProps.type == 'textarea'"

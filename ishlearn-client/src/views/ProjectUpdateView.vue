@@ -8,7 +8,7 @@ import router from '@/router'
 import useFileList from '@/util/file-list'
 import { uploadFiles } from '@/util/file-uploader'
 import { setEditPermission } from '@/util/getUser'
-import { Product } from '@/types/Products'
+import { Product, Visibility } from '@/types/Products'
 import { GenericInputs } from '@/types/GenericInputData'
 import GenericInput from '@/components/GenericInput.vue'
 import { validateMandatory } from '@/util/inputValidation'
@@ -51,15 +51,17 @@ const mdtext: Ref<string> = ref('')
 const editPermission: Ref<boolean> = ref(false)
 
 const loadProduct = async () => {
+  console.log(pid)
   project.value = await Product.getProductById(typeof pid === 'string' ? pid : pid[0])
+  console.log(project.value)
   inputs.title.value.value = project.value.title
-  inputs.visibility.value.value = project.value.visibility
+  inputs.visibility.value.value = project.value.visibility === Visibility.PUBLIC ? true : false
   project.value.fetchDescription().then(() => {
     if (project.value?.description) mdtext.value = project.value?.description
   })
 }
 const loadUser = async () => {
-  while (user.loading == null) { }
+  while (user.loading == null) {}
   await user.loading
   if (!user.status.loggedIn) {
     router.push({ name: 'UserLogin', query: { redirect: router.currentRoute.value.path } })
@@ -70,13 +72,15 @@ const deleteFile = ({ filename }: { filename: string }) => {
   console.log('Delete')
   if (!filename || !project.value) return false
   api.post(`/products/${project.value.id}/media/delete`, {
-    filename
+    filename,
   })
 }
 
 onMounted(async () => {
   try {
     await Promise.all([loadProduct(), loadUser()])
+    console.log('ON Mounted: Update view')
+    console.log(project.value)
     setEditPermission(editPermission, user, project).then(() => {
       if (!editPermission.value) {
         router.push({ name: 'ViewProject', params: { id: project.value?.id } })
@@ -99,7 +103,7 @@ const onSubmit = (_event: Event) => {
     }
     api.put(`/products/${pid}/`, {
       title: inputs.title.value.value,
-      visibility: inputs.visibility.value.value || true,
+      visibility: inputs.visibility.value.value ? Visibility.PUBLIC : Visibility.PRIVATE,
     })
   }
 
@@ -110,7 +114,7 @@ const onSubmit = (_event: Event) => {
     }
 
     api.put(`/products/${pid}/description`, {
-      description: mdtext.value
+      description: mdtext.value,
     })
   }
 
@@ -136,12 +140,11 @@ function onInputChange(e) {
         v-model="input.value.value"
         :inputProps="input"
       />
-
-      <div class="form-group p-2 input-box">
+      <div :key="project.description" class="form-group p-2 input-box">
         <label for="md" class="form-label-text"
           >Projektbeschreibung<span v-show="true">*</span></label
         >
-        <MDEditor v-if="project.description" v-model="mdtext" />
+        <MDEditor v-model="mdtext" />
         <span v-show="!validateMandatory(mdtext)" class="text-danger"
           >Dieses Feld ist Pflicht!<br
         /></span>
@@ -154,9 +157,9 @@ function onInputChange(e) {
             <FilePreviewDownload
               :filename="mediaObject.filename"
               :filetype="mediaObject.fileType || 'notworking/nothing'"
-              :fileurl="`${
-                mediaObject.fileType ? `${origin}/api/files/download/` : ''
-              }${mediaObject.url}`"
+              :fileurl="`${mediaObject.fileType ? `${origin}/api/files/download/` : ''}${
+                mediaObject.url
+              }`"
               :show-delete="true"
               @delete="deleteFile"
             />
@@ -164,11 +167,7 @@ function onInputChange(e) {
         </ul>
 
         <div class="m-4" v-show="project">
-          <DropZone
-            class="drop-area"
-            @files-dropped="addFiles"
-            #default="{ dropZoneActive }"
-          >
+          <DropZone class="drop-area" @files-dropped="addFiles" #default="{ dropZoneActive }">
             <label for="file-input">
               <ul v-show="files.length" class="image-list">
                 <FilePreviewUpload
@@ -188,33 +187,20 @@ function onInputChange(e) {
               <span v-else>
                 <span>Ziehe hier deine Dateien rein</span>
                 <span class="smaller"
-                  >oder <strong>klicke hier</strong> um Dateien
-                  auszuwählen</span
+                  >oder <strong>klicke hier</strong> um Dateien auszuwählen</span
                 >
               </span>
 
-              <input
-                type="file"
-                id="file-input"
-                multiple
-                @change="onInputChange"
-              />
+              <input type="file" id="file-input" multiple @change="onInputChange" />
             </label>
           </DropZone>
-          <button
-            class="upload-button"
-            @click.prevent="uploadFiles(files, project.id)"
-          >
+          <button class="upload-button" @click.prevent="uploadFiles(files, project.id)">
             Hochladen
           </button>
         </div>
       </div>
 
-      <input
-        type="submit"
-        value="Bearbeitung abschließen"
-        class="btn btn-success btn-lg"
-      />
+      <input type="submit" value="Bearbeitung abschließen" class="btn btn-success btn-lg" />
     </form>
 
     <p class="tiny-font">(*) sind Pflichtfelder.</p>

@@ -1,9 +1,27 @@
 <!-- ProductPreview.vue -->
 <script setup lang="ts">
-import { defineProps, ref, Ref } from 'vue'
+import { defineProps, onMounted, ref, Ref } from 'vue'
 import { formatDate } from '@/util/dateUtils'
+import { getUser, setEditPermission } from '@/util/getUser'
+import useUser, { UserStoreState } from '@/store/auth.module'
+import { Store } from 'pinia'
+import api from '@/services/api'
 import { User } from '@/types/Users'
-import { getUser } from '@/util/getUser'
+import { Visibility } from '@/types/Products'
+import IconEye from '@/icons/IconEye.vue'
+import IconEyeSlash from '@/icons/IconEyeSlash.vue'
+
+const user: Store<'user', UserStoreState> = useUser()
+const mayEdit: Ref<boolean> = ref(false)
+
+user.loading?.then(async () => {
+  if (!user.status.loggedIn) return
+  mayEdit.value = user.status.loggedIn && user.user?.id === props.project.createdBy
+
+  // mayEdit.value = (
+  //   await api.get<{ hasEditPermission: boolean }>(`/products/${props.project.id}/permission`)
+  // ).data.hasEditPermission
+})
 
 const props = defineProps(['project'])
 const creator: Ref<User | null> = ref(null)
@@ -12,7 +30,10 @@ getUser(creator, props.project.createdBy)
 </script>
 
 <template>
-  <div class="media box-background rounded shadow m-2">
+  <div class="media box-background rounded shadow m-2 pos-rel">
+    <span v-show="mayEdit" class="info-visibility p-1 put-right put-up"
+      ><IconEye v-if="project.visibility === Visibility.PUBLIC" /><IconEyeSlash v-else
+    /></span>
     <div class="heading">
       <h4>{{ project.title }}</h4>
     </div>
@@ -76,5 +97,8 @@ button {
   vertical-align: bottom;
   width: 100%;
   text-align: center;
+}
+.info-visibility {
+  opacity: 0.5;
 }
 </style>

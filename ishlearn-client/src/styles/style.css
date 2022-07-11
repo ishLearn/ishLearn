@@ -95,3 +95,14 @@ html[data-theme='dark']{
   border: 1px solid rgba(110, 5, 5, 0.623);
   border-radius: 5px;
 }
+.pos-rel {
+  position: relative;
+}
+.put-right {
+  position: absolute;
+  right: 0px;
+}
+.put-up {
+  position: absolute;
+  top: 0px;
+}
