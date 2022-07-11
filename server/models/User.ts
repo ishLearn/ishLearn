@@ -388,7 +388,7 @@ export default class User {
   /**
    *
    * @param uid UserID (hashed)
-   * @param text content for profile picture
+   * @param img content for profile picture
    */
   static async uploadProfilePictureThenSaveToDB(uid: string, img: string) {
     const filepath = User.getProfilePictureFilePath(uid)
@@ -426,10 +426,15 @@ export default class User {
   static async uploadProfileTextThenSaveToDB(uid: string, text: string) {
     const filepath = User.getProfileTextFilePath(uid)
 
-    const res = await Media.uploadMedia(`${filepath}`, Buffer.from(text), {
-      useNameAsPath: true,
-      fileType: 'text/markdown',
-    })
+    const res = await Media.uploadMedia(
+      `${filepath}`,
+      Buffer.from(text),
+      {
+        useNameAsPath: true,
+        fileType: 'text/markdown',
+      },
+      true // Directly override, since description is to be updated
+    )
 
     if (typeof res === 'undefined' || !('worked' in res) || !res.worked)
       throw new Error(`Could not upload comment to S3`)

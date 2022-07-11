@@ -26,11 +26,14 @@ router.post(
     req: express.Request<
       {},
       {},
-      { filename: string; projectId: string; overrideIfNecessary?: boolean }
+      { filename: string; projectId: string; overrideIfNecessary?: string }
     >,
     res: express.Response<{}, UserRecord>
   ) => {
-    const { filename, projectId, overrideIfNecessary } = req.body
+    const { filename, projectId } = req.body
+    const overrideIfNecessary: boolean = req.body.overrideIfNecessary
+      ? req.body.overrideIfNecessary == 'true'
+      : false
 
     if (
       typeof req.files === 'undefined' ||

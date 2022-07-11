@@ -135,17 +135,28 @@ export default class Media {
       ? fileName
       : Media.getFilename(fileName, config?.project || '')
 
+    // Get files with same name at same project
+    const { results } = config?.project
+      ? await new DBService().query(
+          `SELECT * FROM mediaPartOfProduct INNER JOIN media ON media.ID = mediaPartOfProduct.MID WHERE PID = ? AND URL = ?`,
+          [getIntIDFromHash(config?.project), filePathName]
+        )
+      : { results: [] }
     // Cancel if the file or a similar has already been saved
-    if (!overrideIfNecessary && typeof config?.project !== `undefined`) {
-      const { results } = await new DBService().query(
-        `SELECT * FROM mediaPartOfProduct INNER JOIN media ON media.ID = mediaPartOfProduct.MID WHERE PID = ? AND URL = ?`,
-        [getIntIDFromHash(config?.project), filePathName]
-      )
-
+    if (!overrideIfNecessary) {
       if (results.length > 0)
         throw new Error(
           `A File with same or similar name is already saved for this project.`
         )
+    } else {
+      await Promise.all(
+        results.map((result: { MID: NumberLike }) =>
+          new DBService().query(
+            `DELETE FROM mediaPartOfProduct WHERE MID = ?`,
+            [result.MID]
+          )
+        )
+      )
     }
 
     // Ensure Process ENV is correctly set up

@@ -20,7 +20,7 @@
     "taggings",
     "unhashed"
   ],
-  "html.format.wrapLineLength": 100,
+  "html.format.wrapLineLength": 120,
   "editor.formatOnSave": true,
   "githubPullRequests.ignoredPullRequestBranches": ["main"]
 }

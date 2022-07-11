@@ -50,6 +50,18 @@ const project: Ref<Product | null> = ref(null)
 const mdtext: Ref<string> = ref('')
 const editPermission: Ref<boolean> = ref(false)
 
+const forceUpload = {
+  value: ref(false),
+  type: 'checkbox',
+  label: `Eine Datei mit dem oder einem ähnlichen Namen existiert bereits. 
+    Soll es überschrieben werden?`,
+  id: 'forceupload',
+  name: 'forceupload',
+  mandatory: false,
+  placeholder: 'false',
+}
+const showForceUpload = ref(false)
+
 const loadProduct = async () => {
   console.log(pid)
   project.value = await Product.getProductById(typeof pid === 'string' ? pid : pid[0])
@@ -61,10 +73,22 @@ const loadProduct = async () => {
   })
 }
 const loadUser = async () => {
-  while (user.loading == null) {}
+  while (user.loading == null) { }
   await user.loading
   if (!user.status.loggedIn) {
     router.push({ name: 'UserLogin', query: { redirect: router.currentRoute.value.path } })
+  }
+}
+
+const clickUploadFiles = async () => {
+  try {
+    if (!project.value?.id) {
+      return 'New Files or Project not defined'
+    }
+    await uploadFiles(files.value, project.value.id, forceUpload.value.value)
+  } catch (err) {
+    showForceUpload.value = true
+    return 'Could not upload files, force?'
   }
 }
 
@@ -157,9 +181,9 @@ function onInputChange(e) {
             <FilePreviewDownload
               :filename="mediaObject.filename"
               :filetype="mediaObject.fileType || 'notworking/nothing'"
-              :fileurl="`${mediaObject.fileType ? `${origin}/api/files/download/` : ''}${
-                mediaObject.url
-              }`"
+              :fileurl="`${
+                mediaObject.fileType ? `${origin}/api/files/download/` : ''
+              }${mediaObject.url}`"
               :show-delete="true"
               @delete="deleteFile"
             />
@@ -167,7 +191,11 @@ function onInputChange(e) {
         </ul>
 
         <div class="m-4" v-show="project">
-          <DropZone class="drop-area" @files-dropped="addFiles" #default="{ dropZoneActive }">
+          <DropZone
+            class="drop-area"
+            @files-dropped="addFiles"
+            #default="{ dropZoneActive }"
+          >
             <label for="file-input">
               <ul v-show="files.length" class="image-list">
                 <FilePreviewUpload
@@ -187,20 +215,36 @@ function onInputChange(e) {
               <span v-else>
                 <span>Ziehe hier deine Dateien rein</span>
                 <span class="smaller"
-                  >oder <strong>klicke hier</strong> um Dateien auszuwählen</span
+                  >oder <strong>klicke hier</strong> um Dateien
+                  auszuwählen</span
                 >
               </span>
 
-              <input type="file" id="file-input" multiple @change="onInputChange" />
+              <input
+                type="file"
+                id="file-input"
+                multiple
+                @change="onInputChange"
+              />
             </label>
           </DropZone>
-          <button class="upload-button" @click.prevent="uploadFiles(files, project.id)">
+
+          <GenericInput
+            :inputProps="forceUpload"
+            v-model="forceUpload.value.value"
+            v-show="showForceUpload"
+          />
+          <button class="upload-button" @click.prevent="clickUploadFiles()">
             Hochladen
           </button>
         </div>
       </div>
 
-      <input type="submit" value="Bearbeitung abschließen" class="btn btn-success btn-lg" />
+      <input
+        type="submit"
+        value="Bearbeitung abschließen"
+        class="btn btn-success btn-lg"
+      />
     </form>
 
     <p class="tiny-font">(*) sind Pflichtfelder.</p>
