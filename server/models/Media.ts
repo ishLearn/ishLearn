@@ -122,9 +122,11 @@ export default class Media {
       res?: express.Response<{}, UserRecord>
       useNameAsPath?: boolean
       fileType: string
-    }
+    },
+    overrideIfNecessary?: boolean
   ) {
-    if (fileName === '')
+    // Ensure filename is provided
+    if (typeof fileName === 'undefined' || fileName === '')
       return config?.res
         ?.status(400)
         .json({ error: 'Please specify filename.' })
@@ -133,6 +135,20 @@ export default class Media {
       ? fileName
       : Media.getFilename(fileName, config?.project || '')
 
+    // Cancel if the file or a similar has already been saved
+    if (!overrideIfNecessary && typeof config?.project !== `undefined`) {
+      const { results } = await new DBService().query(
+        `SELECT * FROM mediaPartOfProduct INNER JOIN media ON media.ID = mediaPartOfProduct.MID WHERE PID = ? AND URL = ?`,
+        [getIntIDFromHash(config?.project), filePathName]
+      )
+
+      if (results.length > 0)
+        throw new Error(
+          `A File with same or similar name is already saved for this project.`
+        )
+    }
+
+    // Ensure Process ENV is correctly set up
     if (typeof process.env.MAIN_BUCKET === 'undefined')
       throw new Error('Process env is not correctly set up for S3')
 
@@ -155,6 +171,7 @@ export default class Media {
 
     let client: socket.Socket | undefined = undefined
 
+    // Send partial upload status to frontend
     upload.on('httpUploadProgress', stream => {
       if (typeof client === 'undefined') {
         client = Media.uploads.get(newUploadId)?.c
