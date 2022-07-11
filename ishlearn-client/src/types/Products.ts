@@ -15,7 +15,7 @@ export type ID = string | undefined
 export class Product {
   id?: ID
   title: string
-  visibility: Visibility | string
+  visibility: Visibility
   updatedBy: string
   createdBy: string
   createDate?: Date

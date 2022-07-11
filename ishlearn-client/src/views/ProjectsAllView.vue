@@ -1,24 +1,30 @@
 <script setup lang="ts">
 import { onMounted, ref, Ref } from 'vue'
+import { Store } from 'pinia'
 import api from '@/services/api'
+import useUser, { UserStoreState } from '@/store/auth.module'
 import ShowAllProducts from '@/components/ShowAllProducts.vue'
 import SearchField from '@/components/SearchField.vue'
 import IconSearch from '@/icons/IconSearch.vue'
 import IconPlus from '@/icons/IconPlus.vue'
 
+const user: Store<'user', UserStoreState> = useUser()
+
 const allProjects = ref([])
 const checkedTags: Ref<string[]> = ref([])
 const checkedSubjects: Ref<string[]> = ref([])
 
-onMounted(() => {
-  console.log('Getting projects using the api service')
+onMounted(async () => {
+  await user.loading
   api.get('/products/page/0').then((res: { data: [] }) => {
     allProjects.value = res.data
   })
 })
 
 const search = async (queryString: string) => {
-  console.log(queryString)
+  // Minimum query string length is 3 chars
+  if (queryString.length < 3) return
+
   if (queryString.length == 0) return
   api.post('/products/filter/', { queryString: queryString }).then((res) => {
     allProjects.value = res.data.products
@@ -68,7 +74,9 @@ const subjects: string[] = [
           <p>Diese Knöpfe bewirken inhaltlich noch nichts...</p>
 
           <div class="tag-space">
-            <span class="tag tag-blue" v-for="tag in checkedTags" :key="tag">{{ tag }}</span>
+            <span class="tag tag-blue" v-for="tag in checkedTags" :key="tag">{{
+              tag
+            }}</span>
           </div>
 
           <div v-for="kl in classes" :key="kl" class="form-check">
@@ -84,7 +92,12 @@ const subjects: string[] = [
           <hr />
 
           <div class="tag-space">
-            <span class="tag tag-red" v-for="tag in checkedSubjects" :key="tag">{{ tag }}</span>
+            <span
+              class="tag tag-red"
+              v-for="tag in checkedSubjects"
+              :key="tag"
+              >{{ tag }}</span
+            >
           </div>
 
           <div v-for="kl in subjects" :key="kl" class="form-check">
