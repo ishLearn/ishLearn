@@ -21,6 +21,7 @@ import MDEditor from '@/components/MDEditor.vue'
 import FilePreviewDownload from '@/components/FilePreviewDownload.vue'
 import FilePreviewUpload from '@/components/FilePreviewUpload.vue'
 import DropZone from '@/components/DropZone.vue'
+import { isAxiosError } from '@/util/typeguards'
 
 const { files, addFiles, removeFile } = useFileList()
 
@@ -98,8 +99,10 @@ const clickUploadFiles = async () => {
     forceUpload.value.value = false
 
     showForceUpload.value = false
-  } catch (err: any) {
-    if (err.status === 400 || JSON.parse(JSON.stringify(err)).status === 400) {
+  } catch (err: unknown) {
+    if (!isAxiosError(err)) return 'Error code could not be found.'
+
+    if (String(err.status) === String(400) || String(JSON.parse(JSON.stringify(err)).status) === String(400)) {
       showForceUpload.value = true
       return 'Could not upload files, force?'
     } else return `Error with code > 400: ${err.status}`
@@ -159,9 +162,11 @@ const onSubmit = () => {
   router.push({ name: 'ViewProject', params: { id: project.value?.id } })
 }
 
-function onInputChange(e) {
-  addFiles(e.target.files)
-  e.target.value = null
+function onInputChange(e: Event) {
+  if (e.target === null) throw new Error('Event wrongly dispatched')
+
+  addFiles((e.target as EventTarget & { files: File[], value: unknown }).files);
+  (e.target as EventTarget & { files: File[], value: unknown }).value = null
 }
 </script>
 
@@ -171,55 +176,30 @@ function onInputChange(e) {
 
     <p>Fülle bitte alle notwendigen Felder aus.</p>
 
-    <form @submit.prevent="onSubmit" class="form-input-group">
-      <GenericInput
-        v-for="input in inputs"
-        :key="input.id"
-        v-model="input.value.value"
-        :inputProps="input"
-      />
+    <form @submit.prevent="onSubmit" class="form-input-group" v-if="project">
+      <GenericInput v-for="input in inputs" :key="input.id" v-model="input.value.value" :inputProps="input" />
       <div :key="project.description" class="form-group p-2 input-box">
-        <label for="md" class="form-label-text"
-          >Projektbeschreibung<span v-show="true">*</span></label
-        >
+        <label for="md" class="form-label-text">Projektbeschreibung<span v-show="true">*</span></label>
         <MDEditor v-model="mdtext" />
-        <span v-show="!validateMandatory(mdtext)" class="text-danger"
-          >Dieses Feld ist Pflicht!<br
-        /></span>
+        <span v-show="!validateMandatory(mdtext)" class="text-danger">Dieses Feld ist Pflicht!<br /></span>
       </div>
 
       <div class="files p-2">
         <h3>Dateien</h3>
         <ul class="image-list p-2">
           <li v-for="mediaObject of project.media" :key="mediaObject.url">
-            <FilePreviewDownload
-              :filename="mediaObject.filename"
-              :filetype="mediaObject.fileType || 'notworking/nothing'"
-              :fileurl="`${
-                mediaObject.fileType ? `${origin}/api/files/download/` : ''
-              }${mediaObject.url}`"
-              :show-delete="true"
-              @delete="deleteFile"
-            />
+            <FilePreviewDownload :filename="mediaObject.filename"
+              :filetype="mediaObject.fileType || 'notworking/nothing'" :fileurl="`${mediaObject.fileType ? `${origin}/api/files/download/` : ''
+              }${mediaObject.url}`" :show-delete="true" @delete="deleteFile" />
           </li>
         </ul>
 
         <div class="m-4" v-show="project">
-          <DropZone
-            class="drop-area"
-            @files-dropped="addFiles"
-            #default="{ dropZoneActive }"
-          >
+          <DropZone class="drop-area" @files-dropped="addFiles" #default="{ dropZoneActive }">
             <label for="file-input">
               <ul v-show="files.length" class="image-list">
-                <FilePreviewUpload
-                  v-for="file of files"
-                  :key="file.id"
-                  :file="file"
-                  :delete-button="true"
-                  tag="li"
-                  @remove="removeFile"
-                />
+                <FilePreviewUpload v-for="file of files" :key="file.id" :file="file" :delete-button="true" tag="li"
+                  @remove="removeFile" />
               </ul>
 
               <span v-if="dropZoneActive">
@@ -228,37 +208,22 @@ function onInputChange(e) {
               </span>
               <span v-else>
                 <span>Ziehe hier deine Dateien rein</span>
-                <span class="smaller"
-                  >oder <strong>klicke hier</strong> um Dateien
-                  auszuwählen</span
-                >
+                <span class="smaller">oder <strong>klicke hier</strong> um Dateien
+                  auszuwählen</span>
               </span>
 
-              <input
-                type="file"
-                id="file-input"
-                multiple
-                @change="onInputChange"
-              />
+              <input type="file" id="file-input" multiple @change="onInputChange" />
             </label>
           </DropZone>
 
-          <GenericInput
-            :inputProps="forceUpload"
-            v-model="forceUpload.value.value"
-            v-show="showForceUpload"
-          />
+          <GenericInput :inputProps="forceUpload" v-model="forceUpload.value.value" v-show="showForceUpload" />
           <button class="upload-button" @click.prevent="clickUploadFiles()">
             Hochladen
           </button>
         </div>
       </div>
 
-      <input
-        type="submit"
-        value="Bearbeitung abschließen"
-        class="btn btn-success btn-lg"
-      />
+      <input type="submit" value="Bearbeitung abschließen" class="btn btn-success btn-lg" />
     </form>
 
     <p class="tiny-font">(*) sind Pflichtfelder.</p>
@@ -271,6 +236,7 @@ function onInputChange(e) {
   max-width: 800px;
   margin: 50px auto;
 }
+
 .image-list {
   display: flex;
   list-style: none;
@@ -288,6 +254,7 @@ function onInputChange(e) {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
   transition: 0.2s ease;
 }
+
 .drop-area[data-active='true'] {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
   background: #ffffffcc;
@@ -298,9 +265,11 @@ function onInputChange(e) {
   cursor: pointer;
   display: block;
 }
+
 .drop-area label span {
   display: block;
 }
+
 .drop-area label input[type='file']:not(:focus-visible) {
   position: absolute !important;
   width: 1px !important;
@@ -312,6 +281,7 @@ function onInputChange(e) {
   white-space: nowrap !important;
   border: 0 !important;
 }
+
 .drop-area label .smaller {
   font-size: 16px;
 }
@@ -329,6 +299,7 @@ function onInputChange(e) {
   color: #fff;
   text-transform: uppercase;
 }
+
 button {
   cursor: pointer;
 }

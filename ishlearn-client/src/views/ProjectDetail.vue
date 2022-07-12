@@ -60,34 +60,27 @@ watch(project, () => descriptionUpdate.value++)
 </script>
 
 <template>
-  <div
-    class="row p-1"
-    v-if="
-      project &&
-      'title' in project &&
-      'createDate' in project &&
-      typeof project.createDate !== 'undefined' &&
-      'updatedDate' in project &&
-      typeof project.updatedDate !== 'undefined'
-    "
-  >
+  <div class="row p-1" v-if="
+    project &&
+    'title' in project &&
+    'createDate' in project &&
+    typeof project.createDate !== 'undefined' &&
+    'updatedDate' in project &&
+    typeof project.updatedDate !== 'undefined'
+  ">
     <div class="col-lg-9">
       <div class="box-background m-1 p-3">
         <h2 class="pos-rel">
           {{ project.title }}
-          <span v-if="editPermission" class="put-right"
-            ><IconEye
-              v-if="project.visibility === Visibility.PUBLIC"
-              class="icon" /><IconEyeSlash v-else class="icon"
-          /></span>
+          <span v-if="editPermission" class="put-right">
+            <IconEye v-if="project.visibility === Visibility.PUBLIC" class="icon" />
+            <IconEyeSlash v-else class="icon" />
+          </span>
         </h2>
 
         <h4 class="pos-rel">
           Dateien in dem Projekt
-          <router-link
-            v-if="editPermission"
-            :to="{ name: 'UpdateProject', params: { id: project.id } }"
-          >
+          <router-link v-if="editPermission" :to="{ name: 'UpdateProject', params: { id: project.id } }">
             <button class="btn btn-sm btn-secondary edit-button">
               Bearbeiten
             </button>
@@ -98,32 +91,21 @@ watch(project, () => descriptionUpdate.value++)
         </h4>
 
         <div>
-          <ul
-            class="image-list"
-            v-if="
-              mediaMetaFetchingFinished &&
-              project.media &&
-              project.media.length > 0
-            "
-          >
+          <ul class="image-list" v-if="
+            mediaMetaFetchingFinished &&
+            project.media &&
+            project.media.length > 0
+          ">
             <li v-for="mediaObject of project.media" :key="mediaObject.url">
-              <FilePreviewDownload
-                :filename="mediaObject.filename"
-                :filetype="mediaObject.fileType || 'notworking/nothing'"
-                :fileurl="`${
-                  mediaObject.fileType ? `${origin}/api/files/download/` : ''
-                }${mediaObject.url}`"
-                :show-delete="false"
-              />
+              <FilePreviewDownload :filename="mediaObject.filename"
+                :filetype="mediaObject.fileType || 'notworking/nothing'" :fileurl="`${mediaObject.fileType ? `${origin}/api/files/download/` : ''
+                }${mediaObject.url}`" :show-delete="false" />
             </li>
           </ul>
           <h6 v-else>Es gibt in diesem Projekt keine Dateien.</h6>
         </div>
 
-        <span
-          v-if="descriptionFetchingFinished && project.description"
-          :key="descriptionUpdate"
-        >
+        <span v-if="descriptionFetchingFinished && project.description" :key="descriptionUpdate">
           <MDPreview :text-to-display="project.description"></MDPreview>
         </span>
       </div>
@@ -134,19 +116,13 @@ watch(project, () => descriptionUpdate.value++)
         <h4 class="info-box-title info-box-heading">{{ project.title }}</h4>
         <p class="info-box-heading">Erstellt am</p>
         <p class="info-box-content">
-          {{ formatDate(project.createDate) }} (<router-link
-            v-if="creator"
-            :to="{ name: 'UserDetail', params: { id: creator.id } }"
-            >{{ creator.firstName }}</router-link
-          >)
+          {{ formatDate(project.createDate) }} (<router-link v-if="creator"
+            :to="{ name: 'UserDetail', params: { id: creator.id } }">{{ creator.firstName }}</router-link>)
         </p>
         <p class="info-box-heading">Letzte Änderung</p>
         <p class="info-box-content">
-          {{ formatDate(project.updatedDate) }} (<router-link
-            v-if="updater"
-            :to="{ name: 'UserDetail', params: { id: updater.id } }"
-            >{{ updater.firstName }}</router-link
-          >)
+          {{ formatDate(project.updatedDate) }} (<router-link v-if="updater"
+            :to="{ name: 'UserDetail', params: { id: updater.id } }">{{ updater.firstName }}</router-link>)
         </p>
       </div>
       <div class="box-background info-box m-1 p-2">
@@ -176,9 +152,11 @@ watch(project, () => descriptionUpdate.value++)
   align-content: left;
   text-align: left;
 }
+
 .info-box-title {
   font-size: 24px;
 }
+
 .info-box-heading {
   font-weight: bold;
   margin-bottom: 0px;
@@ -190,6 +168,7 @@ watch(project, () => descriptionUpdate.value++)
   flex-wrap: wrap;
   padding: 0;
 }
+
 .icon {
   height: 2rem;
   width: 2rem;

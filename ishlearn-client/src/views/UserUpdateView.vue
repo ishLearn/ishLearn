@@ -61,7 +61,7 @@ const fillUser = async () => {
     return false
   }
 
-  if (!user.user) return false
+  if (!user.user || user.user.lastName === null || user.user.birthday === null || user.user.profileText === null) return false
 
   inputs.firstName.value.value = user.user.firstName
   inputs.lastName.value.value = user.user.lastName
@@ -79,7 +79,7 @@ onUpdated(() => {
 const onSignup = async (e: Event) => {
   e.preventDefault()
 
-  if (!user.user) router.push({ name: 'UserLogin', query: { redirect: router.currentRoute.value.path } })
+  if (user.user === null) return router.push({ name: 'UserLogin', query: { redirect: router.currentRoute.value.path } })
 
   console.log('Textarea')
   console.log(inputs.profileText.value.value)
@@ -96,7 +96,7 @@ const onSignup = async (e: Event) => {
 
   try {
     if (
-      inputs.firstName.value.value !== user.user?.firstName ||
+      inputs.firstName.value.value !== user.user.firstName ||
       inputs.lastName.value.value !== user.user.lastName
     ) {
       console.log('Name was changed')
@@ -116,7 +116,7 @@ const onSignup = async (e: Event) => {
           console.log(err)
         })
     }
-    if (inputs.birthday.value.value !== toYYYYMMDD(new Date(user.user.birthday))) {
+    if (user.user.birthday !== null && inputs.birthday.value.value !== toYYYYMMDD(new Date(user.user.birthday))) {
       console.log('Date has changed')
       api
         .put('/users/birthday', {
@@ -160,12 +160,8 @@ const onSignup = async (e: Event) => {
 
 <template>
   <div>
-    <SmallForm
-      :title="`Account bearbeiten`"
-      :inputs="{ ...inputs }"
-      :submitMessage="'Bearbeitung abschließen'"
-      @onSubmit="onSignup"
-    >
+    <SmallForm :title="`Account bearbeiten`" :inputs="{ ...inputs }" :submitMessage="'Bearbeitung abschließen'"
+      @onSubmit="onSignup">
       <template #subtitle>
         <p>Hier kannst du deinen Account Bearbeiten</p>
       </template>
@@ -176,4 +172,5 @@ const onSignup = async (e: Event) => {
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+</style>

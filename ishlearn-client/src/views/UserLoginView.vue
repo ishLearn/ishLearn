@@ -1,8 +1,11 @@
 <script setup lang="ts">
+// Node Modules
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
+import { Store } from 'pinia'
+// Utilities
 import AuthService from '@/services/auth.service'
-import useUser from '@/store/auth.module'
+import useUser, { UserStoreState } from '@/store/auth.module'
 import router from '@/router'
 import { validateEmail, validatePasswort, validateMandatory } from '@/util/inputValidation'
 import { GenericInputs } from '@/types/GenericInputData'
@@ -32,7 +35,8 @@ const inputs: GenericInputs<string> = {
 }
 
 const redirectPath: string = useRoute().query.redirect as string
-const redirect = (standard: { name: string; params: { [key: string]: string } | null }) => {
+const redirect = (standard: { name: string; params?: { [key: string]: string | undefined } }) => {
+
   try {
     router.push({ path: redirectPath || '/' })
   } catch (err) {
@@ -43,7 +47,7 @@ const redirect = (standard: { name: string; params: { [key: string]: string } | 
 }
 onMounted(() => {
   if (user.status.loggedIn) {
-    redirect({ name: 'UserDetail', params: { id: user.user.id } })
+    redirect({ name: 'UserDetail', params: { id: user.user?.id } })
   }
 })
 const onSignup = async (e: Event) => {
@@ -97,11 +101,13 @@ const onSignup = async (e: Event) => {
 .forms-small {
   max-width: 540px;
 }
+
 [data-theme='light'] .forms-small {
   background-color: white;
   border: 1px solid lightgrey;
   border-radius: 5px;
 }
+
 [data-theme='dark'] .forms-small {
   background-color: rgba(0, 0, 0, 0.4);
   border: 1px solid rgba(0, 0, 0, 0.6);
