@@ -1,27 +1,44 @@
 <template>
   <component :is="tag" class="file-preview">
-    <FileDisplay :filename="file.file.name" :filetype="file.file.type" :fileurl="file.url" />
+    <FileDisplay
+      :filename="file.file.name"
+      :filetype="file.file.type"
+      :fileurl="file.url"
+    />
 
-    <button @click.prevent="$emit('remove', file)" class="close-icon" aria-label="Entfernen">
+    <button
+      @click.prevent="$emit('remove', file)"
+      class="close-icon"
+      aria-label="Entfernen"
+    >
       X
     </button>
 
-    <span class="status-indicator loading-indicator" v-show="file.status === 'loading'"
+    <span
+      class="status-indicator loading-indicator"
+      v-show="file.status === 'loading'"
       >In Progress</span
     >
-    <span class="status-indicator success-indicator" v-show="file.status === true">Uploaded</span>
-    <span class="status-indicator failure-indicator" v-show="file.status === false">Error</span>
+    <span
+      class="status-indicator success-indicator"
+      v-show="file.status === true"
+      >Uploaded</span
+    >
+    <span
+      class="status-indicator failure-indicator"
+      v-show="file.status === false"
+      >Error</span
+    >
   </component>
 </template>
 
 <script setup lang="ts">
-import axios from 'axios'
 import { UploadableFile } from '@/util/file-list'
 import FileDisplay from '@/components/FileDisplayIcon.vue'
 
 defineEmits(['remove'])
 
-const props = defineProps({
+defineProps({
   file: { type: UploadableFile, required: true },
   tag: { type: String, default: 'li' },
 })

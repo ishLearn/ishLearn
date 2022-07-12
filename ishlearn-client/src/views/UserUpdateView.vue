@@ -1,15 +1,15 @@
 <script setup lang="ts">
+// Node Modules
 import { onMounted, onUpdated, ref } from 'vue'
-import AuthService from '@/services/auth.service'
+// Own utilities
 import api from '@/services/api'
 import { GenericInputs } from '@/types/GenericInputData'
-import SmallForm from '@/components/SmallForm.vue'
 import router from '@/router'
-import { validateEmail, validatePasswort, validateMandatory } from '@/util/inputValidation'
-import { useRoute } from 'vue-router'
+import { validateMandatory } from '@/util/inputValidation'
 import useUser from '@/store/auth.module'
 import { toYYYYMMDD } from '@/util/dateUtils'
-import useCounterStore from '@/store/counter'
+// Vue components
+import SmallForm from '@/components/SmallForm.vue'
 
 const user = useUser()
 
@@ -76,7 +76,6 @@ onUpdated(() => {
   fillUser()
 })
 
-const query = useRoute().query
 const onSignup = async (e: Event) => {
   e.preventDefault()
 
@@ -106,11 +105,15 @@ const onSignup = async (e: Event) => {
           firstName: inputs.firstName.value.value,
           lastName: inputs.lastName.value.value,
         })
-        .then((res) => {
+        .then(() => {
           if (user.user) {
             user.user.firstName = inputs.firstName.value.value
             user.user.lastName = inputs.lastName.value.value
           }
+        }).catch((err: unknown) => {
+          // TODO: Error handling
+          console.log('TODO: Error Handling')
+          console.log(err)
         })
     }
     if (inputs.birthday.value.value !== toYYYYMMDD(new Date(user.user.birthday))) {
@@ -119,16 +122,24 @@ const onSignup = async (e: Event) => {
         .put('/users/birthday', {
           birthday: inputs.birthday.value.value,
         })
-        .then((res) => {
+        .then(() => {
           useUser().initUser()
+        }).catch((err: unknown) => {
+          // TODO: Error handling
+          console.log('TODO: Error Handling')
+          console.log(err)
         })
     }
     if (inputs.profileText.value.value !== user.user?.profileText) {
       console.log('Profile Text has changed')
-      api.put('/users/profile/text/', { text: inputs.profileText.value.value }).then((res) => {
+      api.put('/users/profile/text/', { text: inputs.profileText.value.value }).then(() => {
         if (user.user) {
           user.user.profileText = inputs.profileText.value.value
         }
+      }).catch((err: unknown) => {
+        // TODO: Error handling
+        console.log('TODO: Error Handling')
+        console.log(err)
       })
     }
   } catch (err) {
@@ -138,7 +149,7 @@ const onSignup = async (e: Event) => {
     return
   }
   try {
-    router.push({ name: 'UserDetail', params: { id: user.user.id } })
+    router.push({ name: 'UserDetail', params: { id: user.user?.id || '404' } })
   } catch (err) {
     console.log('Fehler beim redirect.')
     console.log(err)

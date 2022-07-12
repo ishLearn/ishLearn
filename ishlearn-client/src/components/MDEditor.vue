@@ -1,6 +1,6 @@
 <!-- GenericInput.vue -->
 <script setup lang="ts">
-import { defineProps, defineEmits, ref, Ref, onMounted, onUpdated, watch } from 'vue'
+import { defineProps, defineEmits, ref, Ref, onMounted } from 'vue'
 
 const markdownOption = {
   bold: true,

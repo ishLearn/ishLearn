@@ -48,14 +48,13 @@ Das ist mir nachträglich aufgefallen, was falsch ist.
 - Buch 2
 `)
 
-const onSubmit = (_event: Event) => {
+const onSubmit = () => {
   console.log('Submitted')
 
   if (!user.status.loggedIn) {
     alert('Du musst eingeloggt sein, um ein Proejekt zu erstellen!')
     return
   }
-  const userId = user.user?.id
 
   if (
     !Object.keys(inputs).reduce((result, k) => {
@@ -118,10 +117,15 @@ const onSubmit = (_event: Event) => {
         </div>
 
         <div class="m-2 p-2">
-          Dateien kannst du später zu deinem Projekt hinzufügen, wenn du es erstellt hast.
+          Dateien kannst du später zu deinem Projekt hinzufügen, wenn du es
+          erstellt hast.
         </div>
 
-        <input type="submit" value="Projekt erstellen" class="btn btn-success" />
+        <input
+          type="submit"
+          value="Projekt erstellen"
+          class="btn btn-success"
+        />
       </form>
 
       <p class="tiny-font">(*) sind Pflichtfelder.</p>

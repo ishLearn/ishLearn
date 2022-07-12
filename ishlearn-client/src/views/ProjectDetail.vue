@@ -9,14 +9,9 @@ import { getUser, setEditPermission } from '@/util/getUser'
 import { User } from '@/types/Users'
 import { Product, Visibility } from '@/types/Products'
 import { formatDate } from '@/util/dateUtils'
-import useFileList from '@/util/file-list'
-import { uploadFiles } from '@/util/file-uploader'
-import api from '@/services/api'
 // Vue imports
-import DropZone from '@/components/DropZone.vue'
 import MDPreview from '@/components/MDPreview.vue'
 import FilePreviewDownload from '@/components/FilePreviewDownload.vue'
-import FilePreviewUpload from '@/components/FilePreviewUpload.vue'
 import IconEye from '@/icons/IconEye.vue'
 import IconEyeSlash from '../icons/IconEyeSlash.vue'
 
@@ -81,9 +76,9 @@ watch(project, () => descriptionUpdate.value++)
         <h2 class="pos-rel">
           {{ project.title }}
           <span v-if="editPermission" class="put-right"
-            ><IconEye v-if="project.visibility === Visibility.PUBLIC" class="icon" /><IconEyeSlash
-              v-else
-              class="icon"
+            ><IconEye
+              v-if="project.visibility === Visibility.PUBLIC"
+              class="icon" /><IconEyeSlash v-else class="icon"
           /></span>
         </h2>
 
@@ -96,7 +91,9 @@ watch(project, () => descriptionUpdate.value++)
             <button class="btn btn-sm btn-secondary edit-button">
               Bearbeiten
             </button>
-            <button class="btn btn-sm btn-secondary put-right">Bearbeiten</button>
+            <button class="btn btn-sm btn-secondary put-right">
+              Bearbeiten
+            </button>
           </router-link>
         </h4>
 
@@ -113,9 +110,9 @@ watch(project, () => descriptionUpdate.value++)
               <FilePreviewDownload
                 :filename="mediaObject.filename"
                 :filetype="mediaObject.fileType || 'notworking/nothing'"
-                :fileurl="`${mediaObject.fileType ? `${origin}/api/files/download/` : ''}${
-                  mediaObject.url
-                }`"
+                :fileurl="`${
+                  mediaObject.fileType ? `${origin}/api/files/download/` : ''
+                }${mediaObject.url}`"
                 :show-delete="false"
               />
             </li>
@@ -158,7 +155,9 @@ watch(project, () => descriptionUpdate.value++)
       </div>
 
       <div class="box-background info-box m-1 p-2">
-        <h4 class="info-box-title info-box-heading">Projekte, die dich interessieren könnten</h4>
+        <h4 class="info-box-title info-box-heading">
+          Projekte, die dich interessieren könnten
+        </h4>
         <p>Coming soon...</p>
       </div>
     </div>
@@ -166,8 +165,8 @@ watch(project, () => descriptionUpdate.value++)
   <div v-else-if="unableToLoad" class="m-2 p-3 alert alert-danger">
     <h2>Dieses Projekt scheint nicht zu existieren</h2>
     <p>
-      Entweder ist die URL falsch und das Projekt existiert nicht, oder es ist inzwischen vom
-      Besitzer auf privat gestellt worden.
+      Entweder ist die URL falsch und das Projekt existiert nicht, oder es ist
+      inzwischen vom Besitzer auf privat gestellt worden.
     </p>
   </div>
 </template>
@@ -183,8 +182,6 @@ watch(project, () => descriptionUpdate.value++)
 .info-box-heading {
   font-weight: bold;
   margin-bottom: 0px;
-}
-.info-box-content {
 }
 
 .image-list {

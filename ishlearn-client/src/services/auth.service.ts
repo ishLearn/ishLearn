@@ -38,13 +38,13 @@ class AuthService {
 
   static async logout() {
     try {
-      const response = (await api.post('/auth/signout/', { refreshToken: store.refreshKey?.token }))
-        .data
+      return (await api.post('/auth/signout/', { refreshToken: store.refreshKey?.token })).data
     } catch (err) {
       console.log('Error during log out')
       console.log(err)
+    } finally {
+      store.removeUser()
     }
-    store.removeUser()
   }
 
   static async register({

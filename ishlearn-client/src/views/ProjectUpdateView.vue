@@ -13,7 +13,6 @@ import { setEditPermission } from '@/util/getUser'
 import { Product, Visibility } from '@/types/Products'
 
 import { GenericInputData, GenericInputs } from '@/types/GenericInputData'
-import GenericInput from '@/components/GenericInput.vue'
 
 import { validateMandatory } from '@/util/inputValidation'
 // Vue components
@@ -131,7 +130,7 @@ onMounted(async () => {
   }
 })
 
-const onSubmit = (_event: Event) => {
+const onSubmit = () => {
   if (
     inputs.title.value.value !== project.value?.title ||
     inputs.visibility.value.value !== project.value.visibility

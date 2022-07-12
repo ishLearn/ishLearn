@@ -1,11 +1,10 @@
 <!-- ProductPreview.vue -->
 <script setup lang="ts">
-import { defineProps, onMounted, ref, Ref } from 'vue'
+import { defineProps, ref, Ref } from 'vue'
 import { formatDate } from '@/util/dateUtils'
-import { getUser, setEditPermission } from '@/util/getUser'
+import { getUser } from '@/util/getUser'
 import useUser, { UserStoreState } from '@/store/auth.module'
 import { Store } from 'pinia'
-import api from '@/services/api'
 import { User } from '@/types/Users'
 import { Visibility } from '@/types/Products'
 import IconEye from '@/icons/IconEye.vue'
@@ -32,7 +31,8 @@ getUser(creator, props.project.createdBy)
 <template>
   <div class="media box-background rounded shadow m-2 pos-rel">
     <span v-show="mayEdit" class="info-visibility p-1 put-right put-up"
-      ><IconEye v-if="project.visibility === Visibility.PUBLIC" /><IconEyeSlash v-else
+      ><IconEye v-if="project.visibility === Visibility.PUBLIC" /><IconEyeSlash
+        v-else
     /></span>
     <div class="heading">
       <h4>{{ project.title }}</h4>

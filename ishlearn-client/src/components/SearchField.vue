@@ -12,7 +12,7 @@ const submitSearchDebounce = debounce(() => {
   emit('submitSearch', searchText.value)
 }, 250)
 
-watch(searchText, (newV, oldV) => {
+watch(searchText, () => {
   submitSearchDebounce()
 })
 </script>

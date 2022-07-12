@@ -5,7 +5,6 @@ import api from '@/services/api'
 import useUser, { UserStoreState } from '@/store/auth.module'
 import ShowAllProducts from '@/components/ShowAllProducts.vue'
 import SearchField from '@/components/SearchField.vue'
-import IconSearch from '@/icons/IconSearch.vue'
 import IconPlus from '@/icons/IconPlus.vue'
 
 const user: Store<'user', UserStoreState> = useUser()
