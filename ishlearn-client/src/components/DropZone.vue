@@ -1,11 +1,6 @@
 <template>
-  <div
-    :data-active="active"
-    @dragenter.prevent="setActive"
-    @dragover.prevent="setActive"
-    @dragleave.prevent="setInactive"
-    @drop.prevent="onDrop"
-  >
+  <div :data-active="active" @dragenter.prevent="setActive" @dragover.prevent="setActive"
+    @dragleave.prevent="setInactive" @drop.prevent="onDrop">
     <slot :dropZoneActive="active"></slot>
   </div>
 </template>
@@ -15,10 +10,10 @@ import { ref, onMounted, onUnmounted } from 'vue'
 const emit = defineEmits(['files-dropped'])
 
 const active = ref(false)
-let inActiveTimeout = null
+let inActiveTimeout: number | null = null
 const setActive = () => {
   active.value = true
-  clearTimeout(inActiveTimeout)
+  if (inActiveTimeout !== null) clearTimeout(inActiveTimeout)
 }
 const setInactive = () => {
   inActiveTimeout = setTimeout(() => {
@@ -26,12 +21,12 @@ const setInactive = () => {
   }, 50)
 }
 
-function onDrop(e) {
+function onDrop(e: Event) {
   setInactive()
-  emit('files-dropped', [...e.dataTransfer.files])
+  emit('files-dropped', [...(e as Event & { dataTransfer: { files: File[] } }).dataTransfer.files])
 }
 
-function preventDefaults(e) {
+function preventDefaults(e: Event) {
   e.preventDefault()
 }
 

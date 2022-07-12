@@ -100,9 +100,10 @@ const clickUploadFiles = async () => {
 
     showForceUpload.value = false
   } catch (err: unknown) {
+    console.log('Axios?')
     if (!isAxiosError(err)) return 'Error code could not be found.'
 
-    if (String(err.status) === String(400) || String(JSON.parse(JSON.stringify(err)).status) === String(400)) {
+    if (String(err.status || err.response?.status) === String(400)) {
       showForceUpload.value = true
       return 'Could not upload files, force?'
     } else return `Error with code > 400: ${err.status}`
