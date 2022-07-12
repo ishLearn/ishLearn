@@ -52,7 +52,7 @@ const onSubmit = () => {
   console.log('Submitted')
 
   if (!user.status.loggedIn) {
-    alert('Du musst eingeloggt sein, um ein Proejekt zu erstellen!')
+    alert('Du musst eingeloggt sein, um ein Projekt zu erstellen!')
     return
   }
 
@@ -99,33 +99,19 @@ const onSubmit = () => {
       <p>Fülle bitte alle notwendigen Felder aus.</p>
 
       <form @submit.prevent="onSubmit" class="form-input-group">
-        <GenericInput
-          v-for="input in inputs"
-          :key="input.id"
-          v-model="input.value.value"
-          :inputProps="input"
-        />
+        <GenericInput v-for="input in inputs" :key="input.id" v-model="input.value.value" :inputProps="input" />
 
         <div class="form-group p-2 input-box">
-          <label for="md" class="form-label-text"
-            >Projektbeschreibung<span v-show="true">*</span></label
-          >
+          <label for="md" class="form-label-text">Projektbeschreibung<span v-show="true">*</span></label>
           <MDEditor v-model="mdtext" />
-          <span v-show="!validateMandatory(mdtext)" class="text-danger"
-            >Dieses Feld ist Pflicht!<br
-          /></span>
+          <span v-show="!validateMandatory(mdtext)" class="text-danger">Dieses Feld ist Pflicht!<br /></span>
         </div>
 
         <div class="m-2 p-2">
-          Dateien kannst du später zu deinem Projekt hinzufügen, wenn du es
-          erstellt hast.
+          Dateien kannst du später zu deinem Projekt hinzufügen, wenn du es erstellt hast.
         </div>
 
-        <input
-          type="submit"
-          value="Projekt erstellen"
-          class="btn btn-success"
-        />
+        <input type="submit" value="Projekt erstellen" class="btn btn-success" />
       </form>
 
       <p class="tiny-font">(*) sind Pflichtfelder.</p>
@@ -137,6 +123,7 @@ const onSubmit = () => {
 .input-box {
   margin: 30px 0px;
 }
+
 .form-label-text {
   display: block;
   margin: 10px 0px;
