@@ -51,17 +51,17 @@
 <script setup lang="ts">
 import axios from 'axios'
 import { ref, Ref } from 'vue'
-import IconEarmarkZip from '@/icons/IconEarmarkZip'
-import IconFileEarmark from '@/icons/IconFileEarmark'
-import IconFileEarmarkCode from '@/icons/IconFileEarmarkCode'
+import IconEarmarkZip from '@/icons/IconEarmarkZip.vue'
+import IconFileEarmark from '@/icons/IconFileEarmark.vue'
+import IconFileEarmarkCode from '@/icons/IconFileEarmarkCode.vue'
 import IconFileEarmarkImage from '@/icons/IconFileEarmarkImage.vue'
-import IconFileEarmarkPdf from '@/icons/IconFileEarmarkPdf'
-import IconFileEarmarkMusic from '@/icons/IconFileEarmarkMusic'
-import IconFileEarmarkPlay from '@/icons/IconFileEarmarkPlay'
-import IconFileEarmarkSlides from '@/icons/IconFileEarmarkSlides'
-import IconFileEarmarkSpreadsheet from '@/icons/IconFileEarmarkSpreadsheet'
-import IconFileEarmarkText from '@/icons/IconFileEarmarkText'
-import IconFileEarmarkWord from '@/icons/IconFileEarmarkWord'
+import IconFileEarmarkPdf from '@/icons/IconFileEarmarkPdf.vue'
+import IconFileEarmarkMusic from '@/icons/IconFileEarmarkMusic.vue'
+import IconFileEarmarkPlay from '@/icons/IconFileEarmarkPlay.vue'
+import IconFileEarmarkSlides from '@/icons/IconFileEarmarkSlides.vue'
+import IconFileEarmarkSpreadsheet from '@/icons/IconFileEarmarkSpreadsheet.vue'
+import IconFileEarmarkText from '@/icons/IconFileEarmarkText.vue'
+import IconFileEarmarkWord from '@/icons/IconFileEarmarkWord.vue'
 
 const props = defineProps(['filename', 'filetype', 'fileurl'])
 
