@@ -2,32 +2,41 @@ import { Request, Response, NextFunction } from 'express'
 import jwt from 'jsonwebtoken'
 import User from '../models/User'
 import { UserRecord } from '../types/users'
+import Logger from '../utils/Logger'
 
 export const authMiddleware = async (
   req: Request,
   res: Response<{}, UserRecord>,
   next: NextFunction
 ) => {
-  // Get access token and user
-  if (
-    handleAuthAccessHeader(req, res) &&
-    typeof res.locals.accessToken !== 'undefined'
-  ) {
-    const verified = jwt.verify(
-      res.locals.accessToken,
-      process.env.ACCESS_TOKEN_JWT_SECRET || ''
-    )
-    if (verified) {
-      const decoded = jwt.decode(res.locals.accessToken) as { id: string }
+  try {
+    // Get access token and user
+    if (
+      handleAuthAccessHeader(req, res) &&
+      typeof res.locals.accessToken !== 'undefined'
+    ) {
+      const verified = jwt.verify(
+        res.locals.accessToken,
+        process.env.ACCESS_TOKEN_JWT_SECRET || ''
+      )
+      if (verified) {
+        const decoded = jwt.decode(res.locals.accessToken) as { id: string }
 
-      if (decoded !== null)
-        res.locals.user = await User.getFullUserById(decoded.id) // Check if decoded or decoded.id
+        if (decoded !== null)
+          res.locals.user = await User.getFullUserById(decoded.id) // Check if decoded or decoded.id
+      }
+      if (!res.locals.user) res.locals.wrongToken = true
+      else res.locals.wrongToken = false
     }
-    if (!res.locals.user) res.locals.wrongToken = true
-    else res.locals.wrongToken = false
+  } catch (err) {
+    new Logger().error(
+      `Authenticate User`,
+      'Get Access Token (JWT): ${res.locals.accessToken}',
+      err
+    )
   }
   // Handle unauthenticated
-  if (!res.locals.user) res.locals.unauthenticated = true
+  if (typeof res.locals.user === 'undefined') res.locals.unauthenticated = true
   else res.locals.unauthenticated = false
 
   // Get potential refresh token
