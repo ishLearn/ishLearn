@@ -17,11 +17,9 @@
 </template>
 
 <script setup lang="ts">
-import axios from 'axios'
-
-import { UploadableFile } from '@/util/file-list'
 import FileDisplayIcon from '@/components/FileDisplayIcon.vue'
 import api from '@/services/api';
+import { AxiosResponse } from 'axios';
 
 const props = defineProps({
   filename: { type: String, required: true },
@@ -43,7 +41,7 @@ function downloadFile() {
     method: isHttp ? 'GET' : 'POST',
     responseType: 'blob',
     data: !isHttp ? { filename: props.fileurl } : {},
-  }).then((res) => {
+  }).then((res: AxiosResponse<any, any>) => {
     console.log(res.data)
     const fileURL = window.URL.createObjectURL(new Blob([res.data]))
     const fileLink = document.createElement('a')

@@ -1,7 +1,7 @@
 <!-- GenericInput.vue -->
 <script setup lang="ts">
 // eslint-disable-next-line
-import { defineProps, defineEmits, watch, ref, onMounted } from 'vue'
+import { defineProps, defineEmits, watch, ref, onMounted, onUpdated } from 'vue'
 import { validateEmail, validatePasswort, validateMandatory } from '@/util/inputValidation'
 
 const props = defineProps(['modelValue', 'inputProps'])
@@ -26,11 +26,21 @@ if (props.inputProps.type === 'email') {
   })
 }
 onMounted(() => {
-  if (props.inputProps.type === 'checkbox') {
-    document.getElementById(props.inputProps.id).defaultChecked = props.modelValue
+  const el = document.getElementById(props.inputProps.id)
+  if (props.inputProps.type === 'checkbox' && el !== null) {
+    el.defaultChecked = props.modelValue
   }
 })
-const customEmit = (event) => {
+onUpdated(() => {
+  const el = document.getElementById(props.inputProps.id)
+  console.log('Updte')
+  console.log(props.modelValue)
+  if (props.inputProps.type === 'checkbox' && el !== null) {
+    el.checked = props.modelValue
+  }
+})
+
+const customEmit = (event: Event) => {
   if (props.inputProps.type === 'checkbox') {
     emit('update:modelValue', !props.inputProps.value.value)
   } else {
@@ -48,7 +58,9 @@ const customEmit = (event) => {
     <label
       :for="inputProps.id"
       :class="`${
-        inputProps.type === 'checkbox' ? 'form-check-label form-label-check' : 'form-label-text'
+        inputProps.type === 'checkbox'
+          ? 'form-check-label form-label-check'
+          : 'form-label-text'
       }`"
       >{{ inputProps.label }}<span v-show="inputProps.mandatory">*</span>
     </label>
@@ -79,11 +91,15 @@ const customEmit = (event) => {
           : 'form-control text-input text-oneline-height'
       }`"
     />
-    <span v-show="mandWarn" class="text-danger">Dieses Feld ist Pflicht!<br /></span>
+    <span v-show="mandWarn" class="text-danger"
+      >Dieses Feld ist Pflicht!<br
+    /></span>
     <span v-show="pwdLengthWarn" class="text-danger"
       >Das Passwort muss mindestens 8 Zeichen lang sein.<br
     /></span>
-    <span v-show="emailWarn" class="text-danger">Bitte gib eine korrekte Email ein.<br /></span>
+    <span v-show="emailWarn" class="text-danger"
+      >Bitte gib eine korrekte Email ein.<br
+    /></span>
   </div>
 </template>
 

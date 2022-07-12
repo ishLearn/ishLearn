@@ -5,11 +5,11 @@ import api from '@/services/api'
 import { Store } from 'pinia'
 import { useRoute } from 'vue-router'
 import router from '@/router'
-import useFileList from '@/util/file-list'
+import useFileList, { UploadableFile } from '@/util/file-list'
 import { uploadFiles } from '@/util/file-uploader'
 import { setEditPermission } from '@/util/getUser'
 import { Product, Visibility } from '@/types/Products'
-import { GenericInputs } from '@/types/GenericInputData'
+import { GenericInputData, GenericInputs } from '@/types/GenericInputData'
 import GenericInput from '@/components/GenericInput.vue'
 import { validateMandatory } from '@/util/inputValidation'
 import MDEditor from '@/components/MDEditor.vue'
@@ -50,7 +50,7 @@ const project: Ref<Product | null> = ref(null)
 const mdtext: Ref<string> = ref('')
 const editPermission: Ref<boolean> = ref(false)
 
-const forceUpload = {
+const forceUpload: GenericInputData<boolean> = {
   value: ref(false),
   type: 'checkbox',
   label: `Eine Datei mit dem oder einem ähnlichen Namen existiert bereits. 
@@ -81,14 +81,23 @@ const loadUser = async () => {
 }
 
 const clickUploadFiles = async () => {
+  // Filter already uploaded files
+  const filesToUpload = files.value.filter((f: UploadableFile) => f.status !== 'loading' && f.status !== true)
+  console.log(filesToUpload)
+  // Try uploading 
   try {
     if (!project.value?.id) {
       return 'New Files or Project not defined'
     }
-    await uploadFiles(files.value, project.value.id, forceUpload.value.value)
-  } catch (err) {
-    showForceUpload.value = true
-    return 'Could not upload files, force?'
+    await uploadFiles(filesToUpload, project.value.id, forceUpload.value.value)
+    forceUpload.value.value = false
+
+    showForceUpload.value = false
+  } catch (err: any) {
+    if (err.status === 400 || JSON.parse(JSON.stringify(err)).status === 400) {
+      showForceUpload.value = true
+      return 'Could not upload files, force?'
+    } else return `Error with code > 400: ${err.status}`
   }
 }
 
