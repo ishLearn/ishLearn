@@ -26,17 +26,15 @@ if (props.inputProps.type === 'email') {
   })
 }
 onMounted(() => {
-  const el = document.getElementById(props.inputProps.id)
+  const el: HTMLElement | null = document.getElementById(props.inputProps.id)
   if (props.inputProps.type === 'checkbox' && el !== null) {
-    el.defaultChecked = props.modelValue
+    (el as HTMLInputElement).defaultChecked = props.modelValue
   }
 })
 onUpdated(() => {
   const el = document.getElementById(props.inputProps.id)
-  console.log('Updte')
-  console.log(props.modelValue)
   if (props.inputProps.type === 'checkbox' && el !== null) {
-    el.checked = props.modelValue
+    (el as HTMLInputElement).checked = props.modelValue
   }
 })
 
@@ -50,56 +48,27 @@ const customEmit = (event: Event) => {
 </script>
 
 <template>
-  <div
-    :class="`form-group p-2 input-box ${
-      inputProps.type === 'checkbox' ? 'form control-check' : ''
-    }`"
-  >
-    <label
-      :for="inputProps.id"
-      :class="`${
-        inputProps.type === 'checkbox'
-          ? 'form-check-label form-label-check'
-          : 'form-label-text'
-      }`"
-      >{{ inputProps.label }}<span v-show="inputProps.mandatory">*</span>
+  <div :class="`form-group p-2 input-box ${inputProps.type === 'checkbox' ? 'form control-check' : ''
+  }`">
+    <label :for="inputProps.id" :class="`${inputProps.type === 'checkbox'
+    ? 'form-check-label form-label-check'
+    : 'form-label-text'
+    }`">{{ inputProps.label }}<span v-show="inputProps.mandatory">*</span>
     </label>
     <!-- Special input type: textarea -->
-    <textarea
-      v-if="inputProps.type == 'textarea'"
-      :id="inputProps.id"
-      :name="inputProps.name"
-      :placeholder="inputProps.placeholder"
-      :value="modelValue"
-      rows="4"
-      @input="$emit('update:modelValue', $event.target?.value)"
-      class="form-control text-input"
-    >
+    <textarea v-if="inputProps.type == 'textarea'" :id="inputProps.id" :name="inputProps.name"
+      :placeholder="inputProps.placeholder" :value="modelValue" rows="4"
+      @input="$emit('update:modelValue', $event.target?.value)" class="form-control text-input">
     </textarea>
     <!-- Normal inputs (text, password, email, date, checkbox ) -->
-    <input
-      v-else
-      :type="inputProps.type"
-      :id="inputProps.id"
-      :name="inputProps.name"
-      :placeholder="inputProps.placeholder"
-      :value="modelValue"
-      @input="customEmit($event)"
-      :class="`${
-        inputProps.type === 'checkbox'
-          ? 'form-check-input input-control-check'
-          : 'form-control text-input text-oneline-height'
-      }`"
-    />
-    <span v-show="mandWarn" class="text-danger"
-      >Dieses Feld ist Pflicht!<br
-    /></span>
-    <span v-show="pwdLengthWarn" class="text-danger"
-      >Das Passwort muss mindestens 8 Zeichen lang sein.<br
-    /></span>
-    <span v-show="emailWarn" class="text-danger"
-      >Bitte gib eine korrekte Email ein.<br
-    /></span>
+    <input v-else :type="inputProps.type" :id="inputProps.id" :name="inputProps.name"
+      :placeholder="inputProps.placeholder" :value="modelValue" @input="customEmit($event)" :class="`${inputProps.type === 'checkbox'
+      ? 'form-check-input input-control-check'
+      : 'form-control text-input text-oneline-height'
+      }`" />
+    <span v-show="mandWarn" class="text-danger">Dieses Feld ist Pflicht!<br /></span>
+    <span v-show="pwdLengthWarn" class="text-danger">Das Passwort muss mindestens 8 Zeichen lang sein.<br /></span>
+    <span v-show="emailWarn" class="text-danger">Bitte gib eine korrekte Email ein.<br /></span>
   </div>
 </template>
 
@@ -107,19 +76,23 @@ const customEmit = (event: Event) => {
 .input-box {
   margin: 10px 0px;
 }
+
 .form-control {
   margin: 20px 0px;
 }
+
 [data-theme='dark'] .text-input {
   background-color: rgba(0, 0, 0, 0.6);
   border-color: rgba(0, 0, 0, 0.6);
   color: var(--text-color);
 }
+
 [data-theme='dark'] .text-input:-webkit-autofill {
   background-color: rgba(0, 0, 0, 0.6) !important;
   border-color: var(--hansenberg-blau);
   color: var(--text-color) !important;
 }
+
 .input-control {
   background-color: rgba(0, 0, 0, 0.5);
   margin: 20px 0px;
@@ -129,12 +102,14 @@ const customEmit = (event: Event) => {
 .form-label-text {
   display: block;
 }
+
 .text-input {
   width: 100%;
   margin: 5px;
   padding: 3px 7px;
   font-size: 17px;
 }
+
 .text-oneline-height {
   height: 40px;
 }
@@ -149,6 +124,7 @@ const customEmit = (event: Event) => {
   flex: 1;
   display: block;
 }
+
 .input-control-check {
   flex: 2;
   height: 20px;
