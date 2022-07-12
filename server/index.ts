@@ -34,6 +34,7 @@ import uploads from './routes/files/uploads'
 import downloads from './routes/files/downloads'
 // Import middleware
 import { authMiddleware } from './middleware/authMiddleware'
+import { deleteOuttimedRefreshTokens } from './utils/refreshTokens'
 
 /**
  * Global Service for DB connections
@@ -103,3 +104,9 @@ exec('ffmpeg -version', (err, _stdout, _stderr) => {
     throw err
   }
 })
+
+setInterval(async () => {
+  // Do all 20 minutes
+  console.log(`Remove outtimed RefreshTokens`)
+  console.log(await deleteOuttimedRefreshTokens())
+}, 1000 * 60 * 20 /* * 60 */)
