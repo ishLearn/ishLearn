@@ -42,7 +42,7 @@ const customEmit = (event: Event) => {
   if (props.inputProps.type === 'checkbox') {
     emit('update:modelValue', !props.inputProps.value.value)
   } else {
-    emit('update:modelValue', event.target?.value)
+    emit('update:modelValue', (event.target as HTMLInputElement | null)?.value)
   }
 }
 </script>
@@ -58,7 +58,8 @@ const customEmit = (event: Event) => {
     <!-- Special input type: textarea -->
     <textarea v-if="inputProps.type == 'textarea'" :id="inputProps.id" :name="inputProps.name"
       :placeholder="inputProps.placeholder" :value="modelValue" rows="4"
-      @input="$emit('update:modelValue', $event.target?.value)" class="form-control text-input">
+      @input="$emit('update:modelValue', ($event.target as HTMLInputElement | null)?.value)"
+      class="form-control text-input">
     </textarea>
     <!-- Normal inputs (text, password, email, date, checkbox ) -->
     <input v-else :type="inputProps.type" :id="inputProps.id" :name="inputProps.name"

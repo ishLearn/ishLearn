@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import useUser from '@/store/auth.module'
 import router from '@/router'
-import IconMoon from '@/icons/IconMoon'
-import IconMoonFill from '@/icons/IconMoonFill'
-import IconBoxArrowRight from '@/icons/IconBoxArrowRight'
+import IconMoon from '@/icons/IconMoon.vue'
+import IconMoonFill from '@/icons/IconMoonFill.vue'
+import IconBoxArrowRight from '@/icons/IconBoxArrowRight.vue'
 
 const user = useUser()
 
@@ -22,15 +22,11 @@ function toggleTheme() {
 
 <template>
   <div>
-    <nav
-      class="navbar navbar-expand-sm fixed-top p-3 navbar-dark nav-colors"
-      style="display: flex; justify-content: space-between; z-index: 2500"
-    >
+    <nav class="navbar navbar-expand-sm fixed-top p-3 navbar-dark nav-colors"
+      style="display: flex; justify-content: space-between; z-index: 2500">
       <div class="" id="" style="display: flex">
         <!-- Brand -->
-        <router-link :to="{ name: 'Home' }" class="navbar-brand logo" id="definitely-white"
-          >ISH/learn</router-link
-        >
+        <router-link :to="{ name: 'Home' }" class="navbar-brand logo" id="definitely-white">ISH/learn</router-link>
 
         <!-- Navbar links -->
         <ul class="navbar-nav no-scrollbar">
@@ -48,24 +44,14 @@ function toggleTheme() {
         <ul class="navbar-nav no-scrollbar">
           <!-- User -->
           <li class="nav-item">
-            <router-link
-              :to="{ name: 'UserDetail', params: { id: user.user?.id } }"
-              class="nav-link"
-              v-if="user.status.loggedIn"
-              >{{ user.user?.firstName }} {{ user.user?.lastName }}</router-link
-            >
-            <router-link
-              :to="{ name: 'UserLogin', query: { redirect: router.currentRoute.value.path } }"
-              class="nav-link"
-              v-else
-              >Login</router-link
-            >
+            <router-link :to="{ name: 'UserDetail', params: { id: user.user?.id } }" class="nav-link"
+              v-if="user.status.loggedIn">{{ user.user?.firstName }} {{ user.user?.lastName }}</router-link>
+            <router-link :to="{ name: 'UserLogin', query: { redirect: router.currentRoute.value.path } }"
+              class="nav-link" v-else>Login</router-link>
           </li>
           <!-- Logout Button -->
           <li class="nav-item" v-if="user.status.loggedIn">
-            <router-link
-              :to="{ name: 'UserLogout', query: { redirect: router.currentRoute.value.path } }"
-            >
+            <router-link :to="{ name: 'UserLogout', query: { redirect: router.currentRoute.value.path } }">
               <button id="logout" class="nav-colors bigger">
                 <IconBoxArrowRight />
               </button>
@@ -99,6 +85,7 @@ nav a {
   color: var(--nav-fg);
   height: 100%;
 }
+
 nav a:hover {
   font-weight: bold;
   color: var(--orange-shade);
@@ -107,10 +94,12 @@ nav a:hover {
 nav a.router-link-exact-active {
   color: var(--orange) !important;
 }
+
 .logo {
   font-family: monospace;
   margin-left: 1rem;
 }
+
 #definitely-white {
   color: var(--nav-fg) !important;
 }
