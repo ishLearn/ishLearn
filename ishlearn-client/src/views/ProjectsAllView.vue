@@ -5,7 +5,6 @@ import api from '@/services/api'
 import useUser, { UserStoreState } from '@/store/auth.module'
 import ShowAllProducts from '@/components/ShowAllProducts.vue'
 import SearchField from '@/components/SearchField.vue'
-import IconSearch from '@/icons/IconSearch.vue'
 import IconPlus from '@/icons/IconPlus.vue'
 
 const user: Store<'user', UserStoreState> = useUser()
@@ -75,39 +74,22 @@ const subjects: string[] = [
 
           <div class="tag-space">
             <span class="tag tag-blue" v-for="tag in checkedTags" :key="tag">{{
-              tag
+                tag
             }}</span>
           </div>
 
           <div v-for="kl in classes" :key="kl" class="form-check">
-            <input
-              class="form-check-input"
-              type="checkbox"
-              :id="kl"
-              :value="kl"
-              v-model="checkedTags"
-            />
+            <input class="form-check-input" type="checkbox" :id="kl" :value="kl" v-model="checkedTags" />
             <label class="form-check-label" :for="kl">{{ kl }}</label>
           </div>
           <hr />
 
           <div class="tag-space">
-            <span
-              class="tag tag-red"
-              v-for="tag in checkedSubjects"
-              :key="tag"
-              >{{ tag }}</span
-            >
+            <span class="tag tag-red" v-for="tag in checkedSubjects" :key="tag">{{ tag }}</span>
           </div>
 
           <div v-for="kl in subjects" :key="kl" class="form-check">
-            <input
-              class="form-check-input"
-              type="checkbox"
-              :id="kl"
-              :value="kl"
-              v-model="checkedSubjects"
-            />
+            <input class="form-check-input" type="checkbox" :id="kl" :value="kl" v-model="checkedSubjects" />
             <label class="form-check-label" :for="kl">{{ kl }}</label>
           </div>
         </div>
@@ -121,8 +103,8 @@ const subjects: string[] = [
           <router-link :to="{ name: 'AddProject' }">
             <button class="btn btn-lg btn-primary add-button">
               <IconPlus class="icon" /> Hinzufügen
-            </button></router-link
-          >
+            </button>
+          </router-link>
         </h1>
         <ShowAllProducts :projects="allProjects" />
       </div>
@@ -134,15 +116,19 @@ const subjects: string[] = [
 .tags .tag-space {
   overflow: scroll;
 }
+
 .tags .tag-space::-webkit-scrollbar {
   display: none;
 }
 
 /* Hide scrollbar for IE, Edge and Firefox */
 .tags .tag-space {
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
 }
+
 .tags .tag {
   color: white;
   padding: 3px;
@@ -152,19 +138,24 @@ const subjects: string[] = [
   font-size: 1rem;
   font-weight: bold;
 }
+
 .tags .tag-blue {
   background-color: blue;
 }
+
 .tags .tag-red {
   background-color: red;
 }
+
 .tags {
   text-align: left;
 }
+
 .icon {
   width: 2rem;
   height: 2rem;
 }
+
 .add-button {
   position: absolute;
   right: 0px;

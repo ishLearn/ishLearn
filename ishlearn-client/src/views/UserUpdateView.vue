@@ -1,15 +1,15 @@
 <script setup lang="ts">
+// Node Modules
 import { onMounted, onUpdated, ref } from 'vue'
-import AuthService from '@/services/auth.service'
+// Own utilities
 import api from '@/services/api'
 import { GenericInputs } from '@/types/GenericInputData'
-import SmallForm from '@/components/SmallForm.vue'
 import router from '@/router'
-import { validateEmail, validatePasswort, validateMandatory } from '@/util/inputValidation'
-import { useRoute } from 'vue-router'
+import { validateMandatory } from '@/util/inputValidation'
 import useUser from '@/store/auth.module'
 import { toYYYYMMDD } from '@/util/dateUtils'
-import useCounterStore from '@/store/counter'
+// Vue components
+import SmallForm from '@/components/SmallForm.vue'
 
 const user = useUser()
 
@@ -61,7 +61,7 @@ const fillUser = async () => {
     return false
   }
 
-  if (!user.user) return false
+  if (!user.user || user.user.lastName === null || user.user.birthday === null || user.user.profileText === null) return false
 
   inputs.firstName.value.value = user.user.firstName
   inputs.lastName.value.value = user.user.lastName
@@ -76,11 +76,10 @@ onUpdated(() => {
   fillUser()
 })
 
-const query = useRoute().query
 const onSignup = async (e: Event) => {
   e.preventDefault()
 
-  if (!user.user) router.push({ name: 'UserLogin', query: { redirect: router.currentRoute.value.path } })
+  if (user.user === null) return router.push({ name: 'UserLogin', query: { redirect: router.currentRoute.value.path } })
 
   console.log('Textarea')
   console.log(inputs.profileText.value.value)
@@ -97,7 +96,7 @@ const onSignup = async (e: Event) => {
 
   try {
     if (
-      inputs.firstName.value.value !== user.user?.firstName ||
+      inputs.firstName.value.value !== user.user.firstName ||
       inputs.lastName.value.value !== user.user.lastName
     ) {
       console.log('Name was changed')
@@ -106,29 +105,41 @@ const onSignup = async (e: Event) => {
           firstName: inputs.firstName.value.value,
           lastName: inputs.lastName.value.value,
         })
-        .then((res) => {
+        .then(() => {
           if (user.user) {
             user.user.firstName = inputs.firstName.value.value
             user.user.lastName = inputs.lastName.value.value
           }
+        }).catch((err: unknown) => {
+          // TODO: Error handling
+          console.log('TODO: Error Handling')
+          console.log(err)
         })
     }
-    if (inputs.birthday.value.value !== toYYYYMMDD(new Date(user.user.birthday))) {
+    if (user.user.birthday !== null && inputs.birthday.value.value !== toYYYYMMDD(new Date(user.user.birthday))) {
       console.log('Date has changed')
       api
         .put('/users/birthday', {
           birthday: inputs.birthday.value.value,
         })
-        .then((res) => {
+        .then(() => {
           useUser().initUser()
+        }).catch((err: unknown) => {
+          // TODO: Error handling
+          console.log('TODO: Error Handling')
+          console.log(err)
         })
     }
     if (inputs.profileText.value.value !== user.user?.profileText) {
       console.log('Profile Text has changed')
-      api.put('/users/profile/text/', { text: inputs.profileText.value.value }).then((res) => {
+      api.put('/users/profile/text/', { text: inputs.profileText.value.value }).then(() => {
         if (user.user) {
           user.user.profileText = inputs.profileText.value.value
         }
+      }).catch((err: unknown) => {
+        // TODO: Error handling
+        console.log('TODO: Error Handling')
+        console.log(err)
       })
     }
   } catch (err) {
@@ -138,7 +149,7 @@ const onSignup = async (e: Event) => {
     return
   }
   try {
-    router.push({ name: 'UserDetail', params: { id: user.user.id } })
+    router.push({ name: 'UserDetail', params: { id: user.user?.id || '404' } })
   } catch (err) {
     console.log('Fehler beim redirect.')
     console.log(err)
@@ -149,12 +160,8 @@ const onSignup = async (e: Event) => {
 
 <template>
   <div>
-    <SmallForm
-      :title="`Account bearbeiten`"
-      :inputs="{ ...inputs }"
-      :submitMessage="'Bearbeitung abschließen'"
-      @onSubmit="onSignup"
-    >
+    <SmallForm :title="`Account bearbeiten`" :inputs="{ ...inputs }" :submitMessage="'Bearbeitung abschließen'"
+      @onSubmit="onSignup">
       <template #subtitle>
         <p>Hier kannst du deinen Account Bearbeiten</p>
       </template>
@@ -165,4 +172,5 @@ const onSignup = async (e: Event) => {
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+</style>

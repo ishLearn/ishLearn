@@ -7,11 +7,13 @@ import useUser, { UserStoreState } from '@/store/auth.module'
 import api from '@/services/api'
 import { Store } from 'pinia'
 import router from '@/router'
-import useFileList from '@/util/file-list'
+import useFileList, { UploadableFile } from '@/util/file-list'
 import { uploadFiles } from '@/util/file-uploader'
 import { setEditPermission } from '@/util/getUser'
 import { Product, Visibility } from '@/types/Products'
-import { GenericInputs } from '@/types/GenericInputData'
+
+import { GenericInputData, GenericInputs } from '@/types/GenericInputData'
+
 import { validateMandatory } from '@/util/inputValidation'
 // Vue components
 import GenericInput from '@/components/GenericInput.vue'
@@ -19,6 +21,7 @@ import MDEditor from '@/components/MDEditor.vue'
 import FilePreviewDownload from '@/components/FilePreviewDownload.vue'
 import FilePreviewUpload from '@/components/FilePreviewUpload.vue'
 import DropZone from '@/components/DropZone.vue'
+import { isAxiosError } from '@/util/typeguards'
 
 const { files, addFiles, removeFile } = useFileList()
 
@@ -53,6 +56,18 @@ const project: Ref<Product | null> = ref(null)
 const mdtext: Ref<string> = ref('')
 const editPermission: Ref<boolean> = ref(false)
 
+const forceUpload: GenericInputData<boolean> = {
+  value: ref(false),
+  type: 'checkbox',
+  label: `Eine Datei mit dem oder einem ähnlichen Namen existiert bereits. 
+    Soll es überschrieben werden?`,
+  id: 'forceupload',
+  name: 'forceupload',
+  mandatory: false,
+  placeholder: 'false',
+}
+const showForceUpload = ref(false)
+
 const loadProduct = async () => {
   console.log(pid)
   project.value = await Product.getProductById(typeof pid === 'string' ? pid : pid[0])
@@ -64,10 +79,34 @@ const loadProduct = async () => {
   })
 }
 const loadUser = async () => {
-  while (user.loading == null) {}
+  while (user.loading == null) { }
   await user.loading
   if (!user.status.loggedIn) {
     router.push({ name: 'UserLogin', query: { redirect: router.currentRoute.value.path } })
+  }
+}
+
+const clickUploadFiles = async () => {
+  // Filter already uploaded files
+  const filesToUpload = files.value.filter((f: UploadableFile) => f.status !== 'loading' && f.status !== true)
+  console.log(filesToUpload)
+  // Try uploading 
+  try {
+    if (!project.value?.id) {
+      return 'New Files or Project not defined'
+    }
+    await uploadFiles(filesToUpload, project.value.id, forceUpload.value.value)
+    forceUpload.value.value = false
+
+    showForceUpload.value = false
+  } catch (err: unknown) {
+    console.log('Axios?')
+    if (!isAxiosError(err)) return 'Error code could not be found.'
+
+    if (String(err.status || err.response?.status) === String(400)) {
+      showForceUpload.value = true
+      return 'Could not upload files, force?'
+    } else return `Error with code > 400: ${err.status}`
   }
 }
 
@@ -95,7 +134,7 @@ onMounted(async () => {
   }
 })
 
-const onSubmit = (_event: Event) => {
+const onSubmit = () => {
   if (
     inputs.title.value.value !== project.value?.title ||
     inputs.visibility.value.value !== project.value.visibility
@@ -124,9 +163,11 @@ const onSubmit = (_event: Event) => {
   router.push({ name: 'ViewProject', params: { id: project.value?.id } })
 }
 
-function onInputChange(e) {
-  addFiles(e.target.files)
-  e.target.value = null
+function onInputChange(e: Event) {
+  if (e.target === null) throw new Error('Event wrongly dispatched')
+
+  addFiles((e.target as EventTarget & { files: File[], value: unknown }).files);
+  (e.target as EventTarget & { files: File[], value: unknown }).value = null
 }
 </script>
 
@@ -136,36 +177,21 @@ function onInputChange(e) {
 
     <p>Fülle bitte alle notwendigen Felder aus.</p>
 
-    <form @submit.prevent="onSubmit" class="form-input-group">
-      <GenericInput
-        v-for="input in inputs"
-        :key="input.id"
-        v-model="input.value.value"
-        :inputProps="input"
-      />
+    <form @submit.prevent="onSubmit" class="form-input-group" v-if="project">
+      <GenericInput v-for="input in inputs" :key="input.id" v-model="input.value.value" :inputProps="input" />
       <div :key="project.description" class="form-group p-2 input-box">
-        <label for="md" class="form-label-text"
-          >Projektbeschreibung<span v-show="true">*</span></label
-        >
+        <label for="md" class="form-label-text">Projektbeschreibung<span v-show="true">*</span></label>
         <MDEditor v-model="mdtext" />
-        <span v-show="!validateMandatory(mdtext)" class="text-danger"
-          >Dieses Feld ist Pflicht!<br
-        /></span>
+        <span v-show="!validateMandatory(mdtext)" class="text-danger">Dieses Feld ist Pflicht!<br /></span>
       </div>
 
       <div class="files p-2">
         <h3>Dateien</h3>
         <ul class="image-list p-2">
           <li v-for="mediaObject of project.media" :key="mediaObject.url">
-            <FilePreviewDownload
-              :filename="mediaObject.filename"
-              :filetype="mediaObject.fileType || 'notworking/nothing'"
-              :fileurl="`${mediaObject.fileType ? `${origin}/api/files/download/` : ''}${
-                mediaObject.url
-              }`"
-              :show-delete="true"
-              @delete="deleteFile"
-            />
+            <FilePreviewDownload :filename="mediaObject.filename"
+              :filetype="mediaObject.fileType || 'notworking/nothing'" :fileurl="`${mediaObject.fileType ? `${origin}/api/files/download/` : ''
+              }${mediaObject.url}`" :show-delete="true" @delete="deleteFile" />
           </li>
         </ul>
 
@@ -173,14 +199,8 @@ function onInputChange(e) {
           <DropZone class="drop-area" @files-dropped="addFiles" #default="{ dropZoneActive }">
             <label for="file-input">
               <ul v-show="files.length" class="image-list">
-                <FilePreviewUpload
-                  v-for="file of files"
-                  :key="file.id"
-                  :file="file"
-                  :delete-button="true"
-                  tag="li"
-                  @remove="removeFile"
-                />
+                <FilePreviewUpload v-for="file of files" :key="file.id" :file="file" :delete-button="true" tag="li"
+                  @remove="removeFile" />
               </ul>
 
               <span v-if="dropZoneActive">
@@ -189,15 +209,16 @@ function onInputChange(e) {
               </span>
               <span v-else>
                 <span>Ziehe hier deine Dateien rein</span>
-                <span class="smaller"
-                  >oder <strong>klicke hier</strong> um Dateien auszuwählen</span
-                >
+                <span class="smaller">oder <strong>klicke hier</strong> um Dateien
+                  auszuwählen</span>
               </span>
 
               <input type="file" id="file-input" multiple @change="onInputChange" />
             </label>
           </DropZone>
-          <button class="upload-button" @click.prevent="uploadFiles(files, project.id)">
+
+          <GenericInput :inputProps="forceUpload" v-model="forceUpload.value.value" v-show="showForceUpload" />
+          <button class="upload-button" @click.prevent="clickUploadFiles()">
             Hochladen
           </button>
         </div>
@@ -216,6 +237,7 @@ function onInputChange(e) {
   max-width: 800px;
   margin: 50px auto;
 }
+
 .image-list {
   display: flex;
   list-style: none;
@@ -233,6 +255,7 @@ function onInputChange(e) {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
   transition: 0.2s ease;
 }
+
 .drop-area[data-active='true'] {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
   background: #ffffffcc;
@@ -243,9 +266,11 @@ function onInputChange(e) {
   cursor: pointer;
   display: block;
 }
+
 .drop-area label span {
   display: block;
 }
+
 .drop-area label input[type='file']:not(:focus-visible) {
   position: absolute !important;
   width: 1px !important;
@@ -257,6 +282,7 @@ function onInputChange(e) {
   white-space: nowrap !important;
   border: 0 !important;
 }
+
 .drop-area label .smaller {
   font-size: 16px;
 }
@@ -274,6 +300,7 @@ function onInputChange(e) {
   color: #fff;
   text-transform: uppercase;
 }
+
 button {
   cursor: pointer;
 }

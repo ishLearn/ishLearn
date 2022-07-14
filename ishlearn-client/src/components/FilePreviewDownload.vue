@@ -1,27 +1,16 @@
 <template>
   <component :is="tag" class="file-preview" @click.prevent="downloadFile">
-    <FileDisplayIcon
-      :filename="filename"
-      :filetype="filetype"
-      :fileurl="fileurl"
-    />
-    <button
-      v-show="showDelete"
-      @click.stop="$emit('delete', { filename })"
-      class="close-icon"
-      aria-label="Entfernen"
-    >
+    <FileDisplayIcon :filename="filename" :filetype="filetype" :fileurl="fileurl" />
+    <button v-show="showDelete" @click.stop="$emit('delete', { filename })" class="close-icon" aria-label="Entfernen">
       X
     </button>
   </component>
 </template>
 
 <script setup lang="ts">
-import axios from 'axios'
-
-import { UploadableFile } from '@/util/file-list'
 import FileDisplayIcon from '@/components/FileDisplayIcon.vue'
 import api from '@/services/api';
+import { AxiosResponse } from 'axios';
 
 const props = defineProps({
   filename: { type: String, required: true },
@@ -43,7 +32,7 @@ function downloadFile() {
     method: isHttp ? 'GET' : 'POST',
     responseType: 'blob',
     data: !isHttp ? { filename: props.fileurl } : {},
-  }).then((res) => {
+  }).then((res: AxiosResponse) => {
     console.log(res.data)
     const fileURL = window.URL.createObjectURL(new Blob([res.data]))
     const fileLink = document.createElement('a')
@@ -67,6 +56,7 @@ function downloadFile() {
   overflow: hidden;
   cursor: pointer;
 }
+
 .file-preview .close-icon,
 .file-preview .status-indicator {
   --size: 20px;
@@ -80,6 +70,7 @@ function downloadFile() {
   border: 0;
   padding: 0;
 }
+
 .file-preview .close-icon {
   width: var(--size);
   font-size: var(--size);

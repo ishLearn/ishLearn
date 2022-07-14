@@ -3,7 +3,7 @@ import { defineEmits, defineProps } from 'vue'
 import GenericInput from '@/components/GenericInput.vue'
 
 const props = defineProps(['title', 'inputs', 'submitMessage'])
-const emit = defineEmits(['onSubmit'])
+defineEmits(['onSubmit'])
 </script>
 
 <template>
@@ -13,7 +13,10 @@ const emit = defineEmits(['onSubmit'])
 
       <slot name="subtitle"></slot>
 
-      <form @submit.prevent="$emit('onSubmit', $event)" class="form-input-group">
+      <form
+        @submit.prevent="$emit('onSubmit', $event)"
+        class="form-input-group"
+      >
         <GenericInput
           v-for="input in props.inputs"
           :key="input.id"
@@ -21,7 +24,11 @@ const emit = defineEmits(['onSubmit'])
           :inputProps="input"
         />
 
-        <input type="submit" :value="props.submitMessage" class="btn btn-success" />
+        <input
+          type="submit"
+          :value="props.submitMessage"
+          class="btn btn-success"
+        />
       </form>
 
       <slot name="footer"></slot>
