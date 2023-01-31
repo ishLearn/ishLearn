@@ -1,7 +1,7 @@
 import api from '@/services/api'
 import { UploadableFile } from './file-list'
 
-export async function uploadfile(file: UploadableFile, pid: string, overrideIfNecessary?: boolean) {
+export async function uploadFile(file: UploadableFile, pid: string, overrideIfNecessary?: boolean) {
   const formData = new FormData()
   formData.append('file', file.file)
   formData.append('filename', file.file.name)
@@ -32,5 +32,5 @@ export async function uploadfile(file: UploadableFile, pid: string, overrideIfNe
  * @throws an Error if one or more files could not be uploaded
  */
 export function uploadFiles(files: UploadableFile[], pid: string, overrideIfNecessary?: boolean) {
-  return Promise.all(files.map((file) => uploadfile(file, pid, overrideIfNecessary)))
+  return Promise.all(files.map((file) => uploadFile(file, pid, overrideIfNecessary)))
 }

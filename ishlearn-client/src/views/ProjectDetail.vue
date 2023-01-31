@@ -81,9 +81,9 @@ watch(project, () => descriptionUpdate.value++)
         <h4 class="pos-rel">
           Dateien in dem Projekt
           <router-link v-if="editPermission" :to="{ name: 'UpdateProject', params: { id: project.id } }">
-            <button class="btn btn-sm btn-secondary edit-button">
+            <!-- <button class="btn btn-sm btn-secondary edit-button">
               Bearbeiten
-            </button>
+            </button> -->
             <button class="btn btn-sm btn-secondary put-right">
               Bearbeiten
             </button>

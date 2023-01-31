@@ -89,7 +89,7 @@ const loadUser = async () => {
 const clickUploadFiles = async () => {
   // Filter already uploaded files
   const filesToUpload = files.value.filter((f: UploadableFile) => f.status !== 'loading' && f.status !== true)
-  console.log(filesToUpload)
+
   // Try uploading 
   try {
     if (!project.value?.id) {
@@ -100,9 +100,12 @@ const clickUploadFiles = async () => {
 
     showForceUpload.value = false
   } catch (err: unknown) {
-    console.log('Axios?')
     if (!isAxiosError(err)) return 'Error code could not be found.'
 
+    if (String(err.status || err.response?.status) === String(413)) {
+      showForceUpload.value = false
+      return 'File too large to be uploaded'
+    }
     if (String(err.status || err.response?.status) === String(400)) {
       showForceUpload.value = true
       return 'Could not upload files, force?'
