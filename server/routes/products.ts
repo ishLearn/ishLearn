@@ -472,7 +472,12 @@ router.post(
         .status(200)
         .json({ msg: `Successfully removed media ${req.body.filename}` })
     } catch (err) {
-      return res.status(200).json({ error: 'Could not remove media.' })
+      new Logger().error(
+        `Media`,
+        `Remove media ${req.params.pid}:${req.body.filename}`,
+        err
+      )
+      return res.status(400).json({ error: 'Could not remove media.' })
     }
   }
 )

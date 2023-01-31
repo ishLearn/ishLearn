@@ -209,7 +209,7 @@ export default class Media {
     })
 
     // Send 'partial content'-header, success and uploadId
-    config.res.status(206).json({
+    config.res.status(200).json({
       success: true,
       uploadId: newUploadId,
     })
