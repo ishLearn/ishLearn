@@ -18,6 +18,7 @@ import {
   searchProductById,
 } from '../services/RedisService'
 import Media, { MediaPartOfProduct, MediaPartOfProductJoin } from './Media'
+import { rejects } from 'assert'
 
 /**
  * A Product is a unit of files, comments and other content and information.
@@ -821,20 +822,25 @@ export default class Product {
    * @param filename the filename to delete
    * @param collaboratorId the hashed collaborator id
    * @returns an array of all Promise results
+   * @throws Error if the media is not found or the media could not be removed
    */
   static async removeMediaByFilename(
     productId: string,
     filename: string,
     collaboratorId: string
   ) {
-    const mid = (
-      await new DBService().query(
-        'SELECT * FROM mediaPartOfProduct INNER JOIN media ON media.ID = mediaPartOfProduct.MID WHERE PID = ? AND media.filename = ?',
-        [getIntIDFromHash(productId), filename]
-      )
-    ).results[0].MID
+    try {
+      const mid = (
+        await new DBService().query(
+          'SELECT * FROM mediaPartOfProduct INNER JOIN media ON media.ID = mediaPartOfProduct.MID WHERE PID = ? AND media.filename = ?',
+          [getIntIDFromHash(productId), filename]
+        )
+      ).results[0].MID
 
-    return Product.removeMedia(productId, collaboratorId, mid)
+      return Product.removeMedia(productId, collaboratorId, mid)
+    } catch (err) {
+      throw err
+    }
   }
 
   /**

@@ -461,11 +461,19 @@ router.post(
     if (!res.locals.user?.id)
       return res.status(403).json({ error: 'User not authenticated' })
 
-    Product.removeMediaByFilename(
-      req.params.pid,
-      req.body.filename,
-      res.locals.user.id
-    )
+    try {
+      Product.removeMediaByFilename(
+        req.params.pid,
+        req.body.filename,
+        res.locals.user.id
+      )
+
+      return res
+        .status(200)
+        .json({ msg: `Successfully removed media ${req.body.filename}` })
+    } catch (err) {
+      return res.status(200).json({ error: 'Could not remove media.' })
+    }
   }
 )
 
