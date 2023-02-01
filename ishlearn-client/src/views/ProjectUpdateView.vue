@@ -53,7 +53,7 @@ const inputs: GenericInputs<string | boolean> = {
 const pid = useRoute().params.id
 const project: Ref<Product | null> = ref(null)
 
-const mdtext: Ref<string> = ref('')
+const mdText: Ref<string> = ref('')
 const editPermission: Ref<boolean> = ref(false)
 
 const forceUpload: GenericInputData<boolean> = {
@@ -75,7 +75,7 @@ const loadProduct = async () => {
   inputs.title.value.value = project.value.title
   inputs.visibility.value.value = project.value.visibility === Visibility.PUBLIC ? true : false
   project.value.fetchDescription().then(() => {
-    if (project.value?.description) mdtext.value = project.value?.description
+    if (project.value?.description) mdText.value = project.value?.description
   })
 }
 const loadUser = async () => {
@@ -83,6 +83,19 @@ const loadUser = async () => {
   await user.loading
   if (!user.status.loggedIn) {
     router.push({ name: 'UserLogin', query: { redirect: router.currentRoute.value.path } })
+  }
+}
+
+const deleteProject = async () => {
+  if (project.value?.id == null || typeof project.value?.id === 'undefined') return false
+  try {
+    await project.value.delete()
+    router.push({ name: 'AllProjects' })
+  }
+  catch (err) {
+    console.error(err)
+
+    return false
   }
 }
 
@@ -152,14 +165,14 @@ const onSubmit = () => {
     })
   }
 
-  if (mdtext.value !== project.value?.description) {
-    if (!validateMandatory(mdtext.value)) {
+  if (mdText.value !== project.value?.description) {
+    if (!validateMandatory(mdText.value)) {
       alert('Das Format deiner Eingabe passt nicht.')
       return
     }
 
     api.put(`/products/${pid}/description`, {
-      description: mdtext.value,
+      description: mdText.value,
     })
   }
 
@@ -178,14 +191,18 @@ function onInputChange(e: Event) {
   <div v-if="editPermission" class="box-background p-2">
     <h2>Bearbeite dein Projekt:</h2>
 
+    <button class="btn btn-lg btn-danger delete-button" @click="deleteProject">
+      Projekt löschen
+    </button>
+
     <p>Fülle bitte alle notwendigen Felder aus.</p>
 
     <form @submit.prevent="onSubmit" class="form-input-group" v-if="project">
       <GenericInput v-for="input in inputs" :key="input.id" v-model="input.value.value" :inputProps="input" />
       <div :key="project.description" class="form-group p-2 input-box">
         <label for="md" class="form-label-text">Projektbeschreibung<span v-show="true">*</span></label>
-        <MDEditor v-model="mdtext" />
-        <span v-show="!validateMandatory(mdtext)" class="text-danger">Dieses Feld ist Pflicht!<br /></span>
+        <MDEditor v-model="mdText" />
+        <span v-show="!validateMandatory(mdText)" class="text-danger">Dieses Feld ist Pflicht!<br /></span>
       </div>
 
       <div class="files p-2">
@@ -306,5 +323,10 @@ function onInputChange(e: Event) {
 
 button {
   cursor: pointer;
+}
+
+.delete-button {
+  position: absolute;
+  right: 0px;
 }
 </style>

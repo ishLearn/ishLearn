@@ -96,4 +96,10 @@ export class Product {
 
     return true
   }
+
+  async delete(): Promise<boolean> {
+    await api.delete(`/products/${this.id}`)
+
+    return true
+  }
 }
