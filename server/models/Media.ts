@@ -209,7 +209,7 @@ export default class Media {
     })
 
     // Send 'partial content'-header, success and uploadId
-    config.res.status(206).json({
+    config.res.status(200).json({
       success: true,
       uploadId: newUploadId,
     })
@@ -319,9 +319,14 @@ export default class Media {
         res.setHeader('Expires', 0)
       }
 
+      new Logger().event(
+        `Download media`,
+        `Downloading ${filename}`,
+        `media.filename = ${media.filename}; filename = ${filename}`
+      )
       res.setHeader(
         'Content-disposition',
-        'inline; filename="' + media.filename + '"'
+        'inline; filename="' + media.filename || filename + '"'
       )
       const type =
         media.filetype || filename.endsWith('.md')
