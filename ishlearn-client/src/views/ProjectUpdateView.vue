@@ -218,7 +218,7 @@ function onInputChange(e: Event) {
         <div class="m-4" v-show="project">
           <DropZone class="drop-area" @files-dropped="addFiles" #default="{ dropZoneActive }">
             <label for="file-input">
-              <ul v-show="files.length" class="image-list">
+              <ul v-show="files.length" class="image-list position-relative">
                 <FilePreviewUpload v-for="file of files" :key="file.id" :file="file" :delete-button="true" tag="li"
                   @remove="removeFile" />
               </ul>
@@ -328,5 +328,9 @@ button {
 .delete-button {
   position: absolute;
   right: 0px;
+}
+
+.position-relative {
+  position: relative;
 }
 </style>
