@@ -87,9 +87,10 @@ export const requireAuthenticatedAsTeacher = (
   next: NextFunction
 ) => {
   if (
+    res.locals.unauthenticated ||
     !res.locals.user ||
     typeof res.locals.user.id === 'undefined' ||
-    !(res.locals.user.rank === 'teacher')
+    res.locals.user.rank !== 'teacher'
   )
     return res.status(403).json({ error: 'Not authenticated' })
   next()
@@ -100,9 +101,10 @@ export const requireAuthenticatedAsStudent = (
   next: NextFunction
 ) => {
   if (
+    res.locals.unauthenticated ||
     !res.locals.user ||
     typeof res.locals.user.id === 'undefined' ||
-    !(res.locals.user.rank === 'student')
+    res.locals.user.rank !== 'student'
   )
     return res.status(403).json({ error: 'Not authenticated' })
   next()

@@ -330,6 +330,22 @@ router.put(
   }
 )
 
+// DELETE /api/products/:pid
+router.delete(
+  '/:pid',
+  requireAuthenticatedAsStudent,
+  async (
+    req: express.Request<{ pid: string }>,
+    res: express.Response<{}, UserRecord>
+  ) => {
+    const { pid } = req.params
+
+    await Product.delete(pid, res.locals.user?.id)
+
+    return res.status(200).json({ success: true })
+  }
+)
+
 // ADD / REMOVE TAGS
 
 // PUT /api/products/:id/tags
