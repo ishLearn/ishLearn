@@ -191,9 +191,11 @@ function onInputChange(e: Event) {
   <div v-if="editPermission" class="box-background p-2">
     <h2>Bearbeite dein Projekt:</h2>
 
-    <button class="btn btn-lg btn-danger delete-button" @click="deleteProject">
-      Projekt löschen
-    </button>
+    <div class="position-relative">
+      <button class="btn btn-lg btn-danger delete-button" @click="deleteProject">
+        Projekt löschen
+      </button>
+    </div>
 
     <p>Fülle bitte alle notwendigen Felder aus.</p>
 
@@ -218,7 +220,7 @@ function onInputChange(e: Event) {
         <div class="m-4" v-show="project">
           <DropZone class="drop-area" @files-dropped="addFiles" #default="{ dropZoneActive }">
             <label for="file-input">
-              <ul v-show="files.length" class="image-list position-relative">
+              <ul v-show="files.length" class="image-list">
                 <FilePreviewUpload v-for="file of files" :key="file.id" :file="file" :delete-button="true" tag="li"
                   @remove="removeFile" />
               </ul>
