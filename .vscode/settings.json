@@ -7,10 +7,15 @@
   "prettier.semi": false,
   "cSpell.words": [
     "catname",
+    "Dateien",
+    "Feld",
     "fileurl",
     "Gaulke",
     "hashids",
     "ishlearn",
+    "notworking",
+    "Pflicht",
+    "Projektbeschreibung",
     "refreshtokens",
     "Schueler",
     "scripthost",
@@ -18,7 +23,8 @@
     "signout",
     "socketio",
     "taggings",
-    "unhashed"
+    "unhashed",
+    "Wähle"
   ],
   "html.format.wrapLineLength": 120,
   "editor.formatOnSave": true,

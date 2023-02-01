@@ -500,6 +500,25 @@ export default class Product {
     }
   }
 
+  /**
+   * Delete a product from the database.
+   *
+   * @param pid The product ID to delete
+   * @param uid The user ID to check permission
+   * @returns whether the DB query was successful AND has updated at least one row
+   */
+  static async delete(pid: string, uid: ID): Promise<boolean> {
+    if (typeof uid !== 'string' || !(await Product.hasPermission(pid, uid)))
+      return false
+
+    const res = await new DBService().query(
+      `DELETE FROM products WHERE ID = ?`,
+      [getIntIDFromHash(pid)]
+    )
+
+    return res.results.affectedRows > 0
+  }
+
   // UPDATE PRODUCT
 
   /**
