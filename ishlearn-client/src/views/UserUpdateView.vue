@@ -56,7 +56,6 @@ const fillUser = async () => {
   // Wait for user to load
   await user.loading
   if (!user.status.loggedIn) {
-    console.log('Not Logged in')
     router.push({ name: 'UserLogin', query: { redirect: router.currentRoute.value.path } })
     return false
   }
@@ -81,9 +80,6 @@ const onSignup = async (e: Event) => {
 
   if (user.user === null) return router.push({ name: 'UserLogin', query: { redirect: router.currentRoute.value.path } })
 
-  console.log('Textarea')
-  console.log(inputs.profileText.value.value)
-
   if (
     !Object.keys(inputs).reduce((result, k) => {
       if (inputs[k].mandatory) result = result && validateMandatory(inputs[k].value.value)
@@ -99,7 +95,6 @@ const onSignup = async (e: Event) => {
       inputs.firstName.value.value !== user.user.firstName ||
       inputs.lastName.value.value !== user.user.lastName
     ) {
-      console.log('Name was changed')
       api
         .put('/users/', {
           firstName: inputs.firstName.value.value,
@@ -117,7 +112,6 @@ const onSignup = async (e: Event) => {
         })
     }
     if (user.user.birthday !== null && inputs.birthday.value.value !== toYYYYMMDD(new Date(user.user.birthday))) {
-      console.log('Date has changed')
       api
         .put('/users/birthday', {
           birthday: inputs.birthday.value.value,
@@ -131,7 +125,6 @@ const onSignup = async (e: Event) => {
         })
     }
     if (inputs.profileText.value.value !== user.user?.profileText) {
-      console.log('Profile Text has changed')
       api.put('/users/profile/text/', { text: inputs.profileText.value.value }).then(() => {
         if (user.user) {
           user.user.profileText = inputs.profileText.value.value
@@ -173,4 +166,5 @@ const onSignup = async (e: Event) => {
 </template>
 
 <style scoped>
+
 </style>

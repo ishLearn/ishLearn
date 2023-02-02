@@ -49,8 +49,6 @@ Das ist mir nachträglich aufgefallen, was falsch ist.
 `)
 
 const onSubmit = () => {
-  console.log('Submitted')
-
   if (!user.status.loggedIn) {
     alert('Du musst eingeloggt sein, um ein Projekt zu erstellen!')
     return
@@ -76,8 +74,6 @@ const onSubmit = () => {
         description: mdtext.value,
       })
       .then((res: AxiosResponse) => {
-        console.log('Hinzufügen des Projektes erfolgreich.')
-        console.log(res)
         router.push({ name: 'ViewProject', params: { id: res.data.id } })
       })
   } catch (err) {

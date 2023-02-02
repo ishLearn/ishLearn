@@ -33,7 +33,6 @@ function preventDefaults(e: Event) {
 const events = ['dragenter', 'dragover', 'dragleave', 'drop']
 
 onMounted(() => {
-  console.log('On Mounted')
   events.forEach((eventName) => {
     document.body.addEventListener(eventName, preventDefaults)
   })

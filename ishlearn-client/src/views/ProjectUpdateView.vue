@@ -69,9 +69,7 @@ const forceUpload: GenericInputData<boolean> = {
 const showForceUpload = ref(false)
 
 const loadProduct = async () => {
-  console.log(pid)
   project.value = await Product.getProductById(typeof pid === 'string' ? pid : pid[0])
-  console.log(project.value)
   inputs.title.value.value = project.value.title
   inputs.visibility.value.value = project.value.visibility === Visibility.PUBLIC ? true : false
   project.value.fetchDescription().then(() => {
@@ -127,7 +125,6 @@ const clickUploadFiles = async () => {
 }
 
 const deleteFile = ({ filename }: { filename: string }) => {
-  console.log('Delete')
   if (!filename || !project.value) return false
   api.post(`/products/${project.value.id}/media/delete`, {
     filename,
@@ -137,8 +134,6 @@ const deleteFile = ({ filename }: { filename: string }) => {
 onMounted(async () => {
   try {
     await Promise.all([loadProduct(), loadUser()])
-    console.log('ON Mounted: Update view')
-    console.log(project.value)
     setEditPermission(editPermission, user, project).then(() => {
       if (!editPermission.value) {
         router.push({ name: 'ViewProject', params: { id: project.value?.id } })

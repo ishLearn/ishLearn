@@ -33,7 +33,6 @@ function downloadFile() {
     responseType: 'blob',
     data: !isHttp ? { filename: props.fileurl } : {},
   }).then((res: AxiosResponse) => {
-    console.log(res.data)
     const fileURL = window.URL.createObjectURL(new Blob([res.data]))
     const fileLink = document.createElement('a')
 
