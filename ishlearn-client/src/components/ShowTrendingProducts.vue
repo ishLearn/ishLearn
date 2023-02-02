@@ -3,10 +3,11 @@ import { Product } from '@/types/Products'
 import { Ref, ref } from 'vue'
 import ShowAllProducts from './ShowAllProducts.vue'
 
-const project: Ref<Product[]> = ref([])
+const projects: Ref<Product[]> = ref([])
 
 try {
-  project.value = await Product.getTrendingProducts()
+  projects.value = await Product.getTrendingProducts()
+  console.log(projects.value)
 } catch (err) {
   console.log('Could not fetch trending products')
 }
