@@ -68,6 +68,8 @@ export class Product {
       api
         .get(`/products/${pid}`)
         .then((res: AxiosResponse<Product | Product[] | null>) => {
+          console.log('Res Data:')
+          console.log(res.data)
           const [p] = res.data instanceof Product ? [res.data] : res.data || []
           if (!res.data || p === null) throw res
 
