@@ -19,11 +19,17 @@
           </p>
         </div>
       </div>
+
+      <ShowTrendingProducts />
     </div>
   </div>
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import ShowTrendingProducts from '@/components/ShowTrendingProducts.vue';
+
+</script>
 
 <style scoped>
+
 </style>
