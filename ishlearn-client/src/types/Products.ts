@@ -1,4 +1,4 @@
-import axios from 'axios'
+import axios, { AxiosResponse } from 'axios'
 import api from '@/services/api'
 import { Ref } from 'vue'
 import { MediaMeta } from './Media'
@@ -67,10 +67,11 @@ export class Product {
     return new Promise<Product>((resolve, reject) => {
       api
         .get(`/products/${pid}`)
-        .then((res) => {
-          const [p] = res.data
-          if (!res.data) throw res
-          return resolve(new Product(p, updateRef))
+        .then((res: AxiosResponse<Product | Product[] | null>) => {
+          const [p] = res.data instanceof Product ? [res.data] : res.data || []
+          if (!res.data || p === null) throw res
+
+          return resolve(new Product({ ...p, id: pid }, updateRef)) // To satisfy TS, the id must be explicitly passed to the constructor
         })
         .catch((err) => reject(err))
     })
