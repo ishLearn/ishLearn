@@ -68,10 +68,8 @@ export class Product {
       api
         .get(`/products/${pid}`)
         .then((res: AxiosResponse<Product | Product[] | null>) => {
-          console.log('Res Data:')
-          console.log(res.data)
-          const [p] = res.data instanceof Product ? [res.data] : res.data || []
-          if (!res.data || p === null) throw res
+          if (!res.data || res.data === null) throw res
+          const p: Product | null = Array.isArray(res.data) ? res.data[0] : res.data // If res.data is an array, get the first element, otherwise return the result (which is a Product)
 
           return resolve(new Product({ ...p, id: pid }, updateRef)) // To satisfy TS, the id must be explicitly passed to the constructor
         })
