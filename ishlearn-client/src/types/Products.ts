@@ -76,6 +76,10 @@ export class Product {
     })
   }
 
+  static async getTrendingProducts(): Promise<Product[]> {
+    return (await api.get('/products/trending')).data.products || []
+  }
+
   async fetchDescription(updateRef?: Ref<number>): Promise<boolean> {
     this.description = (
       await axios.post('/api/files/download', {
