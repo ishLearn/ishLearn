@@ -47,7 +47,7 @@ const productSchema = new Schema(ProductEntity, {
 /**
  * Redis Repository (OM) for Products
  */
-export let productRepo: Repository<ProductEntity>
+export let productRepo: Repository<ProductEntity> | null = null
 /**
  * Try to connect Redis client to server
  */
@@ -88,6 +88,9 @@ export const addProduct = async (p: Product) => {
     alreadyAdded.id = added.ID ?? ''
   }
 
+  // Return if the product repo has not been initialized properly
+  if (!productRepo || !useRedis) return
+
   const product = alreadyAdded.product ?? productRepo.createEntity()
 
   product.ID = p.id
@@ -107,14 +110,16 @@ export const addProduct = async (p: Product) => {
 
 /**
  * Clear the complete cache repository (with Products). Use carefully, may result in higher latency during the first API calls.
- * @returns The number of deleted entries.
+ * @returns The number of deleted entries or undefined if the redis OM is not used
  */
 export const clearProductRepo = async () => {
-  if (!useRedis || !useRedisOM) return
+  if (!useRedis || !useRedisOM || productRepo === null) return
+
   const allIds = (await productRepo.search().returnAll()).map(
     (p: ProductEntity) => p.entityId
   )
-  await Promise.all(allIds.map(async id => productRepo.remove(id)))
+
+  await Promise.all(allIds.map(async id => productRepo?.remove(id)))
   return allIds.length
 }
 
@@ -185,7 +190,7 @@ export const appendValue = async (key: string, value: string) => {
  * @returns An Array of ProductEntities
  */
 export const searchProducts = async (offset: number = 0, ...k: KeyValue[]) => {
-  if (!useRedis || !useRedisOM) return []
+  if (!useRedis || !useRedisOM || !productRepo) return []
 
   const search = productRepo.search()
   k.forEach(k => {
@@ -199,8 +204,27 @@ export const searchProducts = async (offset: number = 0, ...k: KeyValue[]) => {
  * @param id The ID to search for.
  * @returns The result found in Redis or a ProductEntity with only `null`-values.
  */
-export const searchProductById = (id: string) => {
-  if (!useRedis || !useRedisOM) return
+export const searchProductById = async (
+  id: string
+): Promise<ProductEntity | null> => {
+  if (!useRedis || !useRedisOM || !productRepo) return null
 
-  return productRepo.fetch(id)
+  return await productRepo.fetch(id)
+}
+
+/**
+ * Get recently added products.
+ * @param offset How many items to skip
+ * @param count How many items to return
+ * @returns a Promise that resolves to an array containing the items
+ */
+export const getRecentProducts = async (
+  offset: number = 0,
+  count: number = 10
+): Promise<ProductEntity[]> => {
+  if (!useRedisOM || !useRedisOM || !productRepo) return []
+
+  return productRepo
+    .search()
+    .return.page((await productRepo.search().count()) - offset - count, count)
 }

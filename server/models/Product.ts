@@ -16,9 +16,10 @@ import {
   getValue,
   setValue,
   searchProductById,
+  searchProducts,
+  getRecentProducts,
 } from '../services/RedisService'
 import Media, { MediaPartOfProduct, MediaPartOfProductJoin } from './Media'
-import { rejects } from 'assert'
 
 /**
  * A Product is a unit of files, comments and other content and information.
@@ -173,11 +174,25 @@ export default class Product {
       })
     )
 
-    const productResult = result.map(Product.mapResultsToHash)
+    // productResult is either an array containing a single product or the product itself
+    const productResult: Product[] | Product = result.map(
+      Product.mapResultsToHash
+    )
 
     // productResult is an array, which should only contain one product
-    addProduct(productResult[0])
-    return productResult
+    const resultProduct =
+      productResult instanceof Product ? productResult : productResult[0]
+    addProduct(resultProduct)
+    return resultProduct // return productResult; was written previously??
+  }
+
+  /**
+   * Return some trending products.
+   * @param uid The user ID to enable targeted searching
+   */
+  static async getTrendingProducts(uid?: string): Promise<Product[]> {
+    // Get most recent products from redis
+    return (await getRecentProducts()).map(Product.mapResultsToHash)
   }
 
   /**

@@ -54,6 +54,17 @@ router.get(
   }
 )
 
+router.get(
+  '/trending',
+  async (
+    req: express.Request<{}>,
+    res: express.Response<{ products: Product[] }, UserRecord>
+  ) => {
+    const products = await Product.getTrendingProducts(res.locals.user?.id)
+    return res.json({ products })
+  }
+)
+
 // GET /api/products/:id ; where `typeof params.id === 'string'` (not a number!)
 // If the user has the permission to update this product
 router.get(
