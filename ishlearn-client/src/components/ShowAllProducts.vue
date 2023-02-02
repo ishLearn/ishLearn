@@ -4,7 +4,8 @@ import ProductPreview from '@/components/ProductPreview.vue'
 
 const props = defineProps(['projects'])
 
-console.log(`Size of projects in ShowAllProducts: ${props.projects.length}`)
+// console.log(`Size of projects in ShowAllProducts: ${props.projects.length}`)
+// console.log(props.projects)
 </script>
 
 <template>
