@@ -15,7 +15,7 @@ try {
 
 <template>
   <div class="container">
-    <h3>Aktuell beliebte Produkte</h3>
+    <h3>Aktuell beliebte Projekte</h3>
     <ShowAllProducts projects="projects" />
   </div>
 </template>
