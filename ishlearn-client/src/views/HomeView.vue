@@ -2,6 +2,7 @@
   <div>
     <div class="home">
       <h2>Willkommen bei ISH/Learn</h2>
+
       <div class="row">
         <div class="col-md-4">
           <img alt="Vue logo" style="width: 100%" src="../assets/logo.png" />
@@ -20,7 +21,16 @@
         </div>
       </div>
 
-      <ShowTrendingProducts />
+      <div class="trending-products-container">
+        <Suspense>
+          <template #default>
+            <ShowTrendingProducts />
+          </template>
+          <template #fallback>
+            Loading...
+          </template>
+        </Suspense>
+      </div>
     </div>
   </div>
 </template>
@@ -31,5 +41,7 @@ import ShowTrendingProducts from '@/components/ShowTrendingProducts.vue';
 </script>
 
 <style scoped>
-
+.trending-products-container {
+  margin: 3rem 0;
+}
 </style>

@@ -8,7 +8,7 @@ const project: Ref<Product[]> = ref([])
 try {
   project.value = await Product.getTrendingProducts()
 } catch (err) {
-  console.error('Could not fetch trending products')
+  console.log('Could not fetch trending products')
 }
 </script>
 
