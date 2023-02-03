@@ -1,7 +1,5 @@
 import dotenv from 'dotenv'
 dotenv.config()
-console.log(process.env.SCALITY_ACCESS_KEY_ID)
-console.log(process.env.SCALITY_SECRET_ACCESS_KEY)
 
 // Time import
 import { wait } from '../utils/dev/time'

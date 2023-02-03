@@ -107,8 +107,8 @@ const onSignup = async (e: Event) => {
           }
         }).catch((err: unknown) => {
           // TODO: Error handling
-          console.log('TODO: Error Handling')
-          console.log(err)
+          console.log('ERROR: Could not update user names')
+          console.error(err)
         })
     }
     if (user.user.birthday !== null && inputs.birthday.value.value !== toYYYYMMDD(new Date(user.user.birthday))) {
@@ -120,8 +120,8 @@ const onSignup = async (e: Event) => {
           useUser().initUser()
         }).catch((err: unknown) => {
           // TODO: Error handling
-          console.log('TODO: Error Handling')
-          console.log(err)
+          console.log('ERROR: Could not update user birthday')
+          console.error(err)
         })
     }
     if (inputs.profileText.value.value !== user.user?.profileText) {
@@ -131,21 +131,21 @@ const onSignup = async (e: Event) => {
         }
       }).catch((err: unknown) => {
         // TODO: Error handling
-        console.log('TODO: Error Handling')
-        console.log(err)
+        console.log('ERROR: Could not update user profile text')
+        console.error(err)
       })
     }
   } catch (err) {
     alert('Etwas ist mit deiner Registrierung schiefgelaufen.')
-    console.log('Error while Registering:')
-    console.log(err)
+    console.log('ERROR: Other error during user update')
+    console.error(err)
     return
   }
   try {
     router.push({ name: 'UserDetail', params: { id: user.user?.id || '404' } })
   } catch (err) {
-    console.log('Fehler beim redirect.')
-    console.log(err)
+    console.log('ERROR: Could not redirect to user detail page')
+    console.error(err)
     router.push({ name: 'UserLogin' })
   }
 }

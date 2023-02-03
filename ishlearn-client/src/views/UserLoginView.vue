@@ -40,8 +40,8 @@ const redirect = (standard: { name: string; params?: { [key: string]: string | u
   try {
     router.push({ path: redirectPath || '/' })
   } catch (err) {
-    console.log('Error during routing back.')
-    console.log(err)
+    console.log('ERROR: Could not router redirect back.')
+    console.error(err)
     router.push(standard)
   }
 }
@@ -72,8 +72,8 @@ const onSignup = async (e: Event) => {
     })
   } catch (err) {
     alert('Login fehlgeschlagen.')
-    console.log('Error while Login:')
-    console.log(err)
+    console.log('ERROR: during login')
+    console.error(err)
     return
   }
   redirect({ name: 'Home' })

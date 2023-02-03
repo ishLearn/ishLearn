@@ -107,15 +107,15 @@ const onSignup = async (e: Event) => {
     })
   } catch (err) {
     alert('Etwas ist mit deiner Registrierung schiefgelaufen.')
-    console.log('Error while Registering:')
-    console.log(err)
+    console.log('ERROR: Registration could not be completed.')
+    console.error(err)
     return
   }
   try {
     router.push({ name: 'UserLogin', query: query })
   } catch (err) {
-    console.log('Fehler beim redirect.')
-    console.log(err)
+    console.log('ERROR: Could not redirect to login page.')
+    console.error(err)
     router.push({ name: 'UserLogin' })
   }
 }
@@ -123,12 +123,8 @@ const onSignup = async (e: Event) => {
 
 <template>
   <div>
-    <SmallForm
-      :title="`Registrierung`"
-      :inputs="{ ...inputs, ...isSchuelerInput }"
-      :submitMessage="'Account erstellen'"
-      @onSubmit="onSignup"
-    >
+    <SmallForm :title="`Registrierung`" :inputs="{ ...inputs, ...isSchuelerInput }" :submitMessage="'Account erstellen'"
+      @onSubmit="onSignup">
       <template #subtitle>
         <p>Erstelle dir hier einen Account</p>
       </template>

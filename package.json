@@ -4,7 +4,7 @@
   "description": "This contains the code to the web-DB project.",
   "main": "server/dist/index.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "node index.js --color",
     "startExt": "node server/dist/index.js",
     "dev": "nodemon server/index.ts --ignore ishlearn-client",
     "serve": "cd ishlearn-client && npm run serve",

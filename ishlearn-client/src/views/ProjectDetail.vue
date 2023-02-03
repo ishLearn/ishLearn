@@ -50,8 +50,8 @@ onMounted(async () => {
     project.value.fetchMediaMeta().then((worked: boolean) => mediaMetaFetchingFinished.value = worked)
 
   } catch (err) {
-    console.log('Fehler beim Laden des Projektes')
-    console.log(err)
+    console.log('ERROR: Fehler beim Laden des Projektes')
+    console.error(err)
     unableToLoad.value = true
   }
 })

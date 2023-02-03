@@ -140,8 +140,8 @@ onMounted(async () => {
       }
     })
   } catch (err) {
-    console.log('Fehler beim Laden des Projektes')
-    console.log(err)
+    console.log('ERROR: Could not fetch the project')
+    console.error(err)
   }
 })
 

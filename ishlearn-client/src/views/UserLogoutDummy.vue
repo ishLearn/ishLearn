@@ -12,8 +12,8 @@ const autoRedirect = () => {
       return router.push({ path: redirect || '/' })
     if (typeof redirect[0] === 'string') return router.push({ path: redirect[0] })
   } catch (err) {
-    console.log('Error during routing back.')
-    console.log(err)
+    console.log('ERROR: Could not router redirect back.')
+    console.error(err)
   } finally {
     return router.push({ name: 'Home' })
   }

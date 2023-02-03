@@ -105,8 +105,9 @@ exec('ffmpeg -version', (err, _stdout, _stderr) => {
   }
 })
 
+// Remove outtimed RefreshTokens every hour
 setInterval(async () => {
-  // Do all 20 minutes
-  console.log(`Remove outtimed RefreshTokens`)
-  console.log(await deleteOuttimedRefreshTokens())
-}, 1000 * 60 * 20 /* * 60 */)
+  const deleted = await deleteOuttimedRefreshTokens()
+  if (deleted > 0)
+    new Logger().info(`${deleted} outtimed RefreshTokens deleted`)
+}, 1000 * 60 * 60)

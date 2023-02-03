@@ -77,8 +77,8 @@ const onSubmit = () => {
         router.push({ name: 'ViewProject', params: { id: res.data.id } })
       })
   } catch (err) {
-    console.log('Something went wrong adding the project:')
-    console.log(err)
+    console.log('ERROR: Something went wrong adding the project:')
+    console.error(err)
   }
 }
 </script>

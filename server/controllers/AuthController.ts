@@ -82,7 +82,6 @@ export const refreshAccessToken = async (reqToken: string) => {
       tokenObject: refreshToken,
     }
   } catch (err) {
-    new Logger().error('User Authentication', 'Refresh Access Token', err)
     throw new Error('Something failed on server, please try again.')
   }
 }

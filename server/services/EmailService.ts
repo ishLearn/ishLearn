@@ -9,8 +9,8 @@ export default class EmailService {
   static EMAIL_PASSWORD = process.env.EMAIL_PASSWORD
 
   /**
-  * The actions that can be performed with EmailTokens.
-  */
+   * The actions that can be performed with EmailTokens.
+   */
   static actions = {
     pwdForgotten: 'passwordReset',
     confirmNewEmail: 'confirmNewEmail',
@@ -18,9 +18,9 @@ export default class EmailService {
   }
 
   /**
-  * Get a connection to the Email-Server (SMTP)
-  * @returns the Transporter
-  */
+   * Get a connection to the Email-Server (SMTP)
+   * @returns the Transporter
+   */
   static getConnection() {
     // Check ENV
     if (
@@ -33,8 +33,8 @@ export default class EmailService {
       )
 
     /**
-    * options for the Email service
-    */
+     * options for the Email service
+     */
     const options: SMTPTransport.Options = {
       host: process.env.EMAIL_HOST,
       secure: true,
@@ -48,8 +48,8 @@ export default class EmailService {
   }
 
   /**
-  * Verify the configuration of the Email Service
-  */
+   * Verify the configuration of the Email Service
+   */
   static verify(account: Transporter<SMTPTransport.SentMessageInfo>) {
     return new Promise((resolve, reject) => {
       account.verify((err, success) => {
@@ -97,7 +97,7 @@ export default class EmailService {
   /**
    * Send a mail to confirm a user's email address.
    * @param user The user to target
-   * @param initial Whether this is the first Email 
+   * @param initial Whether this is the first Email
    * @returns Nothing
    */
   static async sendConfirmAddressEmail(user: User, initial: boolean = true) {
@@ -130,8 +130,8 @@ export default class EmailService {
   }
 
   /**
-  * Send an Email with parameters.
-  */
+   * Send an Email with parameters.
+   */
   static sendEmail(
     recipient: string,
     recipientName: string,
@@ -153,13 +153,13 @@ export default class EmailService {
               subject,
               html: message,
               envelope: {
-                from: 'Test <ishlearn@sthomas.ch>',
+                from: 'ISH/Learn <ishlearn@sthomas.ch>',
                 to: `${recipientName} <${recipient}>`,
               },
             },
             (err, info) => {
-              console.log('Mail sent')
               if (err) return reject(err)
+              new Logger().info(`Sent Email to ${recipientName}: ${subject}`)
               return resolve(info)
             }
           )

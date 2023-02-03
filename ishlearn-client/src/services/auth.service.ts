@@ -40,8 +40,8 @@ class AuthService {
     try {
       return (await api.post('/auth/signout/', { refreshToken: store.refreshKey?.token })).data
     } catch (err) {
-      console.log('Error during log out')
-      console.log(err)
+      console.log('ERROR: Could not complete signout')
+      console.error(err)
     } finally {
       store.removeUser()
     }

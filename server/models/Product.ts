@@ -20,6 +20,7 @@ import {
   getRecentProducts,
 } from '../services/RedisService'
 import Media, { MediaPartOfProduct, MediaPartOfProductJoin } from './Media'
+import Logger from '../utils/Logger'
 
 /**
  * A Product is a unit of files, comments and other content and information.
@@ -159,9 +160,6 @@ export default class Product {
     const params: any[] = [fields]
     if (loggedInUser?.id) params.push(getIntIDFromHash(loggedInUser.id))
     params.push(id)
-
-    // console.log(query)
-    // console.log(params)
 
     // Send query and await response
     const result = (await new DBService().query(query, params)).results
@@ -510,7 +508,7 @@ export default class Product {
 
       return res.results.insertId
     } catch (err) {
-      console.log(err)
+      new Logger().error('Products', 'Save new Product', err)
       return 0
     }
   }

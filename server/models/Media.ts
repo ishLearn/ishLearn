@@ -319,11 +319,6 @@ export default class Media {
         res.setHeader('Expires', 0)
       }
 
-      new Logger().event(
-        `Download media`,
-        `Downloading ${filename}`,
-        `media.filename = ${media.filename}; filename = ${filename}`
-      )
       res.setHeader(
         'Content-disposition',
         'inline; filename="' + media.filename || filename + '"'

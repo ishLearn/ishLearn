@@ -77,8 +77,8 @@ const useUser = defineStore('user', {
         // Get user profile text
         this.user.profileText = await (await api.get(`/users/${this.user.id}/text`)).data
       } catch (e) {
-        console.log('Could not refresh')
-        console.log(e)
+        console.log('ERROR: Could not refresh')
+        console.error(e)
         this.removeUser()
       }
     },

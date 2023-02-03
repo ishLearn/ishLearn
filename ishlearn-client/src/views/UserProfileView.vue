@@ -36,8 +36,8 @@ onMounted(async () => {
       imageUrl.value = res.data.results[0].picture.large
     })
   } catch (err) {
-    console.log('Fehler beim Laden des Benutzers')
-    console.log(err)
+    console.log('ERROR: Could not fetch user')
+    console.error(err)
     unableToLoad.value = true
   }
 })
@@ -59,9 +59,8 @@ onUpdated(() => {
       </p>
 
       <button class="btn btn-primary m-2">Alle Projekte von {{ user2display.firstName }}</button>
-      <router-link v-if="isHimself" :to="{ name: 'UserUpdate' }"
-        ><button class="btn btn-secondary m-2">Edit Profile settings</button></router-link
-      >
+      <router-link v-if="isHimself" :to="{ name: 'UserUpdate' }"><button class="btn btn-secondary m-2">Edit Profile
+          settings</button></router-link>
     </div>
   </div>
   <div v-else-if="unableToLoad" class="m-2 p-3 alert alert-danger">
