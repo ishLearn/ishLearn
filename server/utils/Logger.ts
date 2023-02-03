@@ -37,16 +37,21 @@ export default class Logger {
    * @param _res The response object (unused)
    * @param {NextFunction} next The next middleware-function to be called after logging
    */
-  request(req: Request, _res: Response<{}, UserRecord>, next: NextFunction) {
+  request(req: Request, res: Response<{}, UserRecord>, next: NextFunction) {
+    if (!req.path.startsWith('/api') && !(req.path == '/')) return next()
+
     const now = new Date()
-    console.log(
+    let str =
       chalk.blue(formatDate('/', now) + ' ' + formatTime(':', now) + ': ') +
-        chalk.red(req.method) +
-        ' ' +
-        chalk.green(req.path) +
-        '; LoggedIn: ' +
-        _res.locals.user?.id
-    )
+      chalk.red(req.method) +
+      '\t' +
+      chalk.green(req.path)
+    if (res.locals.user?.id) str += '; LoggedIn: ' + res.locals.user?.id
+    else
+      str += `; ${
+        req.headers['x-forwarded-for'] || req.headers['X-Forwarded-For']
+      }, Real_IP: ${req.headers['X-Real-IP'] || req.ip}`
+    console.log(str)
 
     next()
   }
