@@ -2,6 +2,8 @@ import axios, { AxiosResponse } from 'axios'
 import api from '@/services/api'
 import { Ref } from 'vue'
 import { MediaMeta } from './Media'
+import { ProductsStoreState } from '@/store/products.module'
+import { Store } from 'pinia'
 
 export enum Visibility {
   PRIVATE = 'private',
@@ -11,6 +13,8 @@ export enum Visibility {
 }
 
 export type ID = string | undefined
+
+type AddProductsCallback = (p: Product[]) => void
 
 export class Product {
   id?: ID
@@ -63,8 +67,14 @@ export class Product {
     }
   }
 
-  static async getProductById(pid: string, updateRef?: Ref<number>): Promise<Product> {
+  static async getProductById(
+    pid: string,
+    productsStore: Store<'products', ProductsStoreState>,
+    updateRef?: Ref<number>,
+  ): Promise<Product> {
     return new Promise<Product>((resolve, reject) => {
+      if (productsStore.products[pid]) return resolve(productsStore.products[pid])
+
       api
         .get(`/products/${pid}`)
         .then((res: AxiosResponse<Product | Product[] | null>) => {
@@ -77,8 +87,28 @@ export class Product {
     })
   }
 
+  static async getPage(page: number, storeAddProducts: AddProductsCallback): Promise<Product[]> {
+    const result = (await api.get<Product[]>(`/products/page/${page}`)).data
+
+    storeAddProducts(result)
+
+    return result
+  }
+
   static async getTrendingProducts(): Promise<Product[]> {
     return (await api.get('/products/trending')).data.products || []
+  }
+
+  static async findFiltered(
+    queryString: string,
+    storeAddProducts: AddProductsCallback,
+  ): Promise<Product[]> {
+    const result = (await api.post<{ products: Product[] }>('/products/filter/', { queryString }))
+      .data.products
+
+    storeAddProducts(result)
+
+    return result
   }
 
   async fetchDescription(updateRef?: Ref<number>): Promise<boolean> {

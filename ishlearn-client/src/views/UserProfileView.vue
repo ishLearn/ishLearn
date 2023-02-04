@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import axios, { AxiosResponse } from 'axios'
+import axios from 'axios'
 import { ref, Ref } from 'vue'
 import { onMounted, onUpdated } from '@vue/runtime-core'
 import { useRoute } from 'vue-router'
 import useUser from '@/store/auth.module'
 import api from '@/services/api'
 import { User } from '@/types/Users'
+import { getUser } from '@/util/getUser'
 
 const uid = useRoute().params.id
 
@@ -17,20 +18,11 @@ const user2display: Ref<User | null> = ref(null)
 const imageUrl: Ref<string> = ref('')
 onMounted(async () => {
   try {
-    const res: AxiosResponse<{
-      id: string
-      rank: string
-      firstName: string
-      lastName: string | null
-      emailTmp: string | null
-      email: string | null
-      birthday: Date | null
-    }> = await api.get(`/users/${uid}/`)
-
-    user2display.value = { ...res.data, profileText: null, profilePicture: null }
-    const { data } = await api.get(`/users/${uid}/text`)
-
-    if (user2display.value !== null) user2display.value.profileText = data
+    await getUser(user2display, typeof uid === 'string' ? uid : uid[0])
+    if (!(user2display.value?.profileText)) {
+      const { data } = await api.get(`/users/${uid}/text`)
+      if (user2display.value !== null) user2display.value.profileText = data
+    }
 
     axios.get('https://randomuser.me/api/').then((res) => {
       imageUrl.value = res.data.results[0].picture.large

@@ -3,11 +3,18 @@ import { Store } from 'pinia'
 
 import api from '@/services/api'
 import { UserStoreState } from '@/store/auth.module'
+import useUsersStore from '@/store/users.module'
 import { Product } from '@/types/Products'
 import { User } from '@/types/Users'
 
 export const getUser = async (user: Ref<User | null>, uid: string) => {
-  user.value = (await api.get<User>(`/users/${uid}`)).data
+  // If the user is already available or is already being fetched
+  user.value = await useUsersStore().user(uid)
+  // If the user has not been fetched yet
+  if (user.value === null) {
+    await useUsersStore().fetchUser(uid)
+    user.value = await useUsersStore().user(uid)
+  }
 }
 
 export const setEditPermission = async (
