@@ -30,6 +30,14 @@ export default class Logger {
     Logger.instance = this
   }
 
+  static getSpaces(maxSpaces: number, usedSpace: number): string {
+    let c = ''
+    for (let i = 0; i < maxSpaces - usedSpace; i++) {
+      c += ' '
+    }
+    return c
+  }
+
   /**
    * Log a new request to the console and calls the next middleware handler.
    *
@@ -44,7 +52,7 @@ export default class Logger {
     let str =
       chalk.blue(formatDate('/', now) + ' ' + formatTime(':', now) + ': ') +
       chalk.red(req.method) +
-      '\t' +
+      Logger.getSpaces(5 + 1, req.method.length) + // Longest method is PATCH, "PATCH".length === 5; 1 extra space after the method
       chalk.green(req.path)
     if (res.locals.user?.id) str += '; LoggedIn: ' + res.locals.user?.id
     else
