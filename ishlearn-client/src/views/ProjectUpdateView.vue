@@ -12,6 +12,8 @@ import { uploadFiles } from '@/util/file-uploader'
 import { setEditPermission } from '@/util/getUser'
 import { Product, Visibility } from '@/types/Products'
 
+import useProductsStore from '@/store/products.module'
+
 import { GenericInputData, GenericInputs } from '@/types/GenericInputData'
 
 import { validateMandatory } from '@/util/inputValidation'
@@ -26,6 +28,7 @@ import { isAxiosError } from '@/util/typeguards'
 const { files, addFiles, removeFile } = useFileList()
 
 const user: Store<'user', UserStoreState> = useUser()
+const products = useProductsStore()
 
 const origin = window.origin
 
@@ -69,7 +72,7 @@ const forceUpload: GenericInputData<boolean> = {
 const showForceUpload = ref(false)
 
 const loadProduct = async () => {
-  project.value = await Product.getProductById(typeof pid === 'string' ? pid : pid[0])
+  project.value = await Product.getProductById(typeof pid === 'string' ? pid : pid[0], products)
   inputs.title.value.value = project.value.title
   inputs.visibility.value.value = project.value.visibility === Visibility.PUBLIC ? true : false
   project.value.fetchDescription().then(() => {

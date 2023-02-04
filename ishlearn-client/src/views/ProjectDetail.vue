@@ -9,6 +9,9 @@ import { getUser, setEditPermission } from '@/util/getUser'
 import { User } from '@/types/Users'
 import { Product, Visibility } from '@/types/Products'
 import { formatDate } from '@/util/dateUtils'
+
+import useProductsStore from '@/store/products.module'
+
 // Vue imports
 import MDPreview from '@/components/MDPreview.vue'
 import FilePreviewDownload from '@/components/FilePreviewDownload.vue'
@@ -16,6 +19,7 @@ import IconEye from '@/icons/IconEye.vue'
 import IconEyeSlash from '../icons/IconEyeSlash.vue'
 
 const user: Store<'user', UserStoreState> = useUser()
+const productsStore = useProductsStore()
 
 const origin = window.origin
 
@@ -37,6 +41,7 @@ onMounted(async () => {
     await user.loading
     project.value = await Product.getProductById(
       typeof pid === 'string' ? pid : pid[0],
+      productsStore,
       descriptionUpdate,
     )
 

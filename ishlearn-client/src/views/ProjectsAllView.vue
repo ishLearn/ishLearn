@@ -1,33 +1,39 @@
 <script setup lang="ts">
 import { onMounted, ref, Ref } from 'vue'
-import { Store } from 'pinia'
-import api from '@/services/api'
-import useUser, { UserStoreState } from '@/store/auth.module'
+import useUser from '@/store/auth.module'
+import useProductsStore from '@/store/products.module'
 import ShowAllProducts from '@/components/ShowAllProducts.vue'
 import SearchField from '@/components/SearchField.vue'
 import IconPlus from '@/icons/IconPlus.vue'
+import { Product } from '@/types/Products'
+import { debounce } from '@/util/debounceThrottle'
 
-const user: Store<'user', UserStoreState> = useUser()
+const user = useUser()
+const productsStore = useProductsStore()
 
-const allProjects = ref([])
+const allProjects: Ref<Product[]> = ref([])
 const checkedTags: Ref<string[]> = ref([])
 const checkedSubjects: Ref<string[]> = ref([])
 
+const fetchProductsFirstPage = async () => {
+  allProjects.value = await Product.getPage(0, productsStore.addProducts);
+}
+
 onMounted(async () => {
   await user.loading
-  api.get('/products/page/0').then((res: { data: [] }) => {
-    allProjects.value = res.data
-  })
+  await fetchProductsFirstPage()
 })
 
 const search = async (queryString: string) => {
-  // Minimum query string length is 3 chars
-  if (queryString.length < 3) return
+  debounce(async () => {
+    // Minimum query string length is 3 chars
+    if (queryString.length < 3) return
 
-  if (queryString.length == 0) return
-  api.post('/products/filter/', { queryString: queryString }).then((res) => {
-    allProjects.value = res.data.products
-  })
+    if (queryString.length == 0) {
+      return fetchProductsFirstPage()
+    }
+    allProjects.value = await Product.findFiltered(queryString, productsStore.addProducts)
+  }, 200)
 }
 
 const classes: string[] = [
@@ -74,7 +80,7 @@ const subjects: string[] = [
 
           <div class="tag-space">
             <span class="tag tag-blue" v-for="tag in checkedTags" :key="tag">{{
-                tag
+              tag
             }}</span>
           </div>
 

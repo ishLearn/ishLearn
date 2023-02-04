@@ -38,6 +38,11 @@ const useProduct = defineStore('products', {
         resolve(true)
       })
     },
+    addProducts(products: Product[]) {
+      for (const p of products) {
+        if (p.id && !this.products[p.id]) this.products[p.id] = p
+      }
+    },
   },
 })
 
