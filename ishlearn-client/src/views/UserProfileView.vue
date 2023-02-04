@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import axios, { AxiosResponse } from 'axios'
+import axios from 'axios'
 import { ref, Ref } from 'vue'
 import { onMounted, onUpdated } from '@vue/runtime-core'
 import { useRoute } from 'vue-router'
