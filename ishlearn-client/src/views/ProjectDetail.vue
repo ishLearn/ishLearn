@@ -45,6 +45,8 @@ onMounted(async () => {
       descriptionUpdate,
     )
 
+    if (!project.value) throw new Error(`Project has not loaded in ProjectDetail; ${pid}`)
+
     if (user.loading !== null) await user.loading
 
     setEditPermission(editPermission, user, project)

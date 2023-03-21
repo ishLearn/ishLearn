@@ -73,6 +73,10 @@ export class Product {
     updateRef?: Ref<number>,
   ): Promise<Product> {
     return new Promise<Product>((resolve, reject) => {
+      console.log({
+        logMsg: 'productsStore.products[pid]',
+        'productsStore.products[pid]': productsStore.products[pid],
+      })
       if (productsStore.products[pid]) return resolve(productsStore.products[pid])
 
       api
