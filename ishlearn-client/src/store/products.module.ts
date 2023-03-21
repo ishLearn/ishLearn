@@ -32,7 +32,7 @@ const useProduct = defineStore('products', {
     async fetchProduct(id: string) {
       this.loadingProducts.push(id)
       this.loading = new Promise(async (resolve) => {
-        this.products[id] = (await api.get(`/products/${id}`)).data
+        this.products[id] = new Product((await api.get(`/products/${id}`)).data)
 
         this.loadingProducts = this.loadingProducts.filter((i) => i !== id)
         resolve(true)
