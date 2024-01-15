@@ -382,7 +382,13 @@ router.put(
         .status(400)
         .json({ msg: 'Should the tags be added or removed?' })
 
-    await Product.updateTags(productId, collaborator, tags, add)
+    try {
+      await Product.updateTags(productId, collaborator, tags, add)
+    } catch (err) {
+      return res
+        .status(403)
+        .json({ error: 'User does not have permission to add tags.' })
+    }
     return res.status(200).json({
       success: true,
       productId,
